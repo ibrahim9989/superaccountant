@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Space_Grotesk, Bodoni_Moda } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
+import SiteHeader from "@/components/SiteHeader";
+import SiteFooter from "@/components/SiteFooter";
 
 const raleway = Space_Grotesk({
   variable: "--font-raleway",
@@ -31,7 +33,9 @@ export default function RootLayout({
         className={`${raleway.variable} ${display.variable} font-sans antialiased`}
       >
         <AuthProvider>
+          <SiteHeader />
           {children}
+          <SiteFooter />
         </AuthProvider>
       </body>
     </html>
