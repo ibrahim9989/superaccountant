@@ -66,70 +66,68 @@ export async function GET(request: Request) {
       }
 
       if (data.session && data.user) {
-        // Check if profile exists, if not create it
+        // Check profile and assessment status to determine redirect
         try {
           const { data: profile, error: profileError } = await supabase
             .from('profiles')
-            .select('id')
+            .select('id, approval_status, first_name, phone')
             .eq('id', data.user.id)
             .maybeSingle()
 
-          console.log('Profile check:', { exists: !!profile, error: profileError })
+          console.log('Profile check:', { exists: !!profile, status: profile?.approval_status, error: profileError })
 
+          // If no profile exists, redirect to profile form
           if (!profile) {
-            console.log('Creating profile for user:', data.user.id)
-            console.log('User metadata:', data.user.user_metadata)
-            
-            // Profile doesn't exist, create it with all required fields
-            const profileData = {
-              id: data.user.id,
-              first_name: data.user.user_metadata?.given_name || data.user.user_metadata?.full_name || 'User',
-              last_name: data.user.user_metadata?.family_name || '',
-              email: data.user.email || '',
-              phone: '',
-              date_of_birth: '2000-01-01', // Default date since it's NOT NULL
-              address: '',
-              city: '',
-              state: '',
-              zip_code: '',
-              country: '',
-              education: '',
-              work_experience: '',
-              current_occupation: '',
-              accounting_experience: '',
-              motivation: '',
-              goals: '',
-              emergency_contact_name: '',
-              emergency_contact_phone: '',
-              emergency_contact_relation: '',
-              approval_status: 'pending' // Default to pending until admin approves
-            }
-
-            console.log('Inserting profile:', profileData)
-
-            const { data: insertedProfile, error: insertError } = await supabase
-              .from('profiles')
-              .upsert(profileData, { onConflict: 'id' })
-              .select()
-
-            if (insertError) {
-              console.error('Failed to create profile:', insertError)
-              console.error('Profile data that failed:', profileData)
-              // Don't fail auth, but log extensively
-            } else {
-              console.log('Profile created successfully:', insertedProfile)
-            }
-          } else {
-            console.log('Profile already exists')
+            console.log('No profile found, redirecting to profile form')
+            return NextResponse.redirect(`${origin}/profile-form`)
           }
-        } catch (profileErr) {
-          console.error('Profile check/creation error:', profileErr)
-        }
 
-        // Redirect to profile form for new users, or to intended destination
-        const redirectTo = next.startsWith('/') ? next : '/profile-form'
-        console.log('Redirecting to:', redirectTo)
-        return NextResponse.redirect(`${origin}${redirectTo}`)
+          // Check if profile form is incomplete (basic fields missing)
+          const isProfileIncomplete = !profile.first_name || !profile.phone
+          
+          if (isProfileIncomplete) {
+            console.log('Profile incomplete, redirecting to profile form')
+            return NextResponse.redirect(`${origin}/profile-form`)
+          }
+
+          // Profile exists and is complete, check approval status
+          const approvalStatus = profile.approval_status
+
+          if (approvalStatus === 'approved') {
+            // Approved users go to dashboard
+            console.log('User approved, redirecting to dashboard')
+            return NextResponse.redirect(`${origin}/dashboard`)
+          }
+
+          // For pending or null/rejected status, check if assessment is completed
+          const { data: assessmentSession, error: assessmentError } = await supabase
+            .from('test_sessions')
+            .select('id, status, completed_at')
+            .eq('user_id', data.user.id)
+            .eq('status', 'completed')
+            .order('completed_at', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+
+          console.log('Assessment check:', { 
+            exists: !!assessmentSession, 
+            error: assessmentError 
+          })
+
+          if (assessmentSession) {
+            // Assessment completed, show under review
+            console.log('Assessment completed, redirecting to under-review')
+            return NextResponse.redirect(`${origin}/under-review`)
+          } else {
+            // No assessment completed, redirect to assessment
+            console.log('No assessment completed, redirecting to assessment')
+            return NextResponse.redirect(`${origin}/assessment`)
+          }
+        } catch (err) {
+          console.error('Profile/assessment check error:', err)
+          // Default to profile form on error
+          return NextResponse.redirect(`${origin}/profile-form`)
+        }
       }
 
       console.error('No session or user after exchange')

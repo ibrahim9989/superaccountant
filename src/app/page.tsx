@@ -38,7 +38,7 @@ export default function Home() {
       // Check if user has a profile
       const { data: profile, error } = await supabase
         .from('profiles')
-        .select('id, approval_status')
+        .select('id, approval_status, first_name, phone')
         .eq('id', user.id)
         .single()
 
@@ -49,18 +49,34 @@ export default function Home() {
         return
       }
 
-      if (!profile) {
-        // No profile found, redirect to create profile
+      // No profile or incomplete profile -> profile form
+      if (!profile || !profile.first_name || !profile.phone) {
         router.push('/profile-form')
-      } else if (profile.approval_status === 'approved') {
-        // Profile approved, redirect to dashboard
+        return
+      }
+
+      // Approved -> dashboard
+      if (profile.approval_status === 'approved') {
         router.push('/dashboard')
-      } else if (profile.approval_status === 'pending') {
-        // Profile pending approval, redirect to under-review page
+        return
+      }
+
+      // Pending or null/rejected -> check assessment completion
+      const { data: assessmentSession } = await supabase
+        .from('test_sessions')
+        .select('id, status')
+        .eq('user_id', user.id)
+        .eq('status', 'completed')
+        .order('completed_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+      if (assessmentSession) {
+        // Assessment completed -> under review
         router.push('/under-review')
       } else {
-        // Rejected or other status, redirect to profile form
-        router.push('/profile-form')
+        // No assessment -> assessment page
+        router.push('/assessment')
       }
     } catch (err) {
       console.error('Unexpected error in handleGetStarted:', err)

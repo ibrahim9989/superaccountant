@@ -16,22 +16,41 @@ function LoginContent() {
   useEffect(() => {
     const run = async () => {
       if (user && !loading) {
-        // Determine proper destination based on profile + approval_status
+        // Determine proper destination based on profile + approval_status + assessment
         const { data: profile } = await supabase
           .from('profiles')
-          .select('approval_status')
+          .select('approval_status, first_name, phone')
           .eq('id', user.id)
           .maybeSingle()
 
-        if (!profile) {
+        // No profile or incomplete profile -> profile form
+        if (!profile || !profile.first_name || !profile.phone) {
           router.push('/profile-form')
           return
         }
 
+        // Approved -> dashboard
         if (profile.approval_status === 'approved') {
           router.push('/dashboard')
-        } else {
+          return
+        }
+
+        // Pending or null/rejected -> check assessment completion
+        const { data: assessmentSession } = await supabase
+          .from('test_sessions')
+          .select('id, status')
+          .eq('user_id', user.id)
+          .eq('status', 'completed')
+          .order('completed_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+
+        if (assessmentSession) {
+          // Assessment completed -> under review
           router.push('/under-review')
+        } else {
+          // No assessment -> assessment page
+          router.push('/assessment')
         }
       }
     }
