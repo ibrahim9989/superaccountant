@@ -7,10 +7,11 @@ import { courseService } from '@/lib/services/courseService';
 import type { CourseEnrollment } from '@/lib/types/course';
 
 export default function DashboardPage() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, signOut } = useAuth();
   const router = useRouter();
   const [enrollments, setEnrollments] = useState<CourseEnrollment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [approvalStatus, setApprovalStatus] = useState<'pending' | 'approved' | 'rejected' | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -18,9 +19,39 @@ export default function DashboardPage() {
       return;
     }
     if (user) {
-      loadEnrollments();
+      checkApprovalStatus();
     }
   }, [user, authLoading, router]);
+
+  const checkApprovalStatus = async () => {
+    try {
+      const supabase = (await import('@/lib/supabase/client')).getSupabaseClient();
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('approval_status')
+        .eq('id', user!.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error checking approval status:', error);
+        return;
+      }
+
+      const status = data?.approval_status || 'pending';
+      setApprovalStatus(status);
+
+      // Redirect if not approved
+      if (status !== 'approved') {
+        router.push('/under-review');
+        return;
+      }
+
+      // Only load enrollments if approved
+      loadEnrollments();
+    } catch (err) {
+      console.error('Error:', err);
+    }
+  };
 
   const loadEnrollments = async () => {
     try {
@@ -51,7 +82,15 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <button
+            onClick={async () => { await signOut(); router.push('/login'); }}
+            className="px-4 py-2 text-sm rounded-lg border border-white/20 hover:border-white/40 text-white/90 hover:text-white transition-colors"
+          >
+            Sign out
+          </button>
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">

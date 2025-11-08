@@ -45,17 +45,7 @@ class MCQService {
   async startTest(userId: string, testData: StartTestData): Promise<TestSessionWithDetails> {
     const testConfig = await this.getTestConfiguration(testData.test_config_id)
     
-    // Check if user has exceeded max attempts
-    const { data: analytics } = await this.supabase
-      .from('test_analytics')
-      .select('total_attempts')
-      .eq('user_id', userId)
-      .eq('test_config_id', testData.test_config_id)
-      .single()
-
-    if (analytics && analytics.total_attempts >= testConfig.max_attempts) {
-      throw new Error('Maximum attempts exceeded for this test')
-    }
+    // No max attempts constraint - users can take the test as many times as needed
 
     // Get questions for the test
     const questions = await this.getTestQuestions(testConfig.id)
@@ -68,7 +58,8 @@ class MCQService {
         test_config_id: testData.test_config_id,
         status: 'in_progress',
         max_possible_score: questions.reduce((sum, q) => sum + q.points, 0),
-        attempt_number: (analytics?.total_attempts || 0) + 1
+        // Start with attempt 1; analytics table tracks running totals independently
+        attempt_number: 1
       })
       .select()
       .single()
@@ -374,7 +365,7 @@ class MCQService {
           best_score: newBestScore,
           average_score: newAverageScore,
           last_attempted_at: new Date().toISOString(),
-          first_passed_at: existing.first_passed_at || (score >= 70 ? new Date().toISOString() : null),
+          first_passed_at: existing.first_passed_at || new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
         .eq('id', existing.id)
@@ -388,7 +379,7 @@ class MCQService {
           best_score: score,
           average_score: score,
           last_attempted_at: new Date().toISOString(),
-          first_passed_at: score >= 70 ? new Date().toISOString() : null
+          first_passed_at: new Date().toISOString()
         })
     }
   }
@@ -444,17 +435,16 @@ class MCQService {
   private generateRecommendations(score: number, categoryPerformance: { category_name: string; percentage: number }[]): string[] {
     const recommendations: string[] = []
 
-    if (score < 70) {
-      recommendations.push('Consider reviewing basic accounting principles before retaking the test')
-    }
+    // No passing score requirement - all submissions are for evaluation
+    recommendations.push('Your assessment has been submitted for review by our team')
 
-    const weakCategories = categoryPerformance.filter(cat => cat.percentage < 70)
+    const weakCategories = categoryPerformance.filter(cat => cat.percentage < 50)
     if (weakCategories.length > 0) {
-      recommendations.push(`Focus on improving knowledge in: ${weakCategories.map(c => c.category_name).join(', ')}`)
+      recommendations.push(`Areas for potential improvement: ${weakCategories.map(c => c.category_name).join(', ')}`)
     }
 
     if (score >= 90) {
-      recommendations.push('Excellent performance! You are ready for advanced accounting topics')
+      recommendations.push('Outstanding performance across all categories!')
     }
 
     return recommendations

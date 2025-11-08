@@ -18,7 +18,7 @@ export default function TestResult({ result, onRetake, onContinue }: TestResultP
     if (onContinue) {
       onContinue()
     } else {
-      router.push('/dashboard')
+      router.push('/under-review')
     }
   }
 
@@ -206,7 +206,7 @@ export default function TestResult({ result, onRetake, onContinue }: TestResultP
             onClick={handleContinue}
             className="px-8 py-4 border border-white/20 text-white rounded-lg font-semibold hover:bg-white/10 transition-colors"
           >
-            {passed ? 'Continue to Course' : 'Back to Dashboard'}
+            Continue
           </button>
         </div>
       </div>

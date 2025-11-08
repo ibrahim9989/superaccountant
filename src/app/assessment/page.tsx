@@ -29,7 +29,8 @@ export default function AssessmentPage() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push('/login')
+      const next = '/assessment'
+      router.push(`/login?next=${encodeURIComponent(next)}`)
       return
     }
 
@@ -94,7 +95,7 @@ export default function AssessmentPage() {
   }
 
   const handleContinue = () => {
-    router.push('/dashboard')
+    router.push('/under-review')
   }
 
   if (authLoading || state === 'loading') {
@@ -203,7 +204,6 @@ export default function AssessmentPage() {
         <div className="space-y-6">
           {testConfigs.map((config) => {
             const userConfigAnalytics = userAnalytics.find(a => a.test_config_id === config.id)
-            const canRetake = !userConfigAnalytics || userConfigAnalytics.total_attempts < config.max_attempts
             
             return (
               <div key={config.id} className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8">
@@ -214,7 +214,7 @@ export default function AssessmentPage() {
                       <p className="text-gray-300 mb-4">{config.description}</p>
                     )}
                     
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div className="grid grid-cols-2 md:grid-cols-2 gap-4 text-sm">
                       <div>
                         <div className="text-gray-400">Questions</div>
                         <div className="text-white font-medium">{config.total_questions}</div>
@@ -222,14 +222,6 @@ export default function AssessmentPage() {
                       <div>
                         <div className="text-gray-400">Time Limit</div>
                         <div className="text-white font-medium">{config.time_limit_minutes} min</div>
-                      </div>
-                      <div>
-                        <div className="text-gray-400">Passing Score</div>
-                        <div className="text-white font-medium">{config.passing_score_percentage}%</div>
-                      </div>
-                      <div>
-                        <div className="text-gray-400">Max Attempts</div>
-                        <div className="text-white font-medium">{config.max_attempts}</div>
                       </div>
                     </div>
                   </div>
@@ -242,28 +234,17 @@ export default function AssessmentPage() {
                         </div>
                         <div className="text-gray-400 text-sm">Best Score</div>
                         <div className="text-gray-400 text-sm">
-                          {userConfigAnalytics.total_attempts}/{config.max_attempts} attempts
+                          {userConfigAnalytics.total_attempts} attempt{userConfigAnalytics.total_attempts > 1 ? 's' : ''}
                         </div>
                       </div>
                     )}
                     
                     <button
                       onClick={() => startTest(config.id)}
-                      disabled={!canRetake}
-                      className={`px-8 py-4 rounded-lg font-semibold transition-colors ${
-                        canRetake
-                          ? 'bg-blue-600 text-white hover:bg-blue-700'
-                          : 'bg-gray-600 text-gray-300 cursor-not-allowed'
-                      }`}
+                      className="px-8 py-4 rounded-lg font-semibold transition-colors bg-blue-600 text-white hover:bg-blue-700"
                     >
                       {userConfigAnalytics ? 'Retake Test' : 'Start Test'}
                     </button>
-                    
-                    {!canRetake && (
-                      <p className="text-red-400 text-sm text-center">
-                        Maximum attempts reached
-                      </p>
-                    )}
                   </div>
                 </div>
               </div>
@@ -297,7 +278,7 @@ export default function AssessmentPage() {
               <div className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                 <span className="text-blue-400 text-sm font-bold">4</span>
               </div>
-              <p>You need to score at least 70% to pass and proceed to the course.</p>
+              <p>Complete the assessment to the best of your ability. Your results will be reviewed by our team.</p>
             </div>
           </div>
         </div>

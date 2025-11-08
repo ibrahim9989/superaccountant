@@ -1,19 +1,21 @@
 'use client'
 
 import { useAuth } from '@/contexts/AuthContext'
-import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, Suspense } from 'react'
 import Link from 'next/link'
 
-export default function LoginPage() {
+function LoginContent() {
   const { user, loading, signInWithGoogle } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const nextParam = searchParams?.get('next') || ''
 
   useEffect(() => {
     if (user && !loading) {
-      router.push('/profile')
+      router.push(nextParam || '/profile-form')
     }
-  }, [user, loading, router])
+  }, [user, loading, router, nextParam])
 
   if (loading) {
     return (
@@ -66,7 +68,7 @@ export default function LoginPage() {
 
             <div className="space-y-6">
               <button
-                onClick={signInWithGoogle}
+              onClick={signInWithGoogle}
                 className="w-full flex items-center justify-center px-6 py-4 bg-white hover:bg-gray-50 text-gray-900 font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
               >
                 <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
@@ -116,5 +118,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-black text-white flex items-center justify-center">Loading…</div>}>
+      <LoginContent />
+    </Suspense>
   )
 }

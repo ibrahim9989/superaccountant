@@ -1,12 +1,18 @@
 import type { Metadata } from "next";
-import { Raleway } from "next/font/google";
+import { Space_Grotesk, Bodoni_Moda } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 
-const raleway = Raleway({
+const raleway = Space_Grotesk({
   variable: "--font-raleway",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  weight: ["300", "400", "500", "600", "700"],
+});
+
+const display = Bodoni_Moda({
+  variable: "--font-display",
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -22,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${raleway.variable} font-sans antialiased`}
+        className={`${raleway.variable} ${display.variable} font-sans antialiased`}
       >
         <AuthProvider>
           {children}
