@@ -1,0 +1,10 @@
+.git
+node_modules
+**/*.sql
+**/*.bat
+**/*.ps1
+**/*.md
+coverage
+.DS_Store
+
+
