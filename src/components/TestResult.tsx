@@ -35,23 +35,19 @@ export default function TestResult({ result, onRetake, onContinue }: TestResultP
       <div className="max-w-4xl mx-auto p-6">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className={`w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center ${
-            passed ? 'bg-green-500/20' : 'bg-red-500/20'
-          }`}>
+          <div className="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center bg-white/10">
             {passed ? (
-              <svg className="w-10 h-10 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             ) : (
-              <svg className="w-10 h-10 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-10 h-10 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             )}
           </div>
           
-          <h1 className={`text-3xl font-bold mb-2 ${
-            passed ? 'text-green-400' : 'text-red-400'
-          }`}>
+          <h1 className="text-3xl font-bold mb-2 text-white">
             {passed ? 'Congratulations!' : 'Test Not Passed'}
           </h1>
           
@@ -98,9 +94,7 @@ export default function TestResult({ result, onRetake, onContinue }: TestResultP
             </div>
             <div className="w-full bg-white/10 rounded-full h-3">
               <div 
-                className={`h-3 rounded-full transition-all duration-500 ${
-                  passed ? 'bg-green-500' : 'bg-red-500'
-                }`}
+                className="h-3 rounded-full transition-all duration-500 bg-white"
                 style={{ width: `${Math.min(score_breakdown.percentage_score, 100)}%` }}
               />
             </div>
@@ -109,28 +103,28 @@ export default function TestResult({ result, onRetake, onContinue }: TestResultP
           {/* Detailed Breakdown */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-white/5 rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-green-400 mb-1">
+              <div className="text-2xl font-bold text-white mb-1">
                 {score_breakdown.correct_answers}
               </div>
               <div className="text-gray-400 text-sm">Correct</div>
             </div>
             
             <div className="bg-white/5 rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-red-400 mb-1">
+              <div className="text-2xl font-bold text-white mb-1">
                 {score_breakdown.incorrect_answers}
               </div>
               <div className="text-gray-400 text-sm">Incorrect</div>
             </div>
             
             <div className="bg-white/5 rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-yellow-400 mb-1">
+              <div className="text-2xl font-bold text-white mb-1">
                 {score_breakdown.skipped_questions}
               </div>
               <div className="text-gray-400 text-sm">Skipped</div>
             </div>
             
             <div className="bg-white/5 rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-blue-400 mb-1">
+              <div className="text-2xl font-bold text-white mb-1">
                 {session.attempt_number}
               </div>
               <div className="text-gray-400 text-sm">Attempt</div>
@@ -153,18 +147,11 @@ export default function TestResult({ result, onRetake, onContinue }: TestResultP
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className={`text-lg font-bold ${
-                      category.percentage >= 70 ? 'text-green-400' : 'text-red-400'
-                    }`}>
+                    <div className="text-lg font-bold text-white">
                       {category.percentage.toFixed(1)}%
                     </div>
                     <div className="w-20 bg-white/10 rounded-full h-2 mt-1">
-                      <div 
-                        className={`h-2 rounded-full ${
-                          category.percentage >= 70 ? 'bg-green-500' : 'bg-red-500'
-                        }`}
-                        style={{ width: `${category.percentage}%` }}
-                      />
+                      <div className="h-2 rounded-full bg-white" style={{ width: `${category.percentage}%` }} />
                     </div>
                   </div>
                 </div>
@@ -181,8 +168,8 @@ export default function TestResult({ result, onRetake, onContinue }: TestResultP
             <div className="space-y-3">
               {recommendations.map((recommendation, index) => (
                 <div key={index} className="flex items-start gap-3 p-4 bg-white/5 rounded-lg">
-                  <div className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-blue-400 text-sm font-bold">{index + 1}</span>
+                  <div className="w-6 h-6 bg-white/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-white text-sm font-bold">{index + 1}</span>
                   </div>
                   <p className="text-gray-300">{recommendation}</p>
                 </div>
@@ -196,7 +183,7 @@ export default function TestResult({ result, onRetake, onContinue }: TestResultP
           {!passed && onRetake && (
             <button
               onClick={handleRetake}
-              className="px-8 py-4 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+              className="px-8 py-4 bg-white text-black rounded-lg font-semibold hover:bg-gray-200 transition-colors"
             >
               Retake Test
             </button>

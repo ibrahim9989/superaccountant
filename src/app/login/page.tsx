@@ -1,6 +1,7 @@
 'use client'
 
 import { useAuth } from '@/contexts/AuthContext'
+import { getSupabaseClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, Suspense } from 'react'
 import Link from 'next/link'
@@ -10,12 +11,32 @@ function LoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const nextParam = searchParams?.get('next') || ''
+  const supabase = getSupabaseClient()
 
   useEffect(() => {
-    if (user && !loading) {
-      router.push(nextParam || '/profile-form')
+    const run = async () => {
+      if (user && !loading) {
+        // Determine proper destination based on profile + approval_status
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('approval_status')
+          .eq('id', user.id)
+          .maybeSingle()
+
+        if (!profile) {
+          router.push('/profile-form')
+          return
+        }
+
+        if (profile.approval_status === 'approved') {
+          router.push('/dashboard')
+        } else {
+          router.push('/under-review')
+        }
+      }
     }
-  }, [user, loading, router, nextParam])
+    run()
+  }, [user, loading, router, nextParam, supabase])
 
   if (loading) {
     return (
