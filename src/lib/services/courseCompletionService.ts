@@ -216,7 +216,7 @@ export class CourseCompletionService {
 
       if (error) {
         // Handle 406 errors gracefully (format/RLS issues)
-        if (error.code === 'PGRST116' || error.message?.includes('406') || error.status === 406) {
+        if (error.code === 'PGRST116' || error.message?.includes('406') || (error as any).status === 406) {
           console.warn('Completion status not found or 406 error (possibly RLS issue):', error.message);
           return null;
         }

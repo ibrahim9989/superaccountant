@@ -478,7 +478,7 @@ export class GrandtestService {
 
       if (error) {
         // Handle 406 errors gracefully (format/RLS issues)
-        if (error.code === 'PGRST116' || error.message?.includes('406') || error.status === 406) {
+        if (error.code === 'PGRST116' || error.message?.includes('406') || (error as any).status === 406) {
           console.warn('Completion status not found or 406 error (possibly RLS issue):', error.message);
           // Initialize completion status
           return await this.initializeCourseCompletion(userId, courseId, enrollmentId);
@@ -543,7 +543,7 @@ export class GrandtestService {
       // Handle RLS errors gracefully (especially 500 errors with infinite recursion)
       if (error) {
         // Check for RLS/infinite recursion errors (42P17 or 500 status)
-        if (error.code === '42P17' || error.message?.includes('infinite recursion') || error.status === 500) {
+        if (error.code === '42P17' || error.message?.includes('infinite recursion') || (error as any).status === 500) {
           console.warn('RLS issue fetching grandtest stats (possibly admin_users recursion):', error.message);
           // Return default stats instead of throwing
           return {

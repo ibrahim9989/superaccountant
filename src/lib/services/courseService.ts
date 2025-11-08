@@ -822,7 +822,7 @@ export class CourseService {
         }
         
         // Handle 406 errors gracefully
-        if (error.message?.includes('406') || error.status === 406) {
+        if (error.message?.includes('406') || (error as any).status === 406) {
           console.warn('406 error fetching quiz (possibly RLS or format issue):', error.message)
           return null
         }

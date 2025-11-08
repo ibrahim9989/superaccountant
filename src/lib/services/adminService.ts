@@ -546,13 +546,22 @@ class AdminService {
         this.getSupabase().from('test_configurations').select('id', { count: 'exact' }),
         this.getSupabase().from('profiles').select('id', { count: 'exact' }),
         this.getSupabase().from('test_sessions').select('id', { count: 'exact' }),
-        this.getSupabase().from('question_reviews').select('id', { count: 'exact' }).eq('status', 'pending').then(result => {
-          // Handle 500 errors or missing tables gracefully
-          if (result.error && (result.error.status === 500 || result.error.code === 'PGRST116' || result.error.message?.includes('relation') || result.error.message?.includes('does not exist'))) {
+        (async () => {
+          try {
+            const result = await this.getSupabase()
+              .from('question_reviews')
+              .select('id', { count: 'exact' })
+              .eq('status', 'pending')
+            // Handle 500 errors or missing tables gracefully
+            const err: any = result.error
+            if (err && (err.status === 500 || err.code === 'PGRST116' || err.message?.includes('relation') || err.message?.includes('does not exist'))) {
+              return { data: [], count: 0, error: null }
+            }
+            return result
+          } catch {
             return { data: [], count: 0, error: null }
           }
-          return result
-        }).catch(() => ({ data: [], count: 0, error: null }))
+        })()
       ])
 
       const activeQuestions = questionsResult.data?.filter(q => q.is_active).length || 0
@@ -697,7 +706,7 @@ class AdminService {
         if (error.code === 'PGRST116' || 
             error.message?.includes('relation') || 
             error.message?.includes('does not exist') ||
-            error.status === 500 ||
+            (error as any).status === 500 ||
             error.message?.includes('500')) {
           console.log('Admin tables not set up yet or RLS issue, returning empty activity log')
           return []

@@ -130,7 +130,7 @@ export interface GrandtestStats {
   passed_attempts: number;
   average_score: number;
   pass_rate: number;
-  last_attempt_date?: string;
+  last_attempt_date?: string | null;
   can_retake: boolean;
   next_available_date?: string;
 }

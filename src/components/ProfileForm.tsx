@@ -475,5 +475,6 @@ export default function ProfileForm() {
         </form>
       </div>
     </div>
+    </div>
   )
 }
