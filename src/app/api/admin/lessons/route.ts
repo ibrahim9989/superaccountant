@@ -43,6 +43,32 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: `Database error: ${error.message}` }, { status: 500 })
     }
 
+    // Fetch flowcharts for each lesson
+    if (lessons && lessons.length > 0) {
+      const lessonIds = lessons.map(lesson => lesson.id)
+      const { data: flowcharts, error: flowchartsError } = await supabase
+        .from('lesson_flowcharts')
+        .select('*')
+        .in('lesson_id', lessonIds)
+        .order('order_index', { ascending: true })
+
+      if (!flowchartsError && flowcharts) {
+        // Group flowcharts by lesson_id and attach to lessons
+        const flowchartsByLesson = flowcharts.reduce((acc: any, flowchart: any) => {
+          if (!acc[flowchart.lesson_id]) {
+            acc[flowchart.lesson_id] = []
+          }
+          acc[flowchart.lesson_id].push(flowchart)
+          return acc
+        }, {})
+
+        // Attach flowcharts to each lesson
+        lessons.forEach((lesson: any) => {
+          lesson.flowcharts = flowchartsByLesson[lesson.id] || []
+        })
+      }
+    }
+
     console.log('Lessons fetched successfully:', lessons?.length || 0)
     return NextResponse.json({ data: lessons || [] })
   } catch (error) {

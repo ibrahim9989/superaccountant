@@ -99,6 +99,23 @@ export default function LearnPage({ params }: LearnPageProps) {
             console.log('No quiz found for lesson - this is normal, not all lessons have quizzes')
           }
         }
+        // Fetch flowcharts for this lesson
+        try {
+          const flowchartsResponse = await fetch(`/api/lessons/${progressData.next_lesson.id}/flowcharts`, {
+            cache: 'no-store'
+          })
+          if (flowchartsResponse.ok) {
+            const flowchartsData = await flowchartsResponse.json()
+            if (lessonData) {
+              (lessonData as any).flowcharts = flowchartsData.data || []
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching flowcharts:', error)
+          if (lessonData) {
+            (lessonData as any).flowcharts = []
+          }
+        }
         setCurrentLesson(lessonData)
       } else if ((enrollmentData.course as any)?.modules?.[0]?.lessons?.[0]) {
         // Start with first lesson if no progress
@@ -115,6 +132,23 @@ export default function LearnPage({ params }: LearnPageProps) {
             console.log('Successfully fetched quiz data for lesson')
           } else {
             console.log('No quiz found for lesson - this is normal, not all lessons have quizzes')
+          }
+        }
+        // Fetch flowcharts for this lesson
+        try {
+          const flowchartsResponse = await fetch(`/api/lessons/${firstLesson.id}/flowcharts`, {
+            cache: 'no-store'
+          })
+          if (flowchartsResponse.ok) {
+            const flowchartsData = await flowchartsResponse.json()
+            if (lessonData) {
+              (lessonData as any).flowcharts = flowchartsData.data || []
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching flowcharts:', error)
+          if (lessonData) {
+            (lessonData as any).flowcharts = []
           }
         }
         setCurrentLesson(lessonData)
@@ -179,6 +213,26 @@ export default function LearnPage({ params }: LearnPageProps) {
         console.error('Error fetching lesson content:', contentError)
         // Don't fail the entire lesson load if content fetch fails
         // Content might already be included in lessonData from getLessonById
+      }
+      
+      // Fetch flowcharts for this lesson
+      try {
+        const flowchartsResponse = await fetch(`/api/lessons/${lessonId}/flowcharts`, {
+          cache: 'no-store'
+        })
+        if (flowchartsResponse.ok) {
+          const flowchartsData = await flowchartsResponse.json()
+          console.log('Fetched lesson flowcharts:', flowchartsData.data)
+          if (lessonData) {
+            (lessonData as any).flowcharts = flowchartsData.data || []
+          }
+        }
+      } catch (flowchartsError) {
+        console.error('Error fetching lesson flowcharts:', flowchartsError)
+        // Don't fail the entire lesson load if flowcharts fetch fails
+        if (lessonData) {
+          (lessonData as any).flowcharts = []
+        }
       }
       
       // If lesson doesn't have quiz data, try to fetch it directly
@@ -467,16 +521,31 @@ export default function LearnPage({ params }: LearnPageProps) {
                       </div>
 
                       {/* Flowchart Component - Hamburger Menu and Sidebar */}
-                      {((currentLesson as any).flowchart_file_path || (currentLesson as any).flowchart_url) && (
+                      {((currentLesson as any).flowcharts && (currentLesson as any).flowcharts.length > 0) && (
                         <div className="flex">
                           <LessonFlowchart
-                            flowchart={{
+                            flowcharts={(currentLesson as any).flowcharts.map((fc: any) => ({
+                              flowchart_file_path: fc.flowchart_file_path,
+                              flowchart_file_name: fc.flowchart_file_name,
+                              flowchart_mime_type: fc.flowchart_mime_type,
+                              flowchart_url: fc.flowchart_url,
+                              flowchart_title: fc.flowchart_title
+                            }))}
+                          />
+                        </div>
+                      )}
+                      {/* Legacy support: check for single flowchart fields (backward compatibility) */}
+                      {(!(currentLesson as any).flowcharts || (currentLesson as any).flowcharts.length === 0) &&
+                       ((currentLesson as any).flowchart_file_path || (currentLesson as any).flowchart_url) && (
+                        <div className="flex">
+                          <LessonFlowchart
+                            flowcharts={[{
                               flowchart_file_path: (currentLesson as any).flowchart_file_path,
                               flowchart_file_name: (currentLesson as any).flowchart_file_name,
                               flowchart_mime_type: (currentLesson as any).flowchart_mime_type,
                               flowchart_url: (currentLesson as any).flowchart_url,
                               flowchart_title: (currentLesson as any).flowchart_title
-                            }}
+                            }]}
                           />
                         </div>
                       )}
@@ -485,18 +554,38 @@ export default function LearnPage({ params }: LearnPageProps) {
                 ) : null}
 
                 {/* Flowchart Component for non-video lessons - Standalone */}
-                {!(currentLesson as any).video_url && ((currentLesson as any).flowchart_file_path || (currentLesson as any).flowchart_url) && (
+                {!(currentLesson as any).video_url && 
+                 ((currentLesson as any).flowcharts && (currentLesson as any).flowcharts.length > 0) && (
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold text-white mb-3">Flowcharts</h3>
+                    <div className="flex items-stretch gap-0 rounded-lg overflow-hidden bg-gray-800">
+                      <LessonFlowchart
+                        flowcharts={(currentLesson as any).flowcharts.map((fc: any) => ({
+                          flowchart_file_path: fc.flowchart_file_path,
+                          flowchart_file_name: fc.flowchart_file_name,
+                          flowchart_mime_type: fc.flowchart_mime_type,
+                          flowchart_url: fc.flowchart_url,
+                          flowchart_title: fc.flowchart_title
+                        }))}
+                      />
+                    </div>
+                  </div>
+                )}
+                {/* Legacy support: check for single flowchart fields (backward compatibility) */}
+                {!(currentLesson as any).video_url && 
+                 (!(currentLesson as any).flowcharts || (currentLesson as any).flowcharts.length === 0) &&
+                 ((currentLesson as any).flowchart_file_path || (currentLesson as any).flowchart_url) && (
                   <div className="mb-6">
                     <h3 className="text-lg font-semibold text-white mb-3">Flowchart</h3>
                     <div className="flex items-stretch gap-0 rounded-lg overflow-hidden bg-gray-800">
                       <LessonFlowchart
-                        flowchart={{
+                        flowcharts={[{
                           flowchart_file_path: (currentLesson as any).flowchart_file_path,
                           flowchart_file_name: (currentLesson as any).flowchart_file_name,
                           flowchart_mime_type: (currentLesson as any).flowchart_mime_type,
                           flowchart_url: (currentLesson as any).flowchart_url,
                           flowchart_title: (currentLesson as any).flowchart_title
-                        }}
+                        }]}
                       />
                     </div>
                   </div>

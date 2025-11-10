@@ -24,6 +24,19 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
+    // Fetch flowcharts for this lesson
+    if (lesson) {
+      const { data: flowcharts, error: flowchartsError } = await supabase
+        .from('lesson_flowcharts')
+        .select('*')
+        .eq('lesson_id', id)
+        .order('order_index', { ascending: true })
+
+      if (!flowchartsError && flowcharts) {
+        (lesson as any).flowcharts = flowcharts
+      }
+    }
+
     return NextResponse.json({ data: lesson })
   } catch (error) {
     console.error('Unexpected error in get lesson API:', error)

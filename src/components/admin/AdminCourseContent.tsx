@@ -145,9 +145,17 @@ export default function AdminCourseContent() {
     is_active: true
   })
   
-  const [flowchartFile, setFlowchartFile] = useState<File | null>(null)
-  const [flowchartUrl, setFlowchartUrl] = useState('')
-  const [flowchartTitle, setFlowchartTitle] = useState('')
+  // Multiple flowcharts support
+  interface FlowchartItem {
+    id?: string // For existing flowcharts
+    file?: File | null
+    url?: string
+    title?: string
+    order_index?: number
+    file_path?: string // For existing flowcharts
+    file_name?: string // For existing flowcharts
+  }
+  const [flowcharts, setFlowcharts] = useState<FlowchartItem[]>([])
 
   const [contentForm, setContentForm] = useState({
     title: '',
@@ -393,35 +401,44 @@ export default function AdminCourseContent() {
         lessonId = responseData.data?.id
       }
       
-      // Upload flowchart if provided
-      
-      if (lessonId && (flowchartFile || flowchartUrl)) {
-        try {
-          const flowchartFormData = new FormData()
-          flowchartFormData.append('lessonId', lessonId)
-          if (flowchartFile) {
-            flowchartFormData.append('file', flowchartFile)
-          }
-          if (flowchartUrl) {
-            flowchartFormData.append('url', flowchartUrl)
-          }
-          if (flowchartTitle) {
-            flowchartFormData.append('title', flowchartTitle)
-          }
+      // Upload all flowcharts
+      if (lessonId && flowcharts.length > 0) {
+        for (let i = 0; i < flowcharts.length; i++) {
+          const flowchart = flowcharts[i]
+          // Skip existing flowcharts (they have an id) - they're already in the database
+          if (flowchart.id) continue
           
-          const flowchartResponse = await fetch('/api/admin/lessons/flowchart', {
-            method: 'POST',
-            body: flowchartFormData
-          })
+          // Only upload if there's a file or URL
+          if (!flowchart.file && !flowchart.url) continue
           
-          if (!flowchartResponse.ok) {
-            const errorData = await flowchartResponse.json().catch(() => ({}))
-            console.error('Failed to upload flowchart:', errorData.error || flowchartResponse.statusText)
-            // Don't throw - lesson was saved successfully
+          try {
+            const flowchartFormData = new FormData()
+            flowchartFormData.append('lessonId', lessonId)
+            flowchartFormData.append('orderIndex', i.toString())
+            if (flowchart.file) {
+              flowchartFormData.append('file', flowchart.file)
+            }
+            if (flowchart.url) {
+              flowchartFormData.append('url', flowchart.url)
+            }
+            if (flowchart.title) {
+              flowchartFormData.append('title', flowchart.title)
+            }
+            
+            const flowchartResponse = await fetch('/api/admin/lessons/flowchart', {
+              method: 'POST',
+              body: flowchartFormData
+            })
+            
+            if (!flowchartResponse.ok) {
+              const errorData = await flowchartResponse.json().catch(() => ({}))
+              console.error(`Failed to upload flowchart ${i + 1}:`, errorData.error || flowchartResponse.statusText)
+              // Continue with other flowcharts
+            }
+          } catch (flowchartError) {
+            console.error(`Error uploading flowchart ${i + 1}:`, flowchartError)
+            // Continue with other flowcharts
           }
-        } catch (flowchartError) {
-          console.error('Error uploading flowchart:', flowchartError)
-          // Don't throw - lesson was saved successfully
         }
       }
       
@@ -478,9 +495,7 @@ export default function AdminCourseContent() {
       order_index: 1,
       is_active: true
     })
-    setFlowchartFile(null)
-    setFlowchartUrl('')
-    setFlowchartTitle('')
+    setFlowcharts([])
   }
 
   const resetContentForm = () => {
@@ -654,7 +669,7 @@ export default function AdminCourseContent() {
     setShowModuleForm(true)
   }
 
-  const editLesson = (lesson: CourseLesson) => {
+  const editLesson = async (lesson: CourseLesson) => {
     setEditingLesson(lesson)
     setLessonForm({
       title: lesson.title,
@@ -665,9 +680,29 @@ export default function AdminCourseContent() {
       order_index: lesson.order_index,
       is_active: lesson.is_active
     })
-    setFlowchartFile(null)
-    setFlowchartUrl((lesson as any).flowchart_url || '')
-    setFlowchartTitle((lesson as any).flowchart_title || '')
+    
+    // Load existing flowcharts for this lesson
+    try {
+      const flowchartsResponse = await fetch(`/api/admin/lessons/flowchart?lessonId=${lesson.id}`)
+      if (flowchartsResponse.ok) {
+        const flowchartsData = await flowchartsResponse.json()
+        const existingFlowcharts = (flowchartsData.data || []).map((fc: any) => ({
+          id: fc.id,
+          url: fc.flowchart_url || '',
+          title: fc.flowchart_title || '',
+          order_index: fc.order_index || 0,
+          file_path: fc.flowchart_file_path || '',
+          file_name: fc.flowchart_file_name || ''
+        }))
+        setFlowcharts(existingFlowcharts)
+      } else {
+        setFlowcharts([])
+      }
+    } catch (error) {
+      console.error('Error loading flowcharts:', error)
+      setFlowcharts([])
+    }
+    
     setShowLessonForm(true)
   }
 
@@ -1846,90 +1881,129 @@ Good luck with your assignment!`,
                 </div>
               )}
 
-              {/* Flowchart Upload Section */}
+              {/* Multiple Flowcharts Upload Section */}
               <div className="border-t border-gray-600 pt-4">
-                <h4 className="text-sm font-semibold text-gray-300 mb-3">Flowchart (Optional)</h4>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Flowchart Title
-                    </label>
-                    <input
-                      type="text"
-                      value={flowchartTitle}
-                      onChange={(e) => setFlowchartTitle(e.target.value)}
-                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
-                      placeholder="e.g., Process Flow Diagram"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Upload Flowchart File (Image, PDF, etc.)
-                    </label>
-                    <input
-                      type="file"
-                      accept="image/*,.pdf"
-                      onChange={(e) => setFlowchartFile(e.target.files?.[0] || null)}
-                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700"
-                    />
-                    {flowchartFile && (
-                      <p className="text-xs text-gray-400 mt-1">
-                        Selected: {flowchartFile.name} ({(flowchartFile.size / 1024).toFixed(2)} KB)
-                      </p>
-                    )}
-                    {editingLesson && (editingLesson as any).flowchart_file_name && (
-                      <p className="text-xs text-yellow-400 mt-1">
-                        Current: {(editingLesson as any).flowchart_file_name}
-                      </p>
-                    )}
-                  </div>
-                  
-                  <div className="text-center text-gray-400 text-sm">OR</div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Flowchart URL (External Link)
-                    </label>
-                    <input
-                      type="url"
-                      value={flowchartUrl}
-                      onChange={(e) => setFlowchartUrl(e.target.value)}
-                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
-                      placeholder="https://example.com/flowchart.pdf"
-                    />
-                  </div>
-                  
-                  {editingLesson && (editingLesson as any).flowchart_file_path && (
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        if (confirm('Are you sure you want to remove the flowchart?')) {
-                          const response = await fetch(`/api/admin/lessons/flowchart?lessonId=${editingLesson.id}`, {
-                            method: 'DELETE'
-                          })
-                          if (response.ok) {
-                            setFlowchartFile(null)
-                            setFlowchartUrl('')
-                            setFlowchartTitle('')
-                            // Reload lessons
-                            const lessonsResponse = await fetch(`/api/admin/lessons?moduleId=${selectedModule?.id}`)
-                            if (lessonsResponse.ok) {
-                              const lessonsData = await lessonsResponse.json()
-                              const lessons = lessonsData.data || []
-                              if (selectedModule) {
-                                setSelectedModule({ ...selectedModule, lessons: lessons as any })
-                              }
-                            }
-                          }
-                        }
-                      }}
-                      className="text-sm text-red-400 hover:text-red-300"
-                    >
-                      Remove Flowchart
-                    </button>
-                  )}
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-semibold text-gray-300">Flowcharts (Optional)</h4>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFlowcharts([...flowcharts, { file: null, url: '', title: '', order_index: flowcharts.length }])
+                    }}
+                    className="text-sm bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded transition-colors"
+                  >
+                    + Add Flowchart
+                  </button>
                 </div>
+                
+                {flowcharts.length > 0 && (
+                  <div className="space-y-4">
+                    {flowcharts.map((flowchart, index) => (
+                      <div key={index} className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-sm font-medium text-gray-300">Flowchart {index + 1}</span>
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              // If it's an existing flowchart, delete it from the database
+                              if (flowchart.id && editingLesson) {
+                                if (confirm('Are you sure you want to remove this flowchart?')) {
+                                  try {
+                                    const response = await fetch(`/api/admin/lessons/flowchart?flowchartId=${flowchart.id}`, {
+                                      method: 'DELETE'
+                                    })
+                                    if (!response.ok) {
+                                      console.error('Failed to delete flowchart')
+                                    }
+                                  } catch (error) {
+                                    console.error('Error deleting flowchart:', error)
+                                  }
+                                } else {
+                                  return
+                                }
+                              }
+                              // Remove from the array
+                              setFlowcharts(flowcharts.filter((_, i) => i !== index))
+                            }}
+                            className="text-sm text-red-400 hover:text-red-300"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                        
+                        <div className="space-y-3">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-1">
+                              Flowchart Title
+                            </label>
+                            <input
+                              type="text"
+                              value={flowchart.title || ''}
+                              onChange={(e) => {
+                                const updated = [...flowcharts]
+                                updated[index].title = e.target.value
+                                setFlowcharts(updated)
+                              }}
+                              className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm"
+                              placeholder="e.g., Process Flow Diagram"
+                            />
+                          </div>
+                          
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-1">
+                              Upload Flowchart File (Image, PDF, etc.)
+                            </label>
+                            <input
+                              type="file"
+                              accept="image/*,.pdf"
+                              onChange={(e) => {
+                                const updated = [...flowcharts]
+                                updated[index].file = e.target.files?.[0] || null
+                                updated[index].url = '' // Clear URL if file is selected
+                                setFlowcharts(updated)
+                              }}
+                              className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700"
+                            />
+                            {flowchart.file && (
+                              <p className="text-xs text-gray-400 mt-1">
+                                Selected: {flowchart.file.name} ({(flowchart.file.size / 1024).toFixed(2)} KB)
+                              </p>
+                            )}
+                            {flowchart.id && !flowchart.file && (
+                              <p className="text-xs text-yellow-400 mt-1">
+                                Existing flowchart: {(flowchart as any).file_name || 'Uploaded file'} {(flowchart as any).file_path && '(upload new file to replace)'}
+                              </p>
+                            )}
+                          </div>
+                          
+                          <div className="text-center text-gray-500 text-xs">OR</div>
+                          
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-1">
+                              Flowchart URL (External Link)
+                            </label>
+                            <input
+                              type="url"
+                              value={flowchart.url || ''}
+                              onChange={(e) => {
+                                const updated = [...flowcharts]
+                                updated[index].url = e.target.value
+                                updated[index].file = null // Clear file if URL is provided
+                                setFlowcharts(updated)
+                              }}
+                              className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm"
+                              placeholder="https://example.com/flowchart.pdf"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {flowcharts.length === 0 && (
+                  <p className="text-sm text-gray-500">No flowcharts added. Click "Add Flowchart" to add one.</p>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">

@@ -10,6 +10,7 @@ if (!supabaseUrl || !serviceKey) {
 
 const supabase = createSupabaseClient(supabaseUrl as string, serviceKey as string)
 
+// POST - Create a new flowchart for a lesson
 export async function POST(request: Request) {
   try {
     const formData = await request.formData()
@@ -17,13 +18,15 @@ export async function POST(request: Request) {
     const file = formData.get('file') as File | null
     const title = formData.get('title') as string | null
     const url = formData.get('url') as string | null
+    const orderIndex = formData.get('orderIndex') as string | null
 
     console.log('Flowchart upload request:', {
       lessonId,
       hasFile: !!file,
       fileName: file?.name,
       url,
-      title
+      title,
+      orderIndex
     })
 
     if (!lessonId) {
@@ -36,21 +39,40 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
     }
 
+    // Get the max order_index for this lesson to determine the next order
+    const { data: existingFlowcharts } = await supabase
+      .from('lesson_flowcharts')
+      .select('order_index')
+      .eq('lesson_id', lessonId)
+      .order('order_index', { ascending: false })
+      .limit(1)
+
+    const nextOrderIndex = orderIndex 
+      ? parseInt(orderIndex) 
+      : (existingFlowcharts && existingFlowcharts.length > 0 
+          ? existingFlowcharts[0].order_index + 1 
+          : 0)
+
     let flowchartData: {
+      lesson_id: string
       flowchart_file_path?: string
       flowchart_file_name?: string
       flowchart_mime_type?: string
       flowchart_url?: string
       flowchart_title?: string
-    } = {}
+      order_index: number
+    } = {
+      lesson_id: lessonId,
+      order_index: nextOrderIndex
+    }
 
     // If file is provided, upload it
     if (file) {
       const fileExt = file.name.split('.').pop()
-      const fileName = `${lessonId}-flowchart-${Date.now()}.${fileExt}`
+      const fileName = `${lessonId}-flowchart-${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
       const filePath = `lessons/${lessonId}/flowcharts/${fileName}`
 
-      // Upload to Supabase Storage (use lesson-content bucket, same as other lesson files)
+      // Upload to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('lesson-content')
         .upload(filePath, file, {
@@ -69,6 +91,7 @@ export async function POST(request: Request) {
         .getPublicUrl(filePath)
 
       flowchartData = {
+        ...flowchartData,
         flowchart_file_path: urlData.publicUrl,
         flowchart_file_name: file.name,
         flowchart_mime_type: file.type,
@@ -77,6 +100,7 @@ export async function POST(request: Request) {
     } else if (url) {
       // If URL is provided instead
       flowchartData = {
+        ...flowchartData,
         flowchart_url: url,
         flowchart_title: title || 'Flowchart'
       }
@@ -84,20 +108,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Either file or URL is required' }, { status: 400 })
     }
 
-    // Update lesson with flowchart data
-    console.log('Updating lesson with flowchart data:', { lessonId, flowchartData })
+    // Insert flowchart into lesson_flowcharts table
+    console.log('Inserting flowchart data:', { lessonId, flowchartData })
     const { data, error } = await supabase
-      .from('lessons')
-      .update({
-        ...flowchartData,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', lessonId)
+      .from('lesson_flowcharts')
+      .insert(flowchartData)
       .select()
       .single()
 
     if (error) {
-      console.error('Error updating lesson with flowchart:', {
+      console.error('Error inserting flowchart:', {
         error: error.message,
         code: error.code,
         details: error.details,
@@ -120,7 +140,8 @@ export async function POST(request: Request) {
   }
 }
 
-export async function DELETE(request: Request) {
+// GET - Fetch all flowcharts for a lesson
+export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const lessonId = searchParams.get('lessonId')
@@ -133,16 +154,53 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
     }
 
-    // Get lesson to check if there's a file to delete
-    const { data: lesson } = await supabase
-      .from('lessons')
+    // Fetch all flowcharts for this lesson, ordered by order_index
+    const { data, error } = await supabase
+      .from('lesson_flowcharts')
+      .select('*')
+      .eq('lesson_id', lessonId)
+      .order('order_index', { ascending: true })
+
+    if (error) {
+      console.error('Error fetching flowcharts:', error)
+      return NextResponse.json({ 
+        error: `Database error: ${error.message}` 
+      }, { status: 500 })
+    }
+
+    return NextResponse.json({ data: data || [] })
+  } catch (error) {
+    console.error('Unexpected error in flowchart fetch API:', error)
+    return NextResponse.json({ 
+      error: `Internal server error: ${error instanceof Error ? error.message : 'Unknown error'}` 
+    }, { status: 500 })
+  }
+}
+
+// DELETE - Delete a specific flowchart by ID
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const flowchartId = searchParams.get('flowchartId')
+
+    if (!flowchartId) {
+      return NextResponse.json({ error: 'flowchartId is required' }, { status: 400 })
+    }
+
+    if (!supabaseUrl || !serviceKey) {
+      return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
+    }
+
+    // Get flowchart to check if there's a file to delete
+    const { data: flowchart } = await supabase
+      .from('lesson_flowcharts')
       .select('flowchart_file_path')
-      .eq('id', lessonId)
+      .eq('id', flowchartId)
       .single()
 
     // If there's a file in storage, delete it
-    if (lesson?.flowchart_file_path && lesson.flowchart_file_path.includes('/storage/v1/object/public/')) {
-      const pathMatch = lesson.flowchart_file_path.match(/lesson-content\/(.+)$/)
+    if (flowchart?.flowchart_file_path && flowchart.flowchart_file_path.includes('/storage/v1/object/public/')) {
+      const pathMatch = flowchart.flowchart_file_path.match(/lesson-content\/(.+)$/)
       if (pathMatch) {
         const filePath = pathMatch[1]
         await supabase.storage
@@ -151,27 +209,20 @@ export async function DELETE(request: Request) {
       }
     }
 
-    // Remove flowchart data from lesson
+    // Delete flowchart from database
     const { data, error } = await supabase
-      .from('lessons')
-      .update({
-        flowchart_file_path: null,
-        flowchart_file_name: null,
-        flowchart_mime_type: null,
-        flowchart_url: null,
-        flowchart_title: null,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', lessonId)
+      .from('lesson_flowcharts')
+      .delete()
+      .eq('id', flowchartId)
       .select()
       .single()
 
     if (error) {
-      console.error('Error removing flowchart from lesson:', error)
+      console.error('Error deleting flowchart:', error)
       return NextResponse.json({ error: `Database error: ${error.message}` }, { status: 500 })
     }
 
-    return NextResponse.json({ data })
+    return NextResponse.json({ data, message: 'Flowchart deleted successfully' })
   } catch (error) {
     console.error('Unexpected error in flowchart delete API:', error)
     return NextResponse.json({ 
@@ -179,4 +230,3 @@ export async function DELETE(request: Request) {
     }, { status: 500 })
   }
 }
-

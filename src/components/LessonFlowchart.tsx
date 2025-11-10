@@ -2,29 +2,38 @@
 
 import { useState } from 'react'
 
-interface LessonFlowchartProps {
-  flowchart: {
-    flowchart_file_path?: string
-    flowchart_file_name?: string
-    flowchart_mime_type?: string
-    flowchart_url?: string
-    flowchart_title?: string
-  }
+interface Flowchart {
+  flowchart_file_path?: string
+  flowchart_file_name?: string
+  flowchart_mime_type?: string
+  flowchart_url?: string
+  flowchart_title?: string
 }
 
-export default function LessonFlowchart({ flowchart }: LessonFlowchartProps) {
+interface LessonFlowchartProps {
+  flowcharts: Flowchart[]
+}
+
+export default function LessonFlowchart({ flowcharts }: LessonFlowchartProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [selectedFlowchartIndex, setSelectedFlowchartIndex] = useState(0)
   const [showZoomedImage, setShowZoomedImage] = useState(false)
 
-  if (!flowchart.flowchart_file_path && !flowchart.flowchart_url) {
+  // Filter out flowcharts without a file path or URL
+  const validFlowcharts = flowcharts.filter(
+    flowchart => flowchart.flowchart_file_path || flowchart.flowchart_url
+  )
+
+  if (validFlowcharts.length === 0) {
     return null
   }
 
-  const flowchartUrl = flowchart.flowchart_file_path || flowchart.flowchart_url
-  const flowchartName = flowchart.flowchart_title || flowchart.flowchart_file_name || 'Flowchart'
-  const isImage = flowchart.flowchart_mime_type?.startsWith('image/') || 
+  const currentFlowchart = validFlowcharts[selectedFlowchartIndex]
+  const flowchartUrl = currentFlowchart.flowchart_file_path || currentFlowchart.flowchart_url
+  const flowchartName = currentFlowchart.flowchart_title || currentFlowchart.flowchart_file_name || 'Flowchart'
+  const isImage = currentFlowchart.flowchart_mime_type?.startsWith('image/') || 
                   flowchartUrl?.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i)
-  const isPdf = flowchart.flowchart_mime_type === 'application/pdf' ||
+  const isPdf = currentFlowchart.flowchart_mime_type === 'application/pdf' ||
                 flowchartUrl?.match(/\.pdf$/i)
 
   return (
@@ -61,8 +70,40 @@ export default function LessonFlowchart({ flowchart }: LessonFlowchartProps) {
         <div className="flex flex-col h-full min-h-full">
           {/* Header */}
           <div className="bg-blue-800 px-6 py-4 flex items-center justify-between border-b border-blue-700 flex-shrink-0">
-            <h2 className="text-xl font-semibold text-white truncate">{flowchartName}</h2>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-xl font-semibold text-white truncate">{flowchartName}</h2>
+              {validFlowcharts.length > 1 && (
+                <p className="text-xs text-blue-200 mt-1">
+                  {selectedFlowchartIndex + 1} of {validFlowcharts.length}
+                </p>
+              )}
+            </div>
             <div className="flex items-center gap-2">
+              {/* Flowchart navigation buttons if multiple flowcharts */}
+              {validFlowcharts.length > 1 && (
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setSelectedFlowchartIndex(Math.max(0, selectedFlowchartIndex - 1))}
+                    disabled={selectedFlowchartIndex === 0}
+                    className="text-gray-300 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    aria-label="Previous flowchart"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => setSelectedFlowchartIndex(Math.min(validFlowcharts.length - 1, selectedFlowchartIndex + 1))}
+                    disabled={selectedFlowchartIndex === validFlowcharts.length - 1}
+                    className="text-gray-300 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    aria-label="Next flowchart"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+              )}
               {isImage && (
                 <button
                   onClick={() => setShowZoomedImage(true)}
@@ -106,6 +147,27 @@ export default function LessonFlowchart({ flowchart }: LessonFlowchartProps) {
               </button>
             </div>
           </div>
+
+          {/* Flowchart list for multiple flowcharts */}
+          {validFlowcharts.length > 1 && (
+            <div className="bg-blue-900 px-4 py-2 border-b border-blue-700 flex-shrink-0 overflow-x-auto">
+              <div className="flex gap-2">
+                {validFlowcharts.map((fc, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedFlowchartIndex(index)}
+                    className={`px-3 py-1 rounded text-sm font-medium transition-colors whitespace-nowrap ${
+                      index === selectedFlowchartIndex
+                        ? 'bg-blue-700 text-white'
+                        : 'bg-blue-800 text-blue-200 hover:bg-blue-700'
+                    }`}
+                  >
+                    {fc.flowchart_title || `Flowchart ${index + 1}`}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-6">
@@ -216,4 +278,3 @@ export default function LessonFlowchart({ flowchart }: LessonFlowchartProps) {
     </>
   )
 }
-
