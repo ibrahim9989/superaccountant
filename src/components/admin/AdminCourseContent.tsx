@@ -1101,6 +1101,7 @@ Good luck with your assignment!`,
                             <button
                               onClick={async () => {
                                 setSelectedModule(module)
+                                setActiveTab('lessons')
                                 try {
                                   console.log('Loading lessons for module:', module.id)
                                   const response = await fetch(`/api/admin/lessons?moduleId=${module.id}`)
