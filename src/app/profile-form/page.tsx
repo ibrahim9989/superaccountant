@@ -13,21 +13,108 @@ export default function ProfileFormPage() {
   const router = useRouter()
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true)
   const supabase = getSupabaseClient()
 
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
   })
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login')
+    const checkProfileAndRedirect = async () => {
+      if (authLoading) return
+      
+      if (!user) {
+        router.push('/login')
+        return
+      }
+
+      // Check if user already has a complete profile
+      try {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .maybeSingle()
+
+        if (error) {
+          console.error('Error checking profile:', error)
+          setIsLoadingProfile(false)
+          return
+        }
+
+        // If profile exists and has required fields, check if we should redirect
+        if (profile && profile.first_name && profile.phone) {
+          // Only redirect if profile is complete AND user is approved
+          // Otherwise allow editing (for pending/rejected users)
+          if (profile.approval_status === 'approved') {
+            router.push('/dashboard')
+            setIsLoadingProfile(false)
+            return
+          }
+
+          // For pending users, check assessment status
+          if (profile.approval_status === 'pending') {
+            const { data: assessmentSession } = await supabase
+              .from('test_sessions')
+              .select('id, status')
+              .eq('user_id', user.id)
+              .eq('status', 'completed')
+              .order('completed_at', { ascending: false })
+              .limit(1)
+              .maybeSingle()
+
+            if (assessmentSession) {
+              router.push('/under-review')
+              setIsLoadingProfile(false)
+              return
+            } else {
+              router.push('/assessment')
+              setIsLoadingProfile(false)
+              return
+            }
+          }
+        }
+
+        // Load existing profile data into form (if profile exists)
+        if (profile) {
+          reset({
+            firstName: profile.first_name || '',
+            lastName: profile.last_name || '',
+            email: profile.email || user.email || '',
+            phone: profile.phone || '',
+            dateOfBirth: profile.date_of_birth || '',
+            address: profile.address || '',
+            city: profile.city || '',
+            state: profile.state || '',
+            zipCode: profile.zip_code || '',
+            country: profile.country || '',
+            education: profile.education || '',
+            workExperience: profile.work_experience || '',
+            currentOccupation: profile.current_occupation || '',
+            accountingExperience: profile.accounting_experience || '',
+            motivation: profile.motivation || '',
+            goals: profile.goals || '',
+            emergencyContactName: profile.emergency_contact_name || '',
+            emergencyContactPhone: profile.emergency_contact_phone || '',
+            emergencyContactRelation: profile.emergency_contact_relation || '',
+          })
+        }
+      } catch (err) {
+        console.error('Error checking profile:', err)
+        // On error, allow user to fill out form
+      } finally {
+        setIsLoadingProfile(false)
+      }
     }
-  }, [user, authLoading, router])
+
+    checkProfileAndRedirect()
+  }, [user, authLoading, router, supabase, reset])
 
   const onSubmit = async (data: ProfileFormData) => {
     if (!user) return
@@ -78,7 +165,7 @@ export default function ProfileFormPage() {
     }
   }
 
-  if (authLoading) {
+  if (authLoading || isLoadingProfile) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>

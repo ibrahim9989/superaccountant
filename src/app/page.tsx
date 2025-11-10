@@ -22,10 +22,61 @@ export default function Home() {
   const ss = String(secondsLeft % 60).padStart(2, '0')
 
   useEffect(() => {
-    if (!loading && user) {
-      router.push('/profile-form')
+    const checkProfileAndRedirect = async () => {
+      if (!loading && user) {
+        try {
+          // Check if user has a profile
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('id, approval_status, first_name, phone')
+            .eq('id', user.id)
+            .maybeSingle()
+
+          if (error) {
+            console.error('Error checking profile:', error)
+            // If there's an error, redirect to profile form to be safe
+            router.push('/profile-form')
+            return
+          }
+
+          // No profile or incomplete profile -> profile form
+          if (!profile || !profile.first_name || !profile.phone) {
+            router.push('/profile-form')
+            return
+          }
+
+          // Approved -> dashboard
+          if (profile.approval_status === 'approved') {
+            router.push('/dashboard')
+            return
+          }
+
+          // Pending or null/rejected -> check assessment completion
+          const { data: assessmentSession } = await supabase
+            .from('test_sessions')
+            .select('id, status')
+            .eq('user_id', user.id)
+            .eq('status', 'completed')
+            .order('completed_at', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+
+          if (assessmentSession) {
+            // Assessment completed -> under review
+            router.push('/under-review')
+          } else {
+            // No assessment -> assessment page
+            router.push('/assessment')
+          }
+        } catch (err) {
+          console.error('Unexpected error in profile check:', err)
+          router.push('/profile-form')
+        }
+      }
     }
-  }, [user, loading, router])
+
+    checkProfileAndRedirect()
+  }, [user, loading, router, supabase])
 
   const handleGetStarted = async () => {
     if (!user) {
