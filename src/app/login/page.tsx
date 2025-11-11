@@ -121,13 +121,13 @@ function LoginContent() {
 
             <div className="space-y-6">
               <button
-                onClick={signInWithGoogle}
+              onClick={signInWithGoogle}
                 className="group relative w-full flex items-center justify-center px-8 py-5 bg-gradient-to-r from-white via-gray-100 to-white text-black font-bold rounded-2xl transition-all duration-500 transform hover:scale-105 shadow-2xl shadow-white/25 hover:shadow-white/40 overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-white to-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <span className="relative z-10 flex items-center">
                   <span className="w-6 h-6 mr-3 rounded-full border-2 border-gray-900 flex items-center justify-center text-xs font-black">G</span>
-                  Continue with Google
+                Continue with Google
                 </span>
               </button>
 

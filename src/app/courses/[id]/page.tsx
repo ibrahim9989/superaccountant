@@ -24,7 +24,7 @@ export default function CourseDetailPage({ params }: CourseDetailPageProps) {
   
   // Unwrap params Promise
   const resolvedParams = use(params)
-  
+
   // Use ref to prevent duplicate API calls
   const hasLoadedCourse = useRef(false)
   const currentCourseId = useRef<string | null>(null)

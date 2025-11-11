@@ -212,6 +212,23 @@ export class CourseService {
 
   async updateCourseModule(moduleId: string, updates: UpdateCourseModule): Promise<CourseModule> {
     const supabase = getSupabaseClient();
+    
+    // First check if module exists
+    const { data: existingModule, error: checkError } = await supabase
+      .from('course_modules')
+      .select('id')
+      .eq('id', moduleId)
+      .maybeSingle()
+
+    if (checkError) {
+      console.error('Error checking course module:', checkError)
+      throw new Error(`Failed to check course module: ${checkError.message}`)
+    }
+
+    if (!existingModule) {
+      throw new Error(`Course module with ID ${moduleId} not found`)
+    }
+
     const { data, error } = await supabase
       .from('course_modules')
       .update(updates)
@@ -222,6 +239,10 @@ export class CourseService {
     if (error) {
       console.error('Error updating course module:', error)
       throw new Error(`Failed to update course module: ${error.message}`)
+    }
+
+    if (!data) {
+      throw new Error(`Course module with ID ${moduleId} not found after update`)
     }
 
     return data

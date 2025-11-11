@@ -27,7 +27,7 @@ export default function AssessmentPage() {
   const [testResult, setTestResult] = useState<TestResultType | null>(null)
   const [userAnalytics, setUserAnalytics] = useState<TestAnalytics[]>([])
   const [error, setError] = useState<string | null>(null)
-  
+
   // Use ref to prevent duplicate API calls
   const hasLoadedData = useRef(false)
 
@@ -133,20 +133,20 @@ export default function AssessmentPage() {
         <div className="relative z-10 max-w-md mx-auto text-center">
           <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-red-500/30 rounded-3xl p-8 shadow-2xl">
             <div className="w-16 h-16 bg-gradient-to-br from-red-900/50 to-red-800/50 rounded-full flex items-center justify-center mx-auto mb-6 border border-red-500/30">
-              <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
+            <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
             <h2 className="text-3xl font-black text-white mb-4 bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
               Something went wrong
             </h2>
             <p className="text-gray-300 mb-8 text-lg">{error}</p>
-            <button
-              onClick={loadAssessmentData}
+          <button
+            onClick={loadAssessmentData}
               className="px-8 py-4 bg-gradient-to-r from-white via-gray-100 to-white text-black font-bold rounded-2xl hover:shadow-2xl hover:shadow-white/25 transition-all duration-300 transform hover:scale-105"
-            >
-              Try Again
-            </button>
+          >
+            Try Again
+          </button>
           </div>
         </div>
       </div>
@@ -194,16 +194,16 @@ export default function AssessmentPage() {
       <nav className="relative z-10 flex items-center justify-between p-6 lg:px-12">
         <Link href="/dashboard" className="flex items-center space-x-2">
           <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-            <span className="text-black font-bold text-sm">SA</span>
+              <span className="text-black font-bold text-sm">SA</span>
           </div>
           <span className="text-white text-xl font-semibold">Super Accountant</span>
         </Link>
-        <button
-          onClick={() => router.push('/dashboard')}
+          <button
+            onClick={() => router.push('/dashboard')}
           className="px-6 py-3 bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 border border-gray-600/50 hover:border-gray-500/70 text-white/90 hover:text-white rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-xl"
-        >
-          Back to Dashboard
-        </button>
+          >
+            Back to Dashboard
+          </button>
       </nav>
 
       <div className="relative z-10 max-w-5xl mx-auto p-6 lg:p-12">
@@ -263,14 +263,14 @@ export default function AssessmentPage() {
                     <div className="flex flex-wrap gap-6 text-sm">
                       <div className="flex items-center space-x-3 bg-gray-800/50 px-4 py-2 rounded-xl border border-gray-700/50">
                         <div className="w-2 h-2 bg-white rounded-full"></div>
-                        <div>
+                      <div>
                           <div className="text-gray-400 text-xs uppercase tracking-wide">Questions</div>
                           <div className="text-white font-bold text-lg">{config.total_questions}</div>
                         </div>
                       </div>
                       <div className="flex items-center space-x-3 bg-gray-800/50 px-4 py-2 rounded-xl border border-gray-700/50">
                         <div className="w-2 h-2 bg-white rounded-full"></div>
-                        <div>
+                      <div>
                           <div className="text-gray-400 text-xs uppercase tracking-wide">Time Limit</div>
                           <div className="text-white font-bold text-lg">{config.time_limit_minutes} min</div>
                         </div>

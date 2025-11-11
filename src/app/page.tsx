@@ -23,7 +23,7 @@ export default function Home() {
 
   useEffect(() => {
     const checkProfileAndRedirect = async () => {
-      if (!loading && user) {
+    if (!loading && user) {
         try {
           // Check if user has a profile
           const { data: profile, error } = await supabase
@@ -35,7 +35,7 @@ export default function Home() {
           if (error) {
             console.error('Error checking profile:', error)
             // If there's an error, redirect to profile form to be safe
-            router.push('/profile-form')
+      router.push('/profile-form')
             return
           }
 
@@ -621,7 +621,7 @@ export default function Home() {
               <div className="text-center mb-6 sm:mb-8 md:mb-10 mt-6 sm:mt-8 md:mt-4">
                 <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gradient-to-br from-white via-gray-200 to-white rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto mb-4 sm:mb-6 md:mb-8 group-hover:scale-110 transition-transform duration-500 shadow-xl shadow-white/25">
                   <span className="text-black text-2xl sm:text-3xl md:text-4xl font-black">SA</span>
-                </div>
+                  </div>
                 <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-white mb-4 sm:mb-6 bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent px-2">
                   Super Accountant Program
                 </h3>
@@ -630,10 +630,10 @@ export default function Home() {
                 <div className="mb-4 sm:mb-6">
                   <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-white mb-1 sm:mb-2 bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
                     ₹2,50,000
-                  </div>
+            </div>
                   <div className="text-gray-300 text-sm sm:text-base md:text-lg font-medium">One-time payment</div>
-                </div>
-                
+              </div>
+
                 <p className="text-gray-300 text-sm sm:text-base md:text-lg lg:text-xl font-light leading-relaxed max-w-xl mx-auto px-2">
                   Complete access to all modules, certifications, and lifetime support
                 </p>
@@ -668,7 +668,7 @@ export default function Home() {
                 <li className="flex items-start text-gray-300">
                   <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-br from-white via-gray-200 to-white rounded-full flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0 mt-0.5 shadow-lg">
                     <span className="text-black text-xs sm:text-sm font-black">✓</span>
-                  </div>
+            </div>
                   <span className="text-sm sm:text-base md:text-lg font-light">24/7 premium support access</span>
                 </li>
                 <li className="flex items-start text-gray-300">

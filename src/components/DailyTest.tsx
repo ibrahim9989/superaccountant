@@ -396,34 +396,34 @@ export default function DailyTest({ enrollmentId, courseId, dayNumber, onTestCom
               Daily Test Results
             </h2>
             <p className="text-gray-300 font-light">{testConfig?.title}</p>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4 mb-6">
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 mb-6">
             <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 border border-gray-700/50 rounded-xl p-4 text-center">
               <p className="text-gray-300 text-sm font-medium mb-2">Score</p>
               <p className={`text-3xl font-black ${getScoreColor(testResult.percentage)}`}>
-                {testResult.score}/{testResult.max_score}
-              </p>
-            </div>
+                  {testResult.score}/{testResult.max_score}
+                </p>
+              </div>
             <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 border border-gray-700/50 rounded-xl p-4 text-center">
               <p className="text-gray-300 text-sm font-medium mb-2">Percentage</p>
               <p className={`text-3xl font-black ${getScoreColor(testResult.percentage)}`}>
-                {testResult.percentage.toFixed(1)}%
-              </p>
-            </div>
+                  {testResult.percentage.toFixed(1)}%
+                </p>
+              </div>
             <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 border border-gray-700/50 rounded-xl p-4 text-center">
               <p className="text-gray-300 text-sm font-medium mb-2">Time Taken</p>
               <p className="text-3xl font-black text-white">
-                {testResult.time_taken_minutes}m
-              </p>
-            </div>
+                  {testResult.time_taken_minutes}m
+                </p>
+              </div>
             <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 border border-gray-700/50 rounded-xl p-4 text-center">
               <p className="text-gray-300 text-sm font-medium mb-2">Status</p>
               <p className={`text-2xl font-black ${testResult.passed ? 'text-green-400' : 'text-red-400'}`}>
-                {testResult.passed ? 'PASSED' : 'FAILED'}
-              </p>
+                  {testResult.passed ? 'PASSED' : 'FAILED'}
+                </p>
+              </div>
             </div>
-          </div>
 
           <div className="bg-gray-800/50 rounded-full h-3 overflow-hidden border border-gray-700/50 mb-6">
             <div 
@@ -436,17 +436,17 @@ export default function DailyTest({ enrollmentId, courseId, dayNumber, onTestCom
             />
           </div>
 
-          {testResult.passed ? (
+            {testResult.passed ? (
             <div className="bg-gradient-to-br from-green-900/30 via-green-800/20 to-green-900/30 border border-green-700/30 rounded-xl p-5 mb-6">
               <p className="text-green-300 font-bold text-lg mb-2">🎉 Congratulations! You passed the daily test!</p>
               <p className="text-green-200 text-sm font-light">Keep up the great work!</p>
-            </div>
-          ) : (
+              </div>
+            ) : (
             <div className="bg-gradient-to-br from-red-900/30 via-red-800/20 to-red-900/30 border border-red-700/30 rounded-xl p-5 mb-6">
               <p className="text-red-300 font-bold text-lg mb-2">Don't worry, you can try again!</p>
               <p className="text-red-200 text-sm font-light">Review the material and attempt the test again.</p>
-            </div>
-          )}
+              </div>
+            )}
 
           <div className="flex justify-center gap-4">
             <button
@@ -557,10 +557,10 @@ export default function DailyTest({ enrollmentId, courseId, dayNumber, onTestCom
               onClick={onClose} 
               className="p-2 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-300 hover:text-white hover:border-gray-500/70 transition-all duration-300"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
           </div>
         </div>
 
@@ -601,7 +601,7 @@ export default function DailyTest({ enrollmentId, courseId, dayNumber, onTestCom
                     userAnswers[question.id] === key
                       ? 'bg-gradient-to-r from-white/20 via-gray-200/10 to-white/20 border-white/50 shadow-lg'
                       : 'bg-gradient-to-br from-gray-800/50 to-gray-900/50 border-gray-700/50 hover:border-gray-500/70 hover:bg-gray-800/70'
-                  }`}
+                    }`}
                 >
                   <span className="font-black mr-3 text-white">{key}.</span>
                   <span className="text-gray-200 group-hover:text-white font-medium">{String(value)}</span>
@@ -618,7 +618,7 @@ export default function DailyTest({ enrollmentId, courseId, dayNumber, onTestCom
                   userAnswers[question.id] === 'true'
                     ? 'bg-gradient-to-r from-white/20 via-gray-200/10 to-white/20 border-white/50 shadow-lg text-white'
                     : 'bg-gradient-to-br from-gray-800/50 to-gray-900/50 border-gray-700/50 hover:border-gray-500/70 hover:bg-gray-800/70 text-gray-200'
-                }`}
+                  }`}
               >
                 True
               </button>
@@ -628,7 +628,7 @@ export default function DailyTest({ enrollmentId, courseId, dayNumber, onTestCom
                   userAnswers[question.id] === 'false'
                     ? 'bg-gradient-to-r from-white/20 via-gray-200/10 to-white/20 border-white/50 shadow-lg text-white'
                     : 'bg-gradient-to-br from-gray-800/50 to-gray-900/50 border-gray-700/50 hover:border-gray-500/70 hover:bg-gray-800/70 text-gray-200'
-                }`}
+                  }`}
               >
                 False
               </button>

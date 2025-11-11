@@ -47,7 +47,7 @@ export default function CoursesPage() {
       router.push('/login')
       return
     }
-    
+
     if (user) {
       loadCourses()
     }
@@ -92,16 +92,16 @@ export default function CoursesPage() {
         <Link href="/dashboard" className="flex items-center space-x-2">
           <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
             <span className="text-black font-bold text-sm">SA</span>
-          </div>
+              </div>
           <span className="text-white text-xl font-semibold">Super Accountant</span>
         </Link>
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={() => router.push('/dashboard')}
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => router.push('/dashboard')}
             className="px-6 py-3 bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 border border-gray-600/50 hover:border-gray-500/70 text-white/90 hover:text-white rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-xl"
-          >
-            Dashboard
-          </button>
+              >
+                Dashboard
+              </button>
         </div>
       </nav>
 

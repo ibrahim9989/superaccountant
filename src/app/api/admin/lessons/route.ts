@@ -81,13 +81,63 @@ export async function POST(request: Request) {
   try {
     const body = await request.json()
     
+    // If duplicate key error (order_index conflict), find next available order_index
+    const lessonData = { ...body }
+    
     const { data: lesson, error } = await supabase
       .from('lessons')
-      .insert(body)
+      .insert(lessonData)
       .select()
       .single()
 
     if (error) {
+      // Handle duplicate order_index constraint
+      if (error.code === '23505' && error.message?.includes('lessons_module_id_order_index_key')) {
+        console.log('Duplicate order_index detected, finding next available order_index...')
+        
+        // Find the maximum order_index for this module
+        const { data: maxOrder, error: maxError } = await supabase
+          .from('lessons')
+          .select('order_index')
+          .eq('module_id', body.module_id)
+          .order('order_index', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+
+        if (maxError) {
+          console.error('Error finding max order_index:', maxError)
+          return NextResponse.json({ 
+            error: `Failed to find next available order index: ${maxError.message}` 
+          }, { status: 500 })
+        }
+
+        // Set order_index to next available
+        const nextOrderIndex = (maxOrder?.order_index ?? -1) + 1
+        const updatedLessonData = { ...lessonData, order_index: nextOrderIndex }
+
+        console.log(`Auto-adjusting order_index to ${nextOrderIndex} for module ${body.module_id}`)
+
+        // Retry insert with new order_index
+        const { data: retryLesson, error: retryError } = await supabase
+          .from('lessons')
+          .insert(updatedLessonData)
+          .select()
+          .single()
+
+        if (retryError) {
+          console.error('Error creating lesson after retry:', retryError)
+          return NextResponse.json({ 
+            error: `Failed to create lesson: ${retryError.message}`,
+            suggestion: `Try using order_index ${nextOrderIndex} or higher`
+          }, { status: 500 })
+        }
+
+        return NextResponse.json({ 
+          data: retryLesson,
+          message: `Lesson created with auto-adjusted order_index: ${nextOrderIndex}`
+        })
+      }
+
       console.error('Error creating lesson:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }

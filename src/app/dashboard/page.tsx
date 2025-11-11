@@ -13,7 +13,7 @@ export default function DashboardPage() {
   const [enrollments, setEnrollments] = useState<CourseEnrollment[]>([]);
   const [loading, setLoading] = useState(true);
   const [approvalStatus, setApprovalStatus] = useState<'pending' | 'approved' | 'rejected' | null>(null);
-  
+
   // Use refs to prevent duplicate API calls
   const hasCheckedApproval = useRef(false);
   const hasLoadedEnrollments = useRef(false);
@@ -199,12 +199,12 @@ export default function DashboardPage() {
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <h3 className="text-lg md:text-xl font-bold text-white mb-2 group-hover:text-gray-100 transition-colors">
-                        {(enrollment as any).course?.title || 'Course'}
-                      </h3>
+                    {(enrollment as any).course?.title || 'Course'}
+                  </h3>
                       <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                         <span className="text-xs md:text-sm text-gray-300 font-medium">
-                          Progress: {Math.round(enrollment.progress_percentage || 0)}%
-                        </span>
+                      Progress: {Math.round(enrollment.progress_percentage || 0)}%
+                    </span>
                         <div className="w-full sm:w-32 h-2 bg-gray-800 rounded-full overflow-hidden border border-gray-700/50">
                           <div
                             className="h-full bg-gradient-to-r from-white via-gray-200 to-white transition-all duration-500"

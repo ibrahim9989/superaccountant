@@ -91,17 +91,17 @@ export default function CourseQuiz({ quiz, enrollmentId, onQuizComplete, onClose
       if (quiz.questions && quiz.questions.length > 0) {
         setQuestions(quiz.questions)
       } else {
-        const supabase = getSupabaseClient()
-        const { data: questionsData, error } = await supabase
-          .from('quiz_questions')
-          .select('*')
-          .eq('quiz_id', quiz.id)
-          .eq('is_active', true)
-          .order('order_index')
+          const supabase = getSupabaseClient()
+          const { data: questionsData, error } = await supabase
+            .from('quiz_questions')
+            .select('*')
+            .eq('quiz_id', quiz.id)
+            .eq('is_active', true)
+            .order('order_index')
 
-        if (error) {
-          console.error('Error loading quiz questions:', error)
-          return
+          if (error) {
+            console.error('Error loading quiz questions:', error)
+            return
         }
         setQuestions(questionsData || [])
       }
@@ -498,27 +498,27 @@ export default function CourseQuiz({ quiz, enrollmentId, onQuizComplete, onClose
               <span className="text-gray-300 text-sm font-medium">
                 Question {currentQuestionIndex + 1} of {questions.length}
               </span>
-              {userAnswers[currentQuestion.id] && (
+            {userAnswers[currentQuestion.id] && (
                 <span className="bg-gradient-to-r from-green-900/50 to-green-800/50 border border-green-700/50 text-green-300 px-3 py-1 rounded-full text-xs font-bold">
-                  ✓ Answered
-                </span>
-              )}
-              {skippedQuestions.has(currentQuestion.id) && (
+                ✓ Answered
+              </span>
+            )}
+            {skippedQuestions.has(currentQuestion.id) && (
                 <span className="bg-gradient-to-r from-yellow-900/50 to-yellow-800/50 border border-yellow-700/50 text-yellow-300 px-3 py-1 rounded-full text-xs font-bold">
-                  ⏭ Skipped
-                </span>
-              )}
-            </div>
+                ⏭ Skipped
+              </span>
+            )}
+          </div>
           </div>
           <div className="flex items-center gap-3">
-            {timeRemaining !== null && (
+          {timeRemaining !== null && (
               <div className="text-right">
                 <div className={`text-xl font-black font-mono ${isTimeLow ? 'text-red-400 animate-pulse' : 'text-white'}`}>
                   {formatTime(timeRemaining)}
                 </div>
                 <div className="text-gray-300 text-xs font-medium">Time Left</div>
               </div>
-            )}
+          )}
             <button 
               onClick={onClose} 
               className="p-2 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-300 hover:text-white hover:border-gray-500/70 transition-all duration-300"
@@ -554,7 +554,7 @@ export default function CourseQuiz({ quiz, enrollmentId, onQuizComplete, onClose
                     userAnswers[currentQuestion.id] === key
                       ? 'bg-gradient-to-r from-white/20 via-gray-200/10 to-white/20 border-white/50 shadow-lg'
                       : 'bg-gradient-to-br from-gray-800/50 to-gray-900/50 border-gray-700/50 hover:border-gray-500/70 hover:bg-gray-800/70'
-                  }`}
+                    }`}
                 >
                   <span className="font-black mr-3 text-white">{key}.</span>
                   <span className="text-gray-200 group-hover:text-white font-medium">{String(value)}</span>
@@ -571,7 +571,7 @@ export default function CourseQuiz({ quiz, enrollmentId, onQuizComplete, onClose
                   userAnswers[currentQuestion.id] === 'true'
                     ? 'bg-gradient-to-r from-white/20 via-gray-200/10 to-white/20 border-white/50 shadow-lg text-white'
                     : 'bg-gradient-to-br from-gray-800/50 to-gray-900/50 border-gray-700/50 hover:border-gray-500/70 hover:bg-gray-800/70 text-gray-200'
-                }`}
+                  }`}
               >
                 True
               </button>
@@ -581,7 +581,7 @@ export default function CourseQuiz({ quiz, enrollmentId, onQuizComplete, onClose
                   userAnswers[currentQuestion.id] === 'false'
                     ? 'bg-gradient-to-r from-white/20 via-gray-200/10 to-white/20 border-white/50 shadow-lg text-white'
                     : 'bg-gradient-to-br from-gray-800/50 to-gray-900/50 border-gray-700/50 hover:border-gray-500/70 hover:bg-gray-800/70 text-gray-200'
-                }`}
+                  }`}
               >
                 False
               </button>

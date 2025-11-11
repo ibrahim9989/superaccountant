@@ -178,13 +178,13 @@ export default function TestResult({ result, onRetake, onContinue }: TestResultP
                     <div className="flex-1">
                       <div className="text-white font-bold text-lg mb-1">{category.category_name}</div>
                       <div className="text-gray-300 text-sm font-medium">
-                        {category.correct_answers}/{category.questions_attempted} correct
-                      </div>
+                      {category.correct_answers}/{category.questions_attempted} correct
                     </div>
+                  </div>
                     <div className="text-right ml-4">
                       <div className="text-2xl font-black text-white mb-2 bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
-                        {category.percentage.toFixed(1)}%
-                      </div>
+                      {category.percentage.toFixed(1)}%
+                    </div>
                     </div>
                   </div>
                   <div className="w-full bg-gray-800/50 rounded-full h-2 overflow-hidden border border-gray-700/50">

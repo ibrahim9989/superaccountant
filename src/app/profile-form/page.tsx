@@ -30,7 +30,7 @@ export default function ProfileFormPage() {
       if (authLoading) return
       
       if (!user) {
-        router.push('/login')
+      router.push('/login')
         return
       }
 
@@ -201,8 +201,8 @@ export default function ProfileFormPage() {
 
       <div className="relative z-10 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-12">
+        {/* Header */}
+        <div className="text-center mb-12">
             <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 border border-gray-500/50 rounded-full mb-6 shadow-2xl backdrop-blur-sm">
               <div className="w-2.5 h-2.5 bg-gradient-to-r from-white to-gray-300 rounded-full mr-3 animate-pulse"></div>
               <span className="text-white text-xs font-bold tracking-[0.22em] uppercase">PROFILE COMPLETION</span>
@@ -212,9 +212,9 @@ export default function ProfileFormPage() {
               Complete Your Profile
             </h1>
             <p className="text-xl text-gray-300 font-light">Please fill in all required information to proceed to the assessment</p>
-          </div>
+        </div>
 
-          {error && (
+        {error && (
             <div className="mb-6 p-6 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 border border-red-500/30 rounded-2xl text-red-400 shadow-xl">
               <div className="flex items-center">
                 <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -222,8 +222,8 @@ export default function ProfileFormPage() {
                 </svg>
                 <span className="font-semibold">{error}</span>
               </div>
-            </div>
-          )}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
           {/* Personal Information */}

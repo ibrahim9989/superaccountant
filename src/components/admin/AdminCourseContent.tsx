@@ -411,31 +411,31 @@ export default function AdminCourseContent() {
           // Only upload if there's a file or URL
           if (!flowchart.file && !flowchart.url) continue
           
-          try {
-            const flowchartFormData = new FormData()
-            flowchartFormData.append('lessonId', lessonId)
+        try {
+          const flowchartFormData = new FormData()
+          flowchartFormData.append('lessonId', lessonId)
             flowchartFormData.append('orderIndex', i.toString())
             if (flowchart.file) {
               flowchartFormData.append('file', flowchart.file)
-            }
+          }
             if (flowchart.url) {
               flowchartFormData.append('url', flowchart.url)
-            }
+          }
             if (flowchart.title) {
               flowchartFormData.append('title', flowchart.title)
-            }
-            
-            const flowchartResponse = await fetch('/api/admin/lessons/flowchart', {
-              method: 'POST',
-              body: flowchartFormData
-            })
-            
-            if (!flowchartResponse.ok) {
-              const errorData = await flowchartResponse.json().catch(() => ({}))
+          }
+          
+          const flowchartResponse = await fetch('/api/admin/lessons/flowchart', {
+            method: 'POST',
+            body: flowchartFormData
+          })
+          
+          if (!flowchartResponse.ok) {
+            const errorData = await flowchartResponse.json().catch(() => ({}))
               console.error(`Failed to upload flowchart ${i + 1}:`, errorData.error || flowchartResponse.statusText)
               // Continue with other flowcharts
-            }
-          } catch (flowchartError) {
+          }
+        } catch (flowchartError) {
             console.error(`Error uploading flowchart ${i + 1}:`, flowchartError)
             // Continue with other flowcharts
           }
@@ -1897,7 +1897,7 @@ Good luck with your assignment!`,
                 </div>
                 
                 {flowcharts.length > 0 && (
-                  <div className="space-y-4">
+                <div className="space-y-4">
                     {flowcharts.map((flowchart, index) => (
                       <div key={index} className="bg-gray-800 rounded-lg p-4 border border-gray-700">
                         <div className="flex items-center justify-between mb-3">
@@ -1932,12 +1932,12 @@ Good luck with your assignment!`,
                         </div>
                         
                         <div className="space-y-3">
-                          <div>
+                  <div>
                             <label className="block text-sm font-medium text-gray-300 mb-1">
-                              Flowchart Title
-                            </label>
-                            <input
-                              type="text"
+                      Flowchart Title
+                    </label>
+                    <input
+                      type="text"
                               value={flowchart.title || ''}
                               onChange={(e) => {
                                 const updated = [...flowcharts]
@@ -1945,17 +1945,17 @@ Good luck with your assignment!`,
                                 setFlowcharts(updated)
                               }}
                               className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm"
-                              placeholder="e.g., Process Flow Diagram"
-                            />
-                          </div>
-                          
-                          <div>
+                      placeholder="e.g., Process Flow Diagram"
+                    />
+                  </div>
+                  
+                  <div>
                             <label className="block text-sm font-medium text-gray-300 mb-1">
-                              Upload Flowchart File (Image, PDF, etc.)
-                            </label>
-                            <input
-                              type="file"
-                              accept="image/*,.pdf"
+                      Upload Flowchart File (Image, PDF, etc.)
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*,.pdf"
                               onChange={(e) => {
                                 const updated = [...flowcharts]
                                 updated[index].file = e.target.files?.[0] || null
@@ -1963,27 +1963,27 @@ Good luck with your assignment!`,
                                 setFlowcharts(updated)
                               }}
                               className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700"
-                            />
+                    />
                             {flowchart.file && (
-                              <p className="text-xs text-gray-400 mt-1">
+                      <p className="text-xs text-gray-400 mt-1">
                                 Selected: {flowchart.file.name} ({(flowchart.file.size / 1024).toFixed(2)} KB)
-                              </p>
-                            )}
+                      </p>
+                    )}
                             {flowchart.id && !flowchart.file && (
-                              <p className="text-xs text-yellow-400 mt-1">
+                      <p className="text-xs text-yellow-400 mt-1">
                                 Existing flowchart: {(flowchart as any).file_name || 'Uploaded file'} {(flowchart as any).file_path && '(upload new file to replace)'}
-                              </p>
-                            )}
-                          </div>
-                          
+                      </p>
+                    )}
+                  </div>
+                  
                           <div className="text-center text-gray-500 text-xs">OR</div>
-                          
-                          <div>
+                  
+                  <div>
                             <label className="block text-sm font-medium text-gray-300 mb-1">
-                              Flowchart URL (External Link)
-                            </label>
-                            <input
-                              type="url"
+                      Flowchart URL (External Link)
+                    </label>
+                    <input
+                      type="url"
                               value={flowchart.url || ''}
                               onChange={(e) => {
                                 const updated = [...flowcharts]
@@ -1992,9 +1992,9 @@ Good luck with your assignment!`,
                                 setFlowcharts(updated)
                               }}
                               className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm"
-                              placeholder="https://example.com/flowchart.pdf"
-                            />
-                          </div>
+                      placeholder="https://example.com/flowchart.pdf"
+                    />
+                  </div>
                         </div>
                       </div>
                     ))}
@@ -2003,7 +2003,7 @@ Good luck with your assignment!`,
                 
                 {flowcharts.length === 0 && (
                   <p className="text-sm text-gray-500">No flowcharts added. Click "Add Flowchart" to add one.</p>
-                )}
+                  )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">

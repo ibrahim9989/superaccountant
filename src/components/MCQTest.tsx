@@ -300,8 +300,8 @@ export default function MCQTest({ session, onComplete, onAbandon }: MCQTestProps
               Abandon Test?
             </h3>
             <p className="text-gray-300 font-light">
-              Are you sure you want to abandon this test? Your progress will be lost and this will count as an attempt.
-            </p>
+            Are you sure you want to abandon this test? Your progress will be lost and this will count as an attempt.
+          </p>
           </div>
           <div className="flex gap-4">
             <button
@@ -460,7 +460,7 @@ export default function MCQTest({ session, onComplete, onAbandon }: MCQTestProps
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-white to-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <span className="relative z-10">
-                  {isSubmitting ? 'Submitting...' : isLastQuestion ? 'Review & Submit' : 'Next Question'}
+                {isSubmitting ? 'Submitting...' : isLastQuestion ? 'Review & Submit' : 'Next Question'}
                 </span>
               </button>
             </div>

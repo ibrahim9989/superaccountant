@@ -3,12 +3,12 @@
 import { useState } from 'react'
 
 interface Flowchart {
-  flowchart_file_path?: string
-  flowchart_file_name?: string
-  flowchart_mime_type?: string
-  flowchart_url?: string
-  flowchart_title?: string
-}
+    flowchart_file_path?: string
+    flowchart_file_name?: string
+    flowchart_mime_type?: string
+    flowchart_url?: string
+    flowchart_title?: string
+  }
 
 interface LessonFlowchartProps {
   flowcharts: Flowchart[]

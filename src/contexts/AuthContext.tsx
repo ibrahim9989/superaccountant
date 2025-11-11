@@ -24,10 +24,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Get initial session
     const getInitialSession = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession()
+      const { data: { session } } = await supabase.auth.getSession()
         if (mounted) {
-          setUser(session?.user ?? null)
-          setLoading(false)
+      setUser(session?.user ?? null)
+      setLoading(false)
         }
       } catch (error) {
         console.error('Error getting initial session:', error)
@@ -43,9 +43,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event: string, session: Session | null) => {
         if (mounted) {
-          setUser(session?.user ?? null)
-          setLoading(false)
-        }
+        setUser(session?.user ?? null)
+        setLoading(false)
+      }
       }
     )
 
