@@ -161,7 +161,7 @@ export default function Home() {
       {/* Navigation now provided globally in SiteHeader */}
 
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-black via-gray-900 to-black py-20 md:py-24 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-black via-gray-900 to-black py-12 sm:py-16 md:py-24 overflow-hidden">
         {/* Luxury Background Effects */}
         <div className="absolute inset-0 opacity-40">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-white/5 via-gray-800/10 to-black/5 rounded-full blur-3xl" />
@@ -179,77 +179,77 @@ export default function Home() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             {/* Luxury Badge */}
-            <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 border border-gray-500/50 rounded-full mb-10 shadow-2xl backdrop-blur-sm">
-              <div className="w-2.5 h-2.5 bg-gradient-to-r from-white to-gray-300 rounded-full mr-3 animate-pulse"></div>
-              <span className="text-white text-xs md:text-sm font-bold tracking-[0.22em] uppercase">ELITE ACCOUNTING MASTERY</span>
-              <div className="w-2.5 h-2.5 bg-gradient-to-r from-gray-300 to-white rounded-full ml-3 animate-pulse"></div>
+            <div className="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 md:px-6 md:py-3 bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 border border-gray-500/50 rounded-full mb-6 sm:mb-8 md:mb-10 shadow-2xl backdrop-blur-sm">
+              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 md:w-2.5 md:h-2.5 bg-gradient-to-r from-white to-gray-300 rounded-full mr-2 sm:mr-2.5 md:mr-3 animate-pulse"></div>
+              <span className="text-white text-[10px] sm:text-xs md:text-sm font-bold tracking-[0.15em] sm:tracking-[0.22em] uppercase">ELITE ACCOUNTING MASTERY</span>
+              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 md:w-2.5 md:h-2.5 bg-gradient-to-r from-gray-300 to-white rounded-full ml-2 sm:ml-2.5 md:ml-3 animate-pulse"></div>
             </div>
 
             {/* Premium Headline */}
             <h1
-              className="text-5xl md:text-7xl lg:text-8xl font-black text-white mb-8 md:mb-10 leading-[0.9] tracking-tight drop-shadow-2xl"
+              className="text-3xl sm:text-4xl md:text-7xl lg:text-8xl font-black text-white mb-4 sm:mb-6 md:mb-10 leading-tight sm:leading-[0.9] tracking-tight drop-shadow-2xl px-2"
               style={{ fontFamily: 'var(--font-display)' }}
             >
               Become a
-              <span className="block bg-gradient-to-r from-gray-100 via-white to-gray-200 bg-clip-text text-transparent">
+              <span className="block bg-gradient-to-r from-gray-100 via-white to-gray-200 bg-clip-text text-transparent mt-1 sm:mt-2">
                 Super Accountant
               </span>
           </h1>
 
             {/* Elegant Subtext */}
-            <div className="max-w-4xl md:max-w-5xl mx-auto mb-12 md:mb-16">
-              <p className="text-lg md:text-xl text-gray-200 leading-relaxed font-light tracking-wide mb-6 md:mb-8">
+            <div className="max-w-4xl md:max-w-5xl mx-auto mb-8 sm:mb-10 md:mb-16 px-2">
+              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-200 leading-relaxed font-light tracking-wide mb-4 sm:mb-6 md:mb-8">
                 Transform from an ordinary accountant into an elite financial strategist.
                 Master advanced accounting principles, strategic financial analysis, and executive-level decision making.
               </p>
-              <div className="flex items-center justify-center gap-3 md:gap-6 text-xs md:text-sm text-gray-300 font-medium">
-                <div className="flex items-center bg-gradient-to-r from-gray-800/50 to-gray-700/50 px-4 py-2 md:px-5 md:py-2.5 rounded-full border border-gray-600/50">
-                  <div className="w-2.5 h-2.5 bg-gradient-to-r from-white to-gray-400 rounded-full mr-2.5"></div>
-                  <span className="tracking-wider">90-DAY PROGRAM</span>
+              <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-6 text-[10px] sm:text-xs md:text-sm text-gray-300 font-medium">
+                <div className="flex items-center bg-gradient-to-r from-gray-800/50 to-gray-700/50 px-2.5 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2.5 rounded-full border border-gray-600/50">
+                  <div className="w-1.5 h-1.5 sm:w-2 h-2 md:w-2.5 md:h-2.5 bg-gradient-to-r from-white to-gray-400 rounded-full mr-1.5 sm:mr-2 md:mr-2.5"></div>
+                  <span className="tracking-wider whitespace-nowrap">90-DAY PROGRAM</span>
                 </div>
-                <div className="flex items-center bg-gradient-to-r from-gray-800/50 to-gray-700/50 px-4 py-2 md:px-5 md:py-2.5 rounded-full border border-gray-600/50">
-                  <div className="w-2.5 h-2.5 bg-gradient-to-r from-white to-gray-400 rounded-full mr-2.5"></div>
-                  <span className="tracking-wider">50+ EXPERT MODULES</span>
+                <div className="flex items-center bg-gradient-to-r from-gray-800/50 to-gray-700/50 px-2.5 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2.5 rounded-full border border-gray-600/50">
+                  <div className="w-1.5 h-1.5 sm:w-2 h-2 md:w-2.5 md:h-2.5 bg-gradient-to-r from-white to-gray-400 rounded-full mr-1.5 sm:mr-2 md:mr-2.5"></div>
+                  <span className="tracking-wider whitespace-nowrap">50+ MODULES</span>
                 </div>
-                <div className="flex items-center bg-gradient-to-r from-gray-800/50 to-gray-700/50 px-4 py-2 md:px-5 md:py-2.5 rounded-full border border-gray-600/50">
-                  <div className="w-2.5 h-2.5 bg-gradient-to-r from-white to-gray-400 rounded-full mr-2.5"></div>
-                  <span className="tracking-wider">100% SUCCESS RATE</span>
+                <div className="flex items-center bg-gradient-to-r from-gray-800/50 to-gray-700/50 px-2.5 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2.5 rounded-full border border-gray-600/50">
+                  <div className="w-1.5 h-1.5 sm:w-2 h-2 md:w-2.5 md:h-2.5 bg-gradient-to-r from-white to-gray-400 rounded-full mr-1.5 sm:mr-2 md:mr-2.5"></div>
+                  <span className="tracking-wider whitespace-nowrap">100% SUCCESS</span>
                 </div>
               </div>
             </div>
 
             {/* Premium CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-6 md:gap-8 justify-center mb-12 md:mb-14">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-8 justify-center mb-8 sm:mb-10 md:mb-14 px-4">
               <button
                 onClick={handleGetStarted}
-                className="group relative bg-gradient-to-r from-white via-gray-100 to-white text-black px-8 md:px-10 py-4 md:py-5 rounded-2xl md:rounded-3xl text-lg md:text-xl font-bold tracking-wide shadow-2xl shadow-white/25 hover:shadow-white/40 transform hover:scale-105 transition-all duration-500 overflow-hidden"
+                className="group relative bg-gradient-to-r from-white via-gray-100 to-white text-black px-6 py-3 sm:px-8 sm:py-4 md:px-10 md:py-5 rounded-xl sm:rounded-2xl md:rounded-3xl text-base sm:text-lg md:text-xl font-bold tracking-wide shadow-2xl shadow-white/25 hover:shadow-white/40 transform hover:scale-105 transition-all duration-500 overflow-hidden min-h-[44px]"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-white to-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <span className="relative z-10">Start Your Journey</span>
               </button>
               <button
                 onClick={handleWatchDemo}
-                className="group border-2 border-gray-400/50 text-white px-8 md:px-10 py-4 md:py-5 rounded-2xl md:rounded-3xl text-lg md:text-xl font-semibold tracking-wide bg-gradient-to-r from-transparent to-gray-800/30 hover:from-gray-800/20 hover:to-gray-700/40 backdrop-blur-sm transition-all duration-500 shadow-xl"
+                className="group border-2 border-gray-400/50 text-white px-6 py-3 sm:px-8 sm:py-4 md:px-10 md:py-5 rounded-xl sm:rounded-2xl md:rounded-3xl text-base sm:text-lg md:text-xl font-semibold tracking-wide bg-gradient-to-r from-transparent to-gray-800/30 hover:from-gray-800/20 hover:to-gray-700/40 backdrop-blur-sm transition-all duration-500 shadow-xl min-h-[44px]"
               >
                 <span className="group-hover:tracking-widest transition-all duration-500">Watch Demo</span>
               </button>
             </div>
 
             {/* Premium Stats - Mobile: Stack, Desktop: Horizontal */}
-            <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-16 text-gray-300">
-              <div className="text-center bg-gradient-to-br from-gray-800/30 to-gray-900/50 px-6 py-5 md:px-8 md:py-6 rounded-2xl border border-gray-700/50 backdrop-blur-sm w-full md:w-auto">
-                <div className="text-4xl md:text-5xl font-black text-white mb-2 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">500+</div>
-                <div className="text-xs md:text-sm tracking-[0.15em] uppercase font-medium">Elite Accountants</div>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 md:gap-16 text-gray-300 px-4">
+              <div className="text-center bg-gradient-to-br from-gray-800/30 to-gray-900/50 px-4 py-4 sm:px-6 sm:py-5 md:px-8 md:py-6 rounded-xl sm:rounded-2xl border border-gray-700/50 backdrop-blur-sm w-full sm:w-auto">
+                <div className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-1 sm:mb-2 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">500+</div>
+                <div className="text-[10px] sm:text-xs md:text-sm tracking-[0.15em] uppercase font-medium">Elite Accountants</div>
               </div>
-              <div className="hidden md:block w-px h-16 bg-gradient-to-b from-transparent via-gray-500 to-transparent"></div>
-              <div className="text-center bg-gradient-to-br from-gray-800/30 to-gray-900/50 px-6 py-5 md:px-8 md:py-6 rounded-2xl border border-gray-700/50 backdrop-blur-sm w-full md:w-auto">
-                <div className="text-4xl md:text-5xl font-black text-white mb-2 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">98%</div>
-                <div className="text-xs md:text-sm tracking-[0.15em] uppercase font-medium">Career Advancement</div>
+              <div className="hidden sm:block w-px h-12 sm:h-16 bg-gradient-to-b from-transparent via-gray-500 to-transparent"></div>
+              <div className="text-center bg-gradient-to-br from-gray-800/30 to-gray-900/50 px-4 py-4 sm:px-6 sm:py-5 md:px-8 md:py-6 rounded-xl sm:rounded-2xl border border-gray-700/50 backdrop-blur-sm w-full sm:w-auto">
+                <div className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-1 sm:mb-2 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">98%</div>
+                <div className="text-[10px] sm:text-xs md:text-sm tracking-[0.15em] uppercase font-medium">Career Advancement</div>
               </div>
-              <div className="hidden md:block w-px h-16 bg-gradient-to-b from-transparent via-gray-500 to-transparent"></div>
-              <div className="text-center bg-gradient-to-br from-gray-800/30 to-gray-900/50 px-6 py-5 md:px-8 md:py-6 rounded-2xl border border-gray-700/50 backdrop-blur-sm w-full md:w-auto">
-                <div className="text-4xl md:text-5xl font-black text-white mb-2 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">24/7</div>
-                <div className="text-xs md:text-sm tracking-[0.15em] uppercase font-medium">Premium Support</div>
+              <div className="hidden sm:block w-px h-12 sm:h-16 bg-gradient-to-b from-transparent via-gray-500 to-transparent"></div>
+              <div className="text-center bg-gradient-to-br from-gray-800/30 to-gray-900/50 px-4 py-4 sm:px-6 sm:py-5 md:px-8 md:py-6 rounded-xl sm:rounded-2xl border border-gray-700/50 backdrop-blur-sm w-full sm:w-auto">
+                <div className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-1 sm:mb-2 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">24/7</div>
+                <div className="text-[10px] sm:text-xs md:text-sm tracking-[0.15em] uppercase font-medium">Premium Support</div>
               </div>
             </div>
           </div>
@@ -583,7 +583,7 @@ export default function Home() {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-32 bg-black relative overflow-hidden">
+      <section id="pricing" className="py-12 sm:py-16 md:py-24 lg:py-32 bg-black relative overflow-hidden">
         {/* Luxury Background Effects */}
         <div className="absolute inset-0 opacity-40">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-white/5 via-gray-800/10 to-black/5 rounded-full blur-3xl" />
@@ -598,104 +598,104 @@ export default function Home() {
         </div>
 
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
-            <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 border border-gray-500/50 rounded-full mb-8 shadow-2xl backdrop-blur-sm">
-              <div className="w-2.5 h-2.5 bg-gradient-to-r from-white to-gray-300 rounded-full mr-3 animate-pulse"></div>
-              <span className="text-white text-xs font-bold tracking-[0.22em] uppercase">ELITE PRICING</span>
-              <div className="w-2.5 h-2.5 bg-gradient-to-r from-gray-300 to-white rounded-full ml-3 animate-pulse"></div>
+          <div className="text-center mb-8 sm:mb-12 md:mb-16 lg:mb-20">
+            <div className="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 md:px-6 md:py-3 bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 border border-gray-500/50 rounded-full mb-4 sm:mb-6 md:mb-8 shadow-2xl backdrop-blur-sm">
+              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 md:w-2.5 md:h-2.5 bg-gradient-to-r from-white to-gray-300 rounded-full mr-2 sm:mr-2.5 md:mr-3 animate-pulse"></div>
+              <span className="text-white text-[10px] sm:text-xs font-bold tracking-[0.15em] sm:tracking-[0.22em] uppercase">ELITE PRICING</span>
+              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 md:w-2.5 md:h-2.5 bg-gradient-to-r from-gray-300 to-white rounded-full ml-2 sm:ml-2.5 md:ml-3 animate-pulse"></div>
             </div>
-            <h2 className="text-5xl md:text-6xl font-black text-white mb-6 leading-tight bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-white mb-3 sm:mb-4 md:mb-6 leading-tight bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent px-2">
               Investment in Your Future
             </h2>
-            <p className="text-xl md:text-2xl text-gray-300 font-light">One comprehensive program, one transformative price</p>
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl text-gray-300 font-light px-2">One comprehensive program, one transformative price</p>
           </div>
 
           {/* Single Pricing Card */}
           <div className="max-w-2xl mx-auto">
-            <div className="group bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-12 rounded-3xl border-2 border-gray-600/50 hover:border-white/70 transition-all duration-700 hover:transform hover:scale-[1.02] shadow-2xl hover:shadow-white/10 relative overflow-hidden">
+            <div className="group bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-4 sm:p-6 md:p-8 lg:p-12 rounded-2xl sm:rounded-3xl border-2 border-gray-600/50 hover:border-white/70 transition-all duration-700 hover:transform hover:scale-[1.02] shadow-2xl hover:shadow-white/10 relative overflow-hidden">
               {/* Premium Badge */}
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-white via-gray-100 to-white text-black px-8 py-2 rounded-full text-sm font-black shadow-2xl shadow-white/25">
+              <div className="absolute -top-3 sm:-top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-white via-gray-100 to-white text-black px-4 sm:px-6 md:px-8 py-1.5 sm:py-2 rounded-full text-[10px] sm:text-xs md:text-sm font-black shadow-2xl shadow-white/25">
                 COMPREHENSIVE PROGRAM
               </div>
 
-              <div className="text-center mb-10 mt-4">
-                <div className="w-24 h-24 bg-gradient-to-br from-white via-gray-200 to-white rounded-3xl flex items-center justify-center mx-auto mb-8 group-hover:scale-110 transition-transform duration-500 shadow-xl shadow-white/25">
-                  <span className="text-black text-4xl font-black">SA</span>
+              <div className="text-center mb-6 sm:mb-8 md:mb-10 mt-6 sm:mt-8 md:mt-4">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gradient-to-br from-white via-gray-200 to-white rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto mb-4 sm:mb-6 md:mb-8 group-hover:scale-110 transition-transform duration-500 shadow-xl shadow-white/25">
+                  <span className="text-black text-2xl sm:text-3xl md:text-4xl font-black">SA</span>
                 </div>
-                <h3 className="text-3xl font-black text-white mb-6 bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
+                <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-white mb-4 sm:mb-6 bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent px-2">
                   Super Accountant Program
                 </h3>
                 
                 {/* Price Display */}
-                <div className="mb-6">
-                  <div className="text-6xl md:text-7xl font-black text-white mb-2 bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
+                <div className="mb-4 sm:mb-6">
+                  <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-white mb-1 sm:mb-2 bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
                     ₹2,50,000
                   </div>
-                  <div className="text-gray-300 text-lg font-medium">One-time payment</div>
+                  <div className="text-gray-300 text-sm sm:text-base md:text-lg font-medium">One-time payment</div>
                 </div>
                 
-                <p className="text-gray-300 text-xl font-light leading-relaxed max-w-xl mx-auto">
+                <p className="text-gray-300 text-sm sm:text-base md:text-lg lg:text-xl font-light leading-relaxed max-w-xl mx-auto px-2">
                   Complete access to all modules, certifications, and lifetime support
                 </p>
               </div>
 
               {/* Features List */}
-              <ul className="space-y-5 mb-12">
+              <ul className="space-y-3 sm:space-y-4 md:space-y-5 mb-6 sm:mb-8 md:mb-12">
                 <li className="flex items-start text-gray-300">
-                  <div className="w-6 h-6 bg-gradient-to-br from-white via-gray-200 to-white rounded-full flex items-center justify-center mr-4 flex-shrink-0 mt-0.5 shadow-lg">
-                    <span className="text-black text-sm font-black">✓</span>
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-br from-white via-gray-200 to-white rounded-full flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0 mt-0.5 shadow-lg">
+                    <span className="text-black text-xs sm:text-sm font-black">✓</span>
                   </div>
-                  <span className="text-lg font-light">Access to all 50+ expert modules</span>
+                  <span className="text-sm sm:text-base md:text-lg font-light">Access to all 50+ expert modules</span>
                 </li>
                 <li className="flex items-start text-gray-300">
-                  <div className="w-6 h-6 bg-gradient-to-br from-white via-gray-200 to-white rounded-full flex items-center justify-center mr-4 flex-shrink-0 mt-0.5 shadow-lg">
-                    <span className="text-black text-sm font-black">✓</span>
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-br from-white via-gray-200 to-white rounded-full flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0 mt-0.5 shadow-lg">
+                    <span className="text-black text-xs sm:text-sm font-black">✓</span>
                   </div>
-                  <span className="text-lg font-light">90-day comprehensive program</span>
+                  <span className="text-sm sm:text-base md:text-lg font-light">90-day comprehensive program</span>
                 </li>
                 <li className="flex items-start text-gray-300">
-                  <div className="w-6 h-6 bg-gradient-to-br from-white via-gray-200 to-white rounded-full flex items-center justify-center mr-4 flex-shrink-0 mt-0.5 shadow-lg">
-                    <span className="text-black text-sm font-black">✓</span>
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-br from-white via-gray-200 to-white rounded-full flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0 mt-0.5 shadow-lg">
+                    <span className="text-black text-xs sm:text-sm font-black">✓</span>
                   </div>
-                  <span className="text-lg font-light">Daily practice tests and assessments</span>
+                  <span className="text-sm sm:text-base md:text-lg font-light">Daily practice tests and assessments</span>
                 </li>
                 <li className="flex items-start text-gray-300">
-                  <div className="w-6 h-6 bg-gradient-to-br from-white via-gray-200 to-white rounded-full flex items-center justify-center mr-4 flex-shrink-0 mt-0.5 shadow-lg">
-                    <span className="text-black text-sm font-black">✓</span>
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-br from-white via-gray-200 to-white rounded-full flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0 mt-0.5 shadow-lg">
+                    <span className="text-black text-xs sm:text-sm font-black">✓</span>
                   </div>
-                  <span className="text-lg font-light">Advanced certifications included</span>
+                  <span className="text-sm sm:text-base md:text-lg font-light">Advanced certifications included</span>
                 </li>
                 <li className="flex items-start text-gray-300">
-                  <div className="w-6 h-6 bg-gradient-to-br from-white via-gray-200 to-white rounded-full flex items-center justify-center mr-4 flex-shrink-0 mt-0.5 shadow-lg">
-                    <span className="text-black text-sm font-black">✓</span>
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-br from-white via-gray-200 to-white rounded-full flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0 mt-0.5 shadow-lg">
+                    <span className="text-black text-xs sm:text-sm font-black">✓</span>
                   </div>
-                  <span className="text-lg font-light">24/7 premium support access</span>
+                  <span className="text-sm sm:text-base md:text-lg font-light">24/7 premium support access</span>
                 </li>
                 <li className="flex items-start text-gray-300">
-                  <div className="w-6 h-6 bg-gradient-to-br from-white via-gray-200 to-white rounded-full flex items-center justify-center mr-4 flex-shrink-0 mt-0.5 shadow-lg">
-                    <span className="text-black text-sm font-black">✓</span>
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-br from-white via-gray-200 to-white rounded-full flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0 mt-0.5 shadow-lg">
+                    <span className="text-black text-xs sm:text-sm font-black">✓</span>
                   </div>
-                  <span className="text-lg font-light">Lifetime access to all content</span>
+                  <span className="text-sm sm:text-base md:text-lg font-light">Lifetime access to all content</span>
                 </li>
                 <li className="flex items-start text-gray-300">
-                  <div className="w-6 h-6 bg-gradient-to-br from-white via-gray-200 to-white rounded-full flex items-center justify-center mr-4 flex-shrink-0 mt-0.5 shadow-lg">
-                    <span className="text-black text-sm font-black">✓</span>
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-br from-white via-gray-200 to-white rounded-full flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0 mt-0.5 shadow-lg">
+                    <span className="text-black text-xs sm:text-sm font-black">✓</span>
                   </div>
-                  <span className="text-lg font-light">Certificate of completion</span>
+                  <span className="text-sm sm:text-base md:text-lg font-light">Certificate of completion</span>
                 </li>
               </ul>
 
               <button
                 onClick={handleGetStarted}
-                className="group relative w-full bg-gradient-to-r from-white via-gray-100 to-white text-black px-8 py-5 rounded-2xl text-xl font-black transition-all duration-500 transform hover:scale-105 shadow-2xl shadow-white/25 hover:shadow-white/40 overflow-hidden"
+                className="group relative w-full bg-gradient-to-r from-white via-gray-100 to-white text-black px-4 sm:px-6 md:px-8 py-3 sm:py-4 md:py-5 rounded-xl sm:rounded-2xl text-base sm:text-lg md:text-xl font-black transition-all duration-500 transform hover:scale-105 shadow-2xl shadow-white/25 hover:shadow-white/40 overflow-hidden min-h-[44px]"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-white to-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <span className="relative z-10">Enroll Now - ₹2,50,000</span>
               </button>
 
               {/* Additional Info */}
-              <div className="mt-8 text-center">
-                <p className="text-gray-400 text-sm font-medium">
+              <div className="mt-4 sm:mt-6 md:mt-8 text-center">
+                <p className="text-gray-400 text-xs sm:text-sm font-medium px-2">
                   Secure payment • Money-back guarantee • Instant access
                 </p>
               </div>

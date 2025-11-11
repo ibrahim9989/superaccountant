@@ -496,13 +496,13 @@ export default function LearnPage({ params }: LearnPageProps) {
           {currentLesson ? (
             <div className="flex-1 flex flex-col">
               {/* Lesson Header */}
-              <div className="bg-white/5 backdrop-blur-sm border-b border-white/10 p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-2xl font-semibold text-white mb-2">
+              <div className="bg-white/5 backdrop-blur-sm border-b border-white/10 p-3 sm:p-4 md:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-white mb-1 sm:mb-2 pr-2">
                       {currentLesson.title}
                     </h2>
-                    <div className="flex items-center space-x-4 text-sm text-gray-400">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4 text-xs sm:text-sm text-gray-400">
                       <span className="capitalize">{currentLesson.lesson_type}</span>
                       {currentLesson.duration_minutes && (
                         <span>{currentLesson.duration_minutes} minutes</span>
@@ -515,7 +515,7 @@ export default function LearnPage({ params }: LearnPageProps) {
                   
                   <button
                     onClick={() => handleLessonComplete(currentLesson.id)}
-                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300"
+                    className="bg-green-600 hover:bg-green-700 text-white px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 rounded-lg font-semibold text-sm sm:text-base transition-all duration-300 min-h-[44px] whitespace-nowrap"
                   >
                     Mark Complete
                   </button>
@@ -523,11 +523,11 @@ export default function LearnPage({ params }: LearnPageProps) {
               </div>
 
               {/* Lesson Content */}
-              <div className="flex-1 p-6 overflow-y-auto bg-gradient-to-br from-gray-900/50 to-gray-800/30 backdrop-blur-sm">
+              <div className="flex-1 p-3 sm:p-4 md:p-6 overflow-y-auto bg-gradient-to-br from-gray-900/50 to-gray-800/30 backdrop-blur-sm">
                 {currentLesson.description && (
-                  <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-white mb-3">Description</h3>
-                    <p className="text-gray-300 leading-relaxed">
+                  <div className="mb-4 sm:mb-5 md:mb-6">
+                    <h3 className="text-base sm:text-lg font-semibold text-white mb-2 sm:mb-3">Description</h3>
+                    <p className="text-sm sm:text-base text-gray-300 leading-relaxed">
                       {currentLesson.description}
                     </p>
                   </div>
@@ -535,8 +535,8 @@ export default function LearnPage({ params }: LearnPageProps) {
 
                 {/* Video Content with Flowchart Sidebar - Show video_url if available */}
                 {(currentLesson as any).video_url ? (
-                  <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-white mb-3">Video Content</h3>
+                  <div className="mb-4 sm:mb-5 md:mb-6">
+                    <h3 className="text-base sm:text-lg font-semibold text-white mb-2 sm:mb-3">Video Content</h3>
                     {/* Container with video and flowchart side by side */}
                     <div className="flex items-stretch gap-0 rounded-lg overflow-hidden bg-black">
                       {/* Video Player - Responsive width */}
@@ -605,8 +605,8 @@ export default function LearnPage({ params }: LearnPageProps) {
                 {/* Flowchart Component for non-video lessons - Standalone */}
                 {!(currentLesson as any).video_url && 
                  ((currentLesson as any).flowcharts && (currentLesson as any).flowcharts.length > 0) && (
-                  <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-white mb-3">Flowcharts</h3>
+                  <div className="mb-4 sm:mb-5 md:mb-6">
+                    <h3 className="text-base sm:text-lg font-semibold text-white mb-2 sm:mb-3">Flowcharts</h3>
                     <div className="flex items-stretch gap-0 rounded-lg overflow-hidden bg-gray-800">
                       <LessonFlowchart
                         flowcharts={(currentLesson as any).flowcharts.map((fc: any) => ({
@@ -624,8 +624,8 @@ export default function LearnPage({ params }: LearnPageProps) {
                 {!(currentLesson as any).video_url && 
                  (!(currentLesson as any).flowcharts || (currentLesson as any).flowcharts.length === 0) &&
                  ((currentLesson as any).flowchart_file_path || (currentLesson as any).flowchart_url) && (
-                  <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-white mb-3">Flowchart</h3>
+                  <div className="mb-4 sm:mb-5 md:mb-6">
+                    <h3 className="text-base sm:text-lg font-semibold text-white mb-2 sm:mb-3">Flowchart</h3>
                     <div className="flex items-stretch gap-0 rounded-lg overflow-hidden bg-gray-800">
                       <LessonFlowchart
                         flowcharts={[{
@@ -642,14 +642,14 @@ export default function LearnPage({ params }: LearnPageProps) {
 
                 {/* Lesson Content Items - Only show if no video_url or for non-video content */}
                 {currentLesson.content && currentLesson.content.length > 0 ? (
-                  <div className="space-y-6">
+                  <div className="space-y-4 sm:space-y-5 md:space-y-6">
                     {currentLesson.content
                       .filter(content => !(currentLesson as any).video_url || content.content_type !== 'video')
                       .map((content, index) => {
                         console.log('Rendering content:', content)
                         return (
-                      <div key={content.id} className="bg-white/5 rounded-lg p-6">
-                        <h4 className="text-lg font-semibold text-white mb-3">
+                      <div key={content.id} className="bg-white/5 rounded-lg p-3 sm:p-4 md:p-6">
+                        <h4 className="text-base sm:text-lg font-semibold text-white mb-2 sm:mb-3">
                           {content.title}
                         </h4>
                         
