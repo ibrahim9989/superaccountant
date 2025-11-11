@@ -739,6 +739,45 @@ export class DailyTestService {
       .single()
 
     if (error) {
+      // Handle duplicate course_day constraint
+      if (error.code === '23505' && error.message?.includes('daily_test_configs_course_day_unique')) {
+        console.log('Duplicate course_day detected, finding next available day_number...')
+        
+        // Find the maximum day_number for this course
+        const { data: maxDay, error: maxError } = await supabase
+          .from('daily_test_configs')
+          .select('day_number')
+          .eq('course_id', configData.course_id)
+          .order('day_number', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+
+        if (maxError) {
+          console.error('Error finding max day_number:', maxError)
+          throw new Error(`Failed to find next available day number: ${maxError.message}`)
+        }
+
+        // Set day_number to next available
+        const nextDayNumber = (maxDay?.day_number ?? 0) + 1
+        const updatedConfigData = { ...configData, day_number: nextDayNumber }
+
+        console.log(`Auto-adjusting day_number to ${nextDayNumber} for course ${configData.course_id}`)
+
+        // Retry insert with new day_number
+        const { data: retryData, error: retryError } = await supabase
+          .from('daily_test_configs')
+          .insert(updatedConfigData)
+          .select()
+          .single()
+
+        if (retryError) {
+          console.error('Error creating daily test config after retry:', retryError)
+          throw new Error(`Failed to create daily test config: ${retryError.message}`)
+        }
+
+        return retryData
+      }
+      
       console.error('Error creating daily test config:', error)
       throw new Error(`Failed to create daily test config: ${error.message}`)
     }

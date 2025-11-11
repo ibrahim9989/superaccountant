@@ -160,8 +160,15 @@ export default function AdminDailyTests() {
         is_active: true,
       })
       loadData()
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating daily test config:', error)
+      // Show user-friendly error message
+      const errorMessage = error?.message || 'Unknown error'
+      if (errorMessage.includes('duplicate') || errorMessage.includes('course_day')) {
+        alert(`Error: A daily test config for day ${formData.day_number} already exists for this course. Please try again - the system will automatically adjust the day number.`)
+      } else {
+        alert(`Error creating daily test config: ${errorMessage}`)
+      }
     }
   }
 
@@ -319,8 +326,11 @@ export default function AdminDailyTests() {
                   type="number"
                   min="1"
                   max="45"
-                  value={formData.day_number}
-                  onChange={(e) => setFormData({ ...formData, day_number: parseInt(e.target.value) })}
+                  value={formData.day_number || 1}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value)
+                    setFormData({ ...formData, day_number: isNaN(value) ? 1 : value })
+                  }}
                   className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
@@ -378,8 +388,11 @@ export default function AdminDailyTests() {
                   type="number"
                   min="1"
                   max="50"
-                  value={formData.question_count}
-                  onChange={(e) => setFormData({ ...formData, question_count: parseInt(e.target.value) })}
+                  value={formData.question_count || 10}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value)
+                    setFormData({ ...formData, question_count: isNaN(value) ? 10 : value })
+                  }}
                   className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
@@ -393,8 +406,11 @@ export default function AdminDailyTests() {
                   type="number"
                   min="1"
                   max="120"
-                  value={formData.time_limit_minutes}
-                  onChange={(e) => setFormData({ ...formData, time_limit_minutes: parseInt(e.target.value) })}
+                  value={formData.time_limit_minutes || 15}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value)
+                    setFormData({ ...formData, time_limit_minutes: isNaN(value) ? 15 : value })
+                  }}
                   className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -407,8 +423,11 @@ export default function AdminDailyTests() {
                   type="number"
                   min="0"
                   max="100"
-                  value={formData.passing_score_percentage}
-                  onChange={(e) => setFormData({ ...formData, passing_score_percentage: parseFloat(e.target.value) })}
+                  value={formData.passing_score_percentage || 70}
+                  onChange={(e) => {
+                    const value = parseFloat(e.target.value)
+                    setFormData({ ...formData, passing_score_percentage: isNaN(value) ? 70 : value })
+                  }}
                   className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
@@ -424,8 +443,11 @@ export default function AdminDailyTests() {
                   type="number"
                   min="1"
                   max="10"
-                  value={formData.max_attempts}
-                  onChange={(e) => setFormData({ ...formData, max_attempts: parseInt(e.target.value) })}
+                  value={formData.max_attempts || 3}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value)
+                    setFormData({ ...formData, max_attempts: isNaN(value) ? 3 : value })
+                  }}
                   className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />

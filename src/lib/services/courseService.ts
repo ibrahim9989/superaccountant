@@ -196,13 +196,56 @@ export class CourseService {
 
   async createCourseModule(moduleData: CreateCourseModule): Promise<CourseModule> {
     const supabase = getSupabaseClient();
+    
+    // If duplicate week_number error, find next available week_number
+    const moduleDataWithFallback = { ...moduleData }
+    
     const { data, error } = await supabase
       .from('course_modules')
-      .insert(moduleData)
+      .insert(moduleDataWithFallback)
       .select()
       .single()
 
     if (error) {
+      // Handle duplicate week_number constraint
+      if (error.code === '23505' && error.message?.includes('course_modules_course_id_week_number_key')) {
+        console.log('Duplicate week_number detected, finding next available week_number...')
+        
+        // Find the maximum week_number for this course
+        const { data: maxWeek, error: maxError } = await supabase
+          .from('course_modules')
+          .select('week_number')
+          .eq('course_id', moduleData.course_id)
+          .order('week_number', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+
+        if (maxError) {
+          console.error('Error finding max week_number:', maxError)
+          throw new Error(`Failed to find next available week number: ${maxError.message}`)
+        }
+
+        // Set week_number to next available
+        const nextWeekNumber = (maxWeek?.week_number ?? 0) + 1
+        const updatedModuleData = { ...moduleData, week_number: nextWeekNumber }
+
+        console.log(`Auto-adjusting week_number to ${nextWeekNumber} for course ${moduleData.course_id}`)
+
+        // Retry insert with new week_number
+        const { data: retryData, error: retryError } = await supabase
+          .from('course_modules')
+          .insert(updatedModuleData)
+          .select()
+          .single()
+
+        if (retryError) {
+          console.error('Error creating course module after retry:', retryError)
+          throw new Error(`Failed to create course module: ${retryError.message}`)
+        }
+
+        return retryData
+      }
+      
       console.error('Error creating course module:', error)
       throw new Error(`Failed to create course module: ${error.message}`)
     }
@@ -229,12 +272,13 @@ export class CourseService {
       throw new Error(`Course module with ID ${moduleId} not found`)
     }
 
+    // Use maybeSingle() instead of single() to handle 0 rows updated
     const { data, error } = await supabase
       .from('course_modules')
       .update(updates)
       .eq('id', moduleId)
       .select()
-      .single()
+      .maybeSingle()
 
     if (error) {
       console.error('Error updating course module:', error)
@@ -242,7 +286,8 @@ export class CourseService {
     }
 
     if (!data) {
-      throw new Error(`Course module with ID ${moduleId} not found after update`)
+      // This can happen if RLS blocks the update or the module was deleted between check and update
+      throw new Error(`Course module with ID ${moduleId} could not be updated. It may have been deleted or you may not have permission to update it.`)
     }
 
     return data

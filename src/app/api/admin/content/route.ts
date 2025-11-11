@@ -48,6 +48,53 @@ export async function POST(request: Request) {
       .single()
 
     if (error) {
+      // Handle duplicate order_index constraint
+      if (error.code === '23505' && error.message?.includes('lesson_content_lesson_id_order_index_key')) {
+        console.log('Duplicate order_index detected, finding next available order_index...')
+        
+        // Find the maximum order_index for this lesson
+        const { data: maxOrder, error: maxError } = await supabase
+          .from('lesson_content')
+          .select('order_index')
+          .eq('lesson_id', body.lesson_id)
+          .order('order_index', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+
+        if (maxError) {
+          console.error('Error finding max order_index:', maxError)
+          return NextResponse.json({ 
+            error: `Failed to find next available order index: ${maxError.message}` 
+          }, { status: 500 })
+        }
+
+        // Set order_index to next available
+        const nextOrderIndex = (maxOrder?.order_index ?? -1) + 1
+        const updatedBody = { ...body, order_index: nextOrderIndex }
+
+        console.log(`Auto-adjusting order_index to ${nextOrderIndex} for lesson ${body.lesson_id}`)
+
+        // Retry insert with new order_index
+        const { data: retryContent, error: retryError } = await supabase
+          .from('lesson_content')
+          .insert(updatedBody)
+          .select()
+          .single()
+
+        if (retryError) {
+          console.error('Error creating content after retry:', retryError)
+          return NextResponse.json({ 
+            error: `Failed to create content: ${retryError.message}`,
+            suggestion: `Try using order_index ${nextOrderIndex} or higher`
+          }, { status: 500 })
+        }
+
+        return NextResponse.json({ 
+          data: retryContent,
+          message: `Content created with auto-adjusted order_index: ${nextOrderIndex}`
+        })
+      }
+      
       console.error('Error creating content:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }

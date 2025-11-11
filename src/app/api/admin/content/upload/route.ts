@@ -89,6 +89,68 @@ export async function POST(request: Request) {
         .single()
 
       if (error) {
+        // Log the full error for debugging
+        console.log('Content upload error:', JSON.stringify(error, null, 2))
+        console.log('Error code:', error.code)
+        console.log('Error message:', error.message)
+        console.log('Error details:', (error as any).details)
+        
+        // Handle duplicate order_index constraint
+        // Check multiple ways the error might be formatted
+        const isDuplicateKeyError = 
+          error.code === '23505' || 
+          error.code === 'PGRST116' ||
+          error.message?.includes('lesson_content_lesson_id_order_index_key') ||
+          error.message?.includes('duplicate key') ||
+          (error as any).details?.includes('lesson_content_lesson_id_order_index_key') ||
+          String(error.message || '').toLowerCase().includes('duplicate')
+        
+        if (isDuplicateKeyError) {
+          console.log('Duplicate order_index detected, finding next available order_index...')
+          
+          // Find the maximum order_index for this lesson
+          const { data: maxOrder, error: maxError } = await supabase
+            .from('lesson_content')
+            .select('order_index')
+            .eq('lesson_id', lesson_id)
+            .order('order_index', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+
+          if (maxError) {
+            console.error('Error finding max order_index:', maxError)
+            return NextResponse.json({ 
+              error: `Failed to find next available order index: ${maxError.message}` 
+            }, { status: 500 })
+          }
+
+          // Set order_index to next available
+          const nextOrderIndex = (maxOrder?.order_index ?? -1) + 1
+          const updatedContentData = { ...contentData, order_index: nextOrderIndex }
+
+          console.log(`Auto-adjusting order_index to ${nextOrderIndex} for lesson ${lesson_id}`)
+
+          // Retry insert with new order_index
+          const { data: retryData, error: retryError } = await supabase
+            .from('lesson_content')
+            .insert(updatedContentData)
+            .select()
+            .single()
+
+          if (retryError) {
+            console.error('Error creating content after retry:', retryError)
+            return NextResponse.json({ 
+              error: `Failed to create content: ${retryError.message}`,
+              suggestion: `Try using order_index ${nextOrderIndex} or higher`
+            }, { status: 500 })
+          }
+
+          return NextResponse.json({ 
+            data: retryData,
+            message: `Content created with auto-adjusted order_index: ${nextOrderIndex}`
+          })
+        }
+        
         console.error('Error creating content:', error)
         return NextResponse.json({ error: error.message }, { status: 500 })
       }
@@ -96,8 +158,15 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ data: result })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Unexpected error in file upload API:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    // If it's a duplicate key error that wasn't caught, handle it
+    if (error?.code === '23505' || error?.message?.includes('duplicate key')) {
+      return NextResponse.json({ 
+        error: 'Duplicate order_index detected. Please try again - the system will auto-adjust it.',
+        code: error.code
+      }, { status: 409 })
+    }
+    return NextResponse.json({ error: error?.message || 'Internal server error' }, { status: 500 })
   }
 }

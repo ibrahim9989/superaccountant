@@ -703,21 +703,33 @@ class AdminService {
       if (error) {
         // If table doesn't exist, return empty array
         // Also handle 500 errors which might be RLS or table issues
-        if (error.code === 'PGRST116' || 
-            error.message?.includes('relation') || 
-            error.message?.includes('does not exist') ||
-            (error as any).status === 500 ||
-            error.message?.includes('500')) {
-          console.log('Admin tables not set up yet or RLS issue, returning empty activity log')
+        const errorMessage = error.message || ''
+        const errorCode = error.code || ''
+        const errorStatus = (error as any).status || (error as any).statusCode || ''
+        
+        if (errorCode === 'PGRST116' || 
+            errorCode === '42P01' || // relation does not exist
+            errorMessage.includes('relation') || 
+            errorMessage.includes('does not exist') ||
+            errorMessage.includes('not found') ||
+            errorStatus === 500 ||
+            errorStatus === '500' ||
+            errorMessage.includes('500') ||
+            errorMessage.includes('permission denied') ||
+            errorMessage.includes('RLS')) {
+          // Silently return empty array - table doesn't exist or RLS is blocking
+          // This is expected if the admin_activity_log table hasn't been created yet
           return []
         }
-        console.error('Error fetching recent activity:', error)
+        // For other errors, log but still return empty array to not break the UI
+        console.warn('Error fetching recent activity (non-critical):', errorMessage || errorCode)
         return []
       }
 
       return data || []
-    } catch (error) {
-      console.log('Admin tables not set up yet, returning empty activity log')
+    } catch (error: any) {
+      // Catch any network errors or unexpected exceptions
+      // Silently return empty array - this is expected if table doesn't exist
       return []
     }
   }

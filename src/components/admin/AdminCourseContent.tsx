@@ -131,6 +131,7 @@ export default function AdminCourseContent() {
   const [moduleForm, setModuleForm] = useState({
     title: '',
     description: '',
+    week_number: 1,
     order_index: 1,
     is_active: true
   })
@@ -336,9 +337,33 @@ export default function AdminCourseContent() {
     try {
       if (!selectedCourse) throw new Error('Select a course first')
       if (editingModule) {
-        await courseService.updateCourseModule(editingModule.id, moduleForm as any)
+        try {
+          await courseService.updateCourseModule(editingModule.id, moduleForm as any)
+        } catch (updateError: any) {
+          // Provide more helpful error message
+          const errorMessage = updateError?.message || 'Unknown error'
+          if (errorMessage.includes('not found')) {
+            alert(`Error: The module you're trying to update no longer exists. Please refresh the page and try again.`)
+          } else if (errorMessage.includes('permission') || errorMessage.includes('RLS')) {
+            alert(`Error: You don't have permission to update this module. Please check your admin access.`)
+          } else {
+            alert(`Error updating module: ${errorMessage}`)
+          }
+          throw updateError
+        }
       } else {
-        await courseService.createCourseModule({ ...moduleForm, course_id: selectedCourse.id } as any)
+        try {
+          await courseService.createCourseModule({ ...moduleForm, course_id: selectedCourse.id } as any)
+        } catch (createError: any) {
+          // Provide more helpful error message
+          const errorMessage = createError?.message || 'Unknown error'
+          if (errorMessage.includes('week_number') || errorMessage.includes('duplicate')) {
+            alert(`Error: A module with week number ${moduleForm.week_number} already exists for this course. Please choose a different week number or the system will auto-adjust it.`)
+          } else {
+            alert(`Error creating module: ${errorMessage}`)
+          }
+          throw createError
+        }
       }
       // Reload selected course modules
       const refreshed = await courseService.getCourseById(selectedCourse.id)
@@ -480,6 +505,7 @@ export default function AdminCourseContent() {
     setModuleForm({
       title: '',
       description: '',
+      week_number: 1,
       order_index: 1,
       is_active: true
     })
@@ -583,8 +609,15 @@ export default function AdminCourseContent() {
       setShowContentForm(false)
       setEditingContent(null)
       resetContentForm()
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving content:', error)
+      // Show user-friendly error message
+      const errorMessage = error?.message || 'Unknown error'
+      if (errorMessage.includes('duplicate') || errorMessage.includes('order_index')) {
+        alert(`Error: A content item with this order index already exists. Please try again - the system will automatically adjust it.`)
+      } else {
+        alert(`Error saving content: ${errorMessage}`)
+      }
     }
   }
 
@@ -662,7 +695,8 @@ export default function AdminCourseContent() {
     setEditingModule(module)
     setModuleForm({
       title: module.title,
-      description: module.description,
+      description: module.description || '',
+      week_number: (module as any).week_number || 1,
       order_index: module.order_index,
       is_active: module.is_active
     })
@@ -1770,12 +1804,29 @@ Good luck with your assignment!`,
 
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Week Number
+                </label>
+                <input
+                  type="number"
+                  value={moduleForm.week_number ?? 1}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value)
+                    setModuleForm({...moduleForm, week_number: isNaN(value) ? 1 : value})
+                  }}
+                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
+                  min="1"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
                   Order Index
                 </label>
                 <input
                   type="number"
-                  value={moduleForm.order_index}
-                  onChange={(e) => setModuleForm({...moduleForm, order_index: parseInt(e.target.value)})}
+                  value={moduleForm.order_index || 1}
+                  onChange={(e) => setModuleForm({...moduleForm, order_index: parseInt(e.target.value) || 1})}
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
                   min="1"
                   required
