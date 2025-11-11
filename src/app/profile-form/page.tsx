@@ -494,6 +494,7 @@ export default function ProfileFormPage() {
             </button>
           </div>
         </form>
+        </div>
       </div>
     </div>
   )

@@ -21,11 +21,12 @@ const display = Bodoni_Moda({
 export const metadata: Metadata = {
   title: "Super Accountant - Professional Accounting Certification",
   description: "Become a certified Super Accountant with our comprehensive 45-day course",
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 5,
-  },
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({
