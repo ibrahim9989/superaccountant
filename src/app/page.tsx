@@ -235,21 +235,21 @@ export default function Home() {
               </button>
             </div>
 
-            {/* Premium Stats */}
-            <div className="flex items-center justify-center space-x-16 text-gray-300">
-              <div className="text-center bg-gradient-to-br from-gray-800/30 to-gray-900/50 px-8 py-6 rounded-2xl border border-gray-700/50 backdrop-blur-sm">
-                <div className="text-5xl font-black text-white mb-2 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">500+</div>
-                <div className="text-sm tracking-[0.15em] uppercase font-medium">Elite Accountants</div>
+            {/* Premium Stats - Mobile: Stack, Desktop: Horizontal */}
+            <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-16 text-gray-300">
+              <div className="text-center bg-gradient-to-br from-gray-800/30 to-gray-900/50 px-6 py-5 md:px-8 md:py-6 rounded-2xl border border-gray-700/50 backdrop-blur-sm w-full md:w-auto">
+                <div className="text-4xl md:text-5xl font-black text-white mb-2 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">500+</div>
+                <div className="text-xs md:text-sm tracking-[0.15em] uppercase font-medium">Elite Accountants</div>
               </div>
               <div className="hidden md:block w-px h-16 bg-gradient-to-b from-transparent via-gray-500 to-transparent"></div>
-              <div className="text-center bg-gradient-to-br from-gray-800/30 to-gray-900/50 px-8 py-6 rounded-2xl border border-gray-700/50 backdrop-blur-sm">
-                <div className="text-5xl font-black text-white mb-2 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">98%</div>
-                <div className="text-sm tracking-[0.15em] uppercase font-medium">Career Advancement</div>
+              <div className="text-center bg-gradient-to-br from-gray-800/30 to-gray-900/50 px-6 py-5 md:px-8 md:py-6 rounded-2xl border border-gray-700/50 backdrop-blur-sm w-full md:w-auto">
+                <div className="text-4xl md:text-5xl font-black text-white mb-2 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">98%</div>
+                <div className="text-xs md:text-sm tracking-[0.15em] uppercase font-medium">Career Advancement</div>
               </div>
               <div className="hidden md:block w-px h-16 bg-gradient-to-b from-transparent via-gray-500 to-transparent"></div>
-              <div className="text-center bg-gradient-to-br from-gray-800/30 to-gray-900/50 px-8 py-6 rounded-2xl border border-gray-700/50 backdrop-blur-sm">
-                <div className="text-5xl font-black text-white mb-2 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">24/7</div>
-                <div className="text-sm tracking-[0.15em] uppercase font-medium">Premium Support</div>
+              <div className="text-center bg-gradient-to-br from-gray-800/30 to-gray-900/50 px-6 py-5 md:px-8 md:py-6 rounded-2xl border border-gray-700/50 backdrop-blur-sm w-full md:w-auto">
+                <div className="text-4xl md:text-5xl font-black text-white mb-2 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">24/7</div>
+                <div className="text-xs md:text-sm tracking-[0.15em] uppercase font-medium">Premium Support</div>
               </div>
             </div>
           </div>
@@ -584,162 +584,121 @@ export default function Home() {
 
       {/* Pricing Section */}
       <section id="pricing" className="py-32 bg-black relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
+        {/* Luxury Background Effects */}
+        <div className="absolute inset-0 opacity-40">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-white/5 via-gray-800/10 to-black/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-black/10 via-gray-700/15 to-white/5 rounded-full blur-3xl" />
+        </div>
+        
+        {/* Subtle Pattern Overlay */}
+        <div className="absolute inset-0 opacity-[0.02]">
           <div className="absolute inset-0" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='40' cy='40' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='50' cy='50' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
           }} />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
-            <div className="inline-flex items-center px-6 py-3 bg-gray-800 border border-gray-600 rounded-full mb-8">
-              <span className="text-white text-sm font-medium tracking-widest uppercase">PREMIUM PLANS</span>
+            <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 border border-gray-500/50 rounded-full mb-8 shadow-2xl backdrop-blur-sm">
+              <div className="w-2.5 h-2.5 bg-gradient-to-r from-white to-gray-300 rounded-full mr-3 animate-pulse"></div>
+              <span className="text-white text-xs font-bold tracking-[0.22em] uppercase">ELITE PRICING</span>
+              <div className="w-2.5 h-2.5 bg-gradient-to-r from-gray-300 to-white rounded-full ml-3 animate-pulse"></div>
             </div>
-            <h2 className="text-5xl md:text-6xl font-black text-white mb-6 leading-tight">
-              Choose Your Elite Path
+            <h2 className="text-5xl md:text-6xl font-black text-white mb-6 leading-tight bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
+              Investment in Your Future
             </h2>
-            <p className="text-xl md:text-2xl text-gray-300 font-light">Select the perfect premium plan for your accounting mastery journey</p>
+            <p className="text-xl md:text-2xl text-gray-300 font-light">One comprehensive program, one transformative price</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            <div className="group bg-gray-900 p-10 rounded-3xl border border-gray-700 hover:border-white transition-all duration-500 hover:transform hover:scale-105">
-              <div className="text-center mb-8">
-                <div className="w-16 h-16 bg-gray-700 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <span className="text-white text-2xl font-bold">S</span>
-                </div>
-                <h3 className="text-2xl font-bold text-white mb-4">Starter</h3>
-                <div className="text-5xl font-black text-white mb-2">$299<span className="text-lg text-gray-400 font-normal">/month</span></div>
-                <p className="text-gray-300 text-lg">Perfect for individual accountants</p>
+          {/* Single Pricing Card */}
+          <div className="max-w-2xl mx-auto">
+            <div className="group bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-12 rounded-3xl border-2 border-gray-600/50 hover:border-white/70 transition-all duration-700 hover:transform hover:scale-[1.02] shadow-2xl hover:shadow-white/10 relative overflow-hidden">
+              {/* Premium Badge */}
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-white via-gray-100 to-white text-black px-8 py-2 rounded-full text-sm font-black shadow-2xl shadow-white/25">
+                COMPREHENSIVE PROGRAM
               </div>
 
-              <ul className="space-y-4 mb-10">
-                <li className="flex items-center text-gray-300">
-                  <div className="w-5 h-5 bg-white rounded-full flex items-center justify-center mr-4 flex-shrink-0">
-                    <span className="text-black text-xs font-bold">✓</span>
+              <div className="text-center mb-10 mt-4">
+                <div className="w-24 h-24 bg-gradient-to-br from-white via-gray-200 to-white rounded-3xl flex items-center justify-center mx-auto mb-8 group-hover:scale-110 transition-transform duration-500 shadow-xl shadow-white/25">
+                  <span className="text-black text-4xl font-black">SA</span>
+                </div>
+                <h3 className="text-3xl font-black text-white mb-6 bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
+                  Super Accountant Program
+                </h3>
+                
+                {/* Price Display */}
+                <div className="mb-6">
+                  <div className="text-6xl md:text-7xl font-black text-white mb-2 bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
+                    ₹2,50,000
                   </div>
-                  <span className="text-lg">Access to all core modules</span>
+                  <div className="text-gray-300 text-lg font-medium">One-time payment</div>
+                </div>
+                
+                <p className="text-gray-300 text-xl font-light leading-relaxed max-w-xl mx-auto">
+                  Complete access to all modules, certifications, and lifetime support
+                </p>
+              </div>
+
+              {/* Features List */}
+              <ul className="space-y-5 mb-12">
+                <li className="flex items-start text-gray-300">
+                  <div className="w-6 h-6 bg-gradient-to-br from-white via-gray-200 to-white rounded-full flex items-center justify-center mr-4 flex-shrink-0 mt-0.5 shadow-lg">
+                    <span className="text-black text-sm font-black">✓</span>
+                  </div>
+                  <span className="text-lg font-light">Access to all 50+ expert modules</span>
                 </li>
-                <li className="flex items-center text-gray-300">
-                  <div className="w-5 h-5 bg-white rounded-full flex items-center justify-center mr-4 flex-shrink-0">
-                    <span className="text-black text-xs font-bold">✓</span>
+                <li className="flex items-start text-gray-300">
+                  <div className="w-6 h-6 bg-gradient-to-br from-white via-gray-200 to-white rounded-full flex items-center justify-center mr-4 flex-shrink-0 mt-0.5 shadow-lg">
+                    <span className="text-black text-sm font-black">✓</span>
                   </div>
-                  <span className="text-lg">Daily practice tests</span>
+                  <span className="text-lg font-light">90-day comprehensive program</span>
                 </li>
-                <li className="flex items-center text-gray-300">
-                  <div className="w-5 h-5 bg-white rounded-full flex items-center justify-center mr-4 flex-shrink-0">
-                    <span className="text-black text-xs font-bold">✓</span>
+                <li className="flex items-start text-gray-300">
+                  <div className="w-6 h-6 bg-gradient-to-br from-white via-gray-200 to-white rounded-full flex items-center justify-center mr-4 flex-shrink-0 mt-0.5 shadow-lg">
+                    <span className="text-black text-sm font-black">✓</span>
                   </div>
-                  <span className="text-lg">Email support</span>
+                  <span className="text-lg font-light">Daily practice tests and assessments</span>
                 </li>
-                <li className="flex items-center text-gray-600">
-                  <div className="w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
-                    <span className="text-xs">✗</span>
+                <li className="flex items-start text-gray-300">
+                  <div className="w-6 h-6 bg-gradient-to-br from-white via-gray-200 to-white rounded-full flex items-center justify-center mr-4 flex-shrink-0 mt-0.5 shadow-lg">
+                    <span className="text-black text-sm font-black">✓</span>
                   </div>
-                  <span className="text-lg">Advanced certifications</span>
+                  <span className="text-lg font-light">Advanced certifications included</span>
+                </li>
+                <li className="flex items-start text-gray-300">
+                  <div className="w-6 h-6 bg-gradient-to-br from-white via-gray-200 to-white rounded-full flex items-center justify-center mr-4 flex-shrink-0 mt-0.5 shadow-lg">
+                    <span className="text-black text-sm font-black">✓</span>
+                  </div>
+                  <span className="text-lg font-light">24/7 premium support access</span>
+                </li>
+                <li className="flex items-start text-gray-300">
+                  <div className="w-6 h-6 bg-gradient-to-br from-white via-gray-200 to-white rounded-full flex items-center justify-center mr-4 flex-shrink-0 mt-0.5 shadow-lg">
+                    <span className="text-black text-sm font-black">✓</span>
+                  </div>
+                  <span className="text-lg font-light">Lifetime access to all content</span>
+                </li>
+                <li className="flex items-start text-gray-300">
+                  <div className="w-6 h-6 bg-gradient-to-br from-white via-gray-200 to-white rounded-full flex items-center justify-center mr-4 flex-shrink-0 mt-0.5 shadow-lg">
+                    <span className="text-black text-sm font-black">✓</span>
+                  </div>
+                  <span className="text-lg font-light">Certificate of completion</span>
                 </li>
               </ul>
 
               <button
                 onClick={handleGetStarted}
-                className="w-full bg-gray-700 text-white py-4 rounded-2xl text-lg font-bold hover:bg-gray-600 transition-all duration-300"
+                className="group relative w-full bg-gradient-to-r from-white via-gray-100 to-white text-black px-8 py-5 rounded-2xl text-xl font-black transition-all duration-500 transform hover:scale-105 shadow-2xl shadow-white/25 hover:shadow-white/40 overflow-hidden"
               >
-                Get Started
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-white to-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <span className="relative z-10">Enroll Now - ₹2,50,000</span>
               </button>
-            </div>
 
-            <div className="group bg-gray-800 p-10 rounded-3xl border-2 border-white relative hover:transform hover:scale-105 transition-all duration-500">
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-white text-black px-6 py-2 rounded-full text-sm font-bold">
-                MOST POPULAR
+              {/* Additional Info */}
+              <div className="mt-8 text-center">
+                <p className="text-gray-400 text-sm font-medium">
+                  Secure payment • Money-back guarantee • Instant access
+                </p>
               </div>
-
-              <div className="text-center mb-8">
-                <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <span className="text-black text-2xl font-bold">P</span>
-                </div>
-                <h3 className="text-2xl font-bold text-white mb-4">Professional</h3>
-                <div className="text-5xl font-black text-white mb-2">$499<span className="text-lg text-gray-400 font-normal">/month</span></div>
-                <p className="text-gray-300 text-lg">For serious career advancement</p>
-              </div>
-
-              <ul className="space-y-4 mb-10">
-                <li className="flex items-center text-gray-300">
-                  <div className="w-5 h-5 bg-white rounded-full flex items-center justify-center mr-4 flex-shrink-0">
-                    <span className="text-black text-xs font-bold">✓</span>
-                  </div>
-                  <span className="text-lg">Everything in Starter</span>
-                </li>
-                <li className="flex items-center text-gray-300">
-                  <div className="w-5 h-5 bg-white rounded-full flex items-center justify-center mr-4 flex-shrink-0">
-                    <span className="text-black text-xs font-bold">✓</span>
-                  </div>
-                  <span className="text-lg">Advanced certifications</span>
-                </li>
-                <li className="flex items-center text-gray-300">
-                  <div className="w-5 h-5 bg-white rounded-full flex items-center justify-center mr-4 flex-shrink-0">
-                    <span className="text-black text-xs font-bold">✓</span>
-                  </div>
-                  <span className="text-lg">1-on-1 mentoring</span>
-                </li>
-                <li className="flex items-center text-gray-300">
-                  <div className="w-5 h-5 bg-white rounded-full flex items-center justify-center mr-4 flex-shrink-0">
-                    <span className="text-black text-xs font-bold">✓</span>
-                  </div>
-                  <span className="text-lg">Priority support</span>
-                </li>
-              </ul>
-
-              <button
-                onClick={handleGetStarted}
-                className="w-full bg-white text-black py-4 rounded-2xl text-lg font-bold hover:bg-gray-200 transition-all duration-300"
-              >
-                Get Started
-              </button>
-            </div>
-
-            <div className="group bg-gray-900 p-10 rounded-3xl border border-gray-700 hover:border-white transition-all duration-500 hover:transform hover:scale-105">
-              <div className="text-center mb-8">
-                <div className="w-16 h-16 bg-gray-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <span className="text-white text-2xl font-bold">E</span>
-                </div>
-                <h3 className="text-2xl font-bold text-white mb-4">Enterprise</h3>
-                <div className="text-5xl font-black text-white mb-2">Custom</div>
-                <p className="text-gray-300 text-lg">For accounting firms & teams</p>
-              </div>
-
-              <ul className="space-y-4 mb-10">
-                <li className="flex items-center text-gray-300">
-                  <div className="w-5 h-5 bg-white rounded-full flex items-center justify-center mr-4 flex-shrink-0">
-                    <span className="text-black text-xs font-bold">✓</span>
-                  </div>
-                  <span className="text-lg">Everything in Professional</span>
-                </li>
-                <li className="flex items-center text-gray-300">
-                  <div className="w-5 h-5 bg-white rounded-full flex items-center justify-center mr-4 flex-shrink-0">
-                    <span className="text-black text-xs font-bold">✓</span>
-                  </div>
-                  <span className="text-lg">Team management tools</span>
-                </li>
-                <li className="flex items-center text-gray-300">
-                  <div className="w-5 h-5 bg-white rounded-full flex items-center justify-center mr-4 flex-shrink-0">
-                    <span className="text-black text-xs font-bold">✓</span>
-                  </div>
-                  <span className="text-lg">Custom curriculum</span>
-                </li>
-                <li className="flex items-center text-gray-300">
-                  <div className="w-5 h-5 bg-white rounded-full flex items-center justify-center mr-4 flex-shrink-0">
-                    <span className="text-black text-xs font-bold">✓</span>
-                  </div>
-                  <span className="text-lg">Dedicated success manager</span>
-                </li>
-              </ul>
-
-              <button
-                onClick={handleGetStarted}
-                className="w-full bg-gray-600 text-white py-4 rounded-2xl text-lg font-bold hover:bg-gray-500 transition-all duration-300"
-              >
-                Contact Sales
-              </button>
             </div>
           </div>
         </div>

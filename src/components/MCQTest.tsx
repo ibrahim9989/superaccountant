@@ -6,6 +6,7 @@ import {
   TestResult
 } from '@/lib/validations/mcq'
 import { mcqService } from '@/lib/services/mcqService'
+import { showToast } from './Toast'
 
 interface MCQTestProps {
   session: TestSessionWithDetails
@@ -53,10 +54,11 @@ export default function MCQTest({ session, onComplete, onAbandon }: MCQTestProps
     setIsSubmitting(true)
     try {
       const result = await mcqService.completeTest(session.id, { session_id: session.id })
+      showToast('Time is up! Test completed automatically.', 'info')
       onComplete(result)
     } catch (error) {
       console.error('Error completing test:', error)
-      alert('Failed to complete test. Please try again.')
+      showToast('Failed to complete test. Please try again.', 'error')
     } finally {
       setIsSubmitting(false)
     }
@@ -76,7 +78,7 @@ export default function MCQTest({ session, onComplete, onAbandon }: MCQTestProps
 
   const handleNextQuestion = async () => {
     if (selectedOptions.length === 0) {
-      alert('Please select at least one option before proceeding.')
+      showToast('Please select at least one option before proceeding.', 'warning')
       return
     }
 
@@ -107,7 +109,7 @@ export default function MCQTest({ session, onComplete, onAbandon }: MCQTestProps
       }
     } catch (error) {
       console.error('Error submitting answer:', error)
-      alert('Failed to submit answer. Please try again.')
+      showToast('Failed to submit answer. Please try again.', 'error')
     } finally {
       setIsSubmitting(false)
     }
@@ -126,10 +128,11 @@ export default function MCQTest({ session, onComplete, onAbandon }: MCQTestProps
     setIsSubmitting(true)
     try {
       const result = await mcqService.completeTest(session.id, { session_id: session.id })
+      showToast('Test completed successfully!', 'success')
       onComplete(result)
     } catch (error) {
       console.error('Error completing test:', error)
-      alert('Failed to complete test. Please try again.')
+      showToast('Failed to complete test. Please try again.', 'error')
     } finally {
       setIsSubmitting(false)
     }
@@ -148,11 +151,12 @@ export default function MCQTest({ session, onComplete, onAbandon }: MCQTestProps
   const confirmAbandon = async () => {
     setIsSubmitting(true)
     try {
-      // Update session status to abandoned
       await mcqService.completeTest(session.id, { session_id: session.id })
+      showToast('Test abandoned.', 'info')
       onAbandon()
     } catch (error) {
       console.error('Error abandoning test:', error)
+      showToast('Failed to abandon test.', 'error')
     } finally {
       setIsSubmitting(false)
       setShowConfirmDialog(false)
@@ -172,52 +176,69 @@ export default function MCQTest({ session, onComplete, onAbandon }: MCQTestProps
   }
 
   const progressPercentage = ((currentQuestionIndex + 1) / session.questions.length) * 100
+  const isTimeLow = timeRemaining < 300 // Less than 5 minutes
 
   if (showReview) {
-    // Use the answeredQuestions state to track which questions have been answered
     const stillSkippedQuestions = session.questions.filter(q => 
       skippedQuestions.has(q.id) && !answeredQuestions.has(q.id)
     )
     const answeredQuestionsList = session.questions.filter(q => answeredQuestions.has(q.id))
     
     return (
-      <div className="min-h-screen w-full bg-black">
-        <div className="max-w-4xl mx-auto p-6">
-          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8">
-            <h2 className="text-2xl font-bold text-white mb-6 text-center">Review Your Answers</h2>
+      <div className="min-h-screen w-full bg-black relative">
+        {/* Luxury Background Effects */}
+        <div className="absolute inset-0 opacity-40">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-white/5 via-gray-800/10 to-black/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-black/10 via-gray-700/15 to-white/5 rounded-full blur-3xl" />
+        </div>
+
+        <div className="relative z-10 max-w-5xl mx-auto p-6 lg:p-12">
+          <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-gray-600/50 rounded-3xl p-8 shadow-2xl">
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 border border-gray-500/50 rounded-full mb-6 shadow-2xl backdrop-blur-sm">
+                <div className="w-2.5 h-2.5 bg-gradient-to-r from-white to-gray-300 rounded-full mr-3 animate-pulse"></div>
+                <span className="text-white text-xs font-bold tracking-[0.22em] uppercase">REVIEW ANSWERS</span>
+                <div className="w-2.5 h-2.5 bg-gradient-to-r from-gray-300 to-white rounded-full ml-3 animate-pulse"></div>
+              </div>
+              <h2 className="text-3xl font-black text-white mb-4 bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
+                Review Your Answers
+              </h2>
+            </div>
             
-            <div className="mb-6">
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-4">
-                  <div className="text-green-400 font-semibold text-lg">{answeredQuestionsList.length}</div>
-                  <div className="text-green-300 text-sm">Questions Answered</div>
+            <div className="mb-8">
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="bg-gradient-to-br from-green-900/50 via-green-800/50 to-green-900/50 border border-green-700/50 rounded-2xl p-6">
+                  <div className="text-4xl font-black text-green-300 mb-2">{answeredQuestionsList.length}</div>
+                  <div className="text-green-200 text-sm font-medium uppercase tracking-wide">Questions Answered</div>
                 </div>
-                <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-4">
-                  <div className="text-yellow-400 font-semibold text-lg">{stillSkippedQuestions.length}</div>
-                  <div className="text-yellow-300 text-sm">Questions Still Skipped</div>
+                <div className="bg-gradient-to-br from-yellow-900/50 via-yellow-800/50 to-yellow-900/50 border border-yellow-700/50 rounded-2xl p-6">
+                  <div className="text-4xl font-black text-yellow-300 mb-2">{stillSkippedQuestions.length}</div>
+                  <div className="text-yellow-200 text-sm font-medium uppercase tracking-wide">Questions Skipped</div>
                 </div>
               </div>
             </div>
 
             {stillSkippedQuestions.length > 0 && (
               <div className="mb-8">
-                <h3 className="text-xl font-semibold text-white mb-4">Skipped Questions</h3>
+                <h3 className="text-xl font-black text-white mb-6 bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
+                  Skipped Questions
+                </h3>
                 <div className="space-y-4">
-                  {stillSkippedQuestions.map((question, index) => (
-                    <div key={question.id} className="bg-white/5 rounded-lg p-4">
+                  {stillSkippedQuestions.map((question) => (
+                    <div key={question.id} className="bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 border border-yellow-700/50 rounded-xl p-5">
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-yellow-400 font-medium">Question {session.questions.findIndex(q => q.id === question.id) + 1}</span>
+                        <span className="text-yellow-300 font-bold">Question {session.questions.findIndex(q => q.id === question.id) + 1}</span>
                         <button
                           onClick={() => {
                             setCurrentQuestionIndex(session.questions.findIndex(q => q.id === question.id))
                             setShowReview(false)
                           }}
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition-colors"
+                          className="px-4 py-2 bg-gradient-to-r from-white via-gray-100 to-white text-black font-bold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105"
                         >
                           Answer Now
                         </button>
                       </div>
-                      <p className="text-gray-300 text-sm">{question.question_text}</p>
+                      <p className="text-gray-300 font-light">{question.question_text}</p>
                     </div>
                   ))}
                 </div>
@@ -226,34 +247,37 @@ export default function MCQTest({ session, onComplete, onAbandon }: MCQTestProps
 
             {answeredQuestionsList.length > 0 && (
               <div className="mb-8">
-                <h3 className="text-xl font-semibold text-white mb-4">Answered Questions</h3>
-                <div className="space-y-2">
-                  {answeredQuestionsList.map((question, index) => (
-                    <div key={question.id} className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
+                <h3 className="text-xl font-black text-white mb-6 bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
+                  Answered Questions
+                </h3>
+                <div className="space-y-3">
+                  {answeredQuestionsList.map((question) => (
+                    <div key={question.id} className="bg-gradient-to-br from-green-900/30 via-green-800/20 to-green-900/30 border border-green-700/30 rounded-xl p-4">
                       <div className="flex items-center justify-between">
-                        <span className="text-green-400 font-medium">Question {session.questions.findIndex(q => q.id === question.id) + 1}</span>
-                        <span className="text-green-300 text-sm">✓ Answered</span>
+                        <span className="text-green-300 font-bold">Question {session.questions.findIndex(q => q.id === question.id) + 1}</span>
+                        <span className="text-green-300 text-sm font-medium">✓ Answered</span>
                       </div>
-                      <p className="text-gray-300 text-sm mt-1">{question.question_text}</p>
+                      <p className="text-gray-300 text-sm mt-2 font-light">{question.question_text}</p>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            <div className="flex justify-center space-x-4">
+            <div className="flex justify-center gap-4">
               <button
                 onClick={() => setShowReview(false)}
-                className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300"
+                className="px-8 py-4 bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 border border-gray-600/50 hover:border-gray-500/70 text-white font-black rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-xl"
               >
                 Continue Test
               </button>
               <button
                 onClick={handleReviewComplete}
                 disabled={isSubmitting}
-                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group relative px-8 py-4 bg-gradient-to-r from-white via-gray-100 to-white text-black font-black rounded-2xl transition-all duration-500 transform hover:scale-105 shadow-2xl shadow-white/25 hover:shadow-white/40 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none overflow-hidden"
               >
-                {isSubmitting ? 'Submitting...' : 'Complete Test'}
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-white to-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <span className="relative z-10">{isSubmitting ? 'Submitting...' : 'Complete Test'}</span>
               </button>
             </div>
           </div>
@@ -264,23 +288,32 @@ export default function MCQTest({ session, onComplete, onAbandon }: MCQTestProps
 
   if (showConfirmDialog) {
     return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 max-w-md mx-4">
-          <h3 className="text-xl font-semibold text-white mb-4">Abandon Test?</h3>
-          <p className="text-gray-300 mb-6">
-            Are you sure you want to abandon this test? Your progress will be lost and this will count as an attempt.
-          </p>
+      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
+        <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-gray-600/50 rounded-3xl p-8 max-w-md mx-4 shadow-2xl">
+          <div className="text-center mb-6">
+            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-red-900/50 via-red-800/50 to-red-900/50 border border-red-700/50 rounded-full flex items-center justify-center">
+              <svg className="w-8 h-8 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-black text-white mb-3 bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
+              Abandon Test?
+            </h3>
+            <p className="text-gray-300 font-light">
+              Are you sure you want to abandon this test? Your progress will be lost and this will count as an attempt.
+            </p>
+          </div>
           <div className="flex gap-4">
             <button
               onClick={() => setShowConfirmDialog(false)}
-              className="flex-1 px-4 py-2 border border-white/20 text-white rounded-lg hover:bg-white/10 transition-colors"
+              className="flex-1 px-6 py-3 bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 border border-gray-600/50 hover:border-gray-500/70 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-xl"
             >
               Cancel
             </button>
             <button
               onClick={confirmAbandon}
               disabled={isSubmitting}
-              className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+              className="flex-1 px-6 py-3 bg-gradient-to-r from-red-700 via-red-600 to-red-700 hover:from-red-600 hover:via-red-500 hover:to-red-600 text-white font-black rounded-xl transition-all duration-300 transform hover:scale-105 shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               {isSubmitting ? 'Abandoning...' : 'Abandon Test'}
             </button>
@@ -291,61 +324,73 @@ export default function MCQTest({ session, onComplete, onAbandon }: MCQTestProps
   }
 
   return (
-    <div className="min-h-screen w-full bg-black">
+    <div className="min-h-screen w-full bg-black relative">
+      {/* Luxury Background Effects */}
+      <div className="absolute inset-0 opacity-40">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-white/5 via-gray-800/10 to-black/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-black/10 via-gray-700/15 to-white/5 rounded-full blur-3xl" />
+      </div>
+
       {/* Header */}
-      <div className="bg-white/5 backdrop-blur-sm border-b border-white/10 p-4">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
+      <div className="relative z-10 bg-gradient-to-br from-gray-900/80 via-gray-800/80 to-gray-900/80 backdrop-blur-sm border-b border-gray-600/50 p-4">
+        <div className="max-w-5xl mx-auto flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h1 className="text-white text-lg font-semibold">{session.test_config.name}</h1>
-            <div className="flex items-center gap-3">
-              <p className="text-gray-400 text-sm">
+            <h1 className="text-xl font-black text-white mb-2 bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
+              {session.test_config.name}
+            </h1>
+            <div className="flex items-center gap-3 flex-wrap">
+              <p className="text-gray-300 text-sm font-medium">
                 Question {currentQuestionIndex + 1} of {session.questions.length}
               </p>
               {answeredQuestions.has(currentQuestion.id) && (
-                <span className="bg-green-500/20 text-green-400 px-2 py-1 rounded-full text-xs">
+                <span className="bg-gradient-to-r from-green-900/50 to-green-800/50 border border-green-700/50 text-green-300 px-3 py-1 rounded-full text-xs font-bold">
                   ✓ Answered
                 </span>
               )}
               {skippedQuestions.has(currentQuestion.id) && (
-                <span className="bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded-full text-xs">
+                <span className="bg-gradient-to-r from-yellow-900/50 to-yellow-800/50 border border-yellow-700/50 text-yellow-300 px-3 py-1 rounded-full text-xs font-bold">
                   ⏭ Skipped
                 </span>
               )}
             </div>
           </div>
           <div className="text-right">
-            <div className="text-white text-lg font-mono">
+            <div className={`text-2xl font-black font-mono ${isTimeLow ? 'text-red-400 animate-pulse' : 'text-white'}`}>
               {formatTime(timeRemaining)}
             </div>
-            <div className="text-gray-400 text-sm">Time Remaining</div>
+            <div className="text-gray-300 text-sm font-medium">Time Remaining</div>
           </div>
         </div>
         
         {/* Progress Bar */}
-        <div className="max-w-4xl mx-auto mt-4">
-          <div className="w-full bg-white/10 rounded-full h-2">
+        <div className="max-w-5xl mx-auto mt-4">
+          <div className="w-full bg-gray-800/50 rounded-full h-3 overflow-hidden border border-gray-700/50">
             <div 
-              className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+              className="h-full bg-gradient-to-r from-white via-gray-200 to-white rounded-full transition-all duration-500"
               style={{ width: `${progressPercentage}%` }}
             />
+          </div>
+          <div className="flex justify-between text-xs text-gray-400 mt-2 font-medium">
+            <span>{Math.round(progressPercentage)}% Complete</span>
+            <span>{session.questions.length - currentQuestionIndex - 1} questions remaining</span>
           </div>
         </div>
       </div>
 
       {/* Question Content */}
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8">
+      <div className="relative z-10 max-w-5xl mx-auto p-6 lg:p-12">
+        <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-gray-600/50 rounded-3xl p-8 shadow-2xl">
           {/* Question */}
           <div className="mb-8">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full text-sm font-medium">
+            <div className="flex items-center gap-3 mb-4 flex-wrap">
+              <span className="bg-gradient-to-r from-gray-800 to-gray-900 border border-gray-700/50 text-white px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wide">
                 {currentQuestion.difficulty}
               </span>
-              <span className="text-gray-400 text-sm">
+              <span className="text-gray-300 text-sm font-medium">
                 {currentQuestion.points} point{currentQuestion.points > 1 ? 's' : ''}
               </span>
             </div>
-            <h2 className="text-white text-xl font-medium leading-relaxed">
+            <h2 className="text-2xl font-black text-white leading-relaxed bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
               {currentQuestion.question_text}
             </h2>
           </div>
@@ -355,10 +400,10 @@ export default function MCQTest({ session, onComplete, onAbandon }: MCQTestProps
             {currentQuestion.options.map((option, index) => (
               <label
                 key={option.id}
-                className={`flex items-center p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
+                className={`flex items-center p-5 rounded-xl border cursor-pointer transition-all duration-300 group ${
                   selectedOptions.includes(option.id)
-                    ? 'border-blue-500 bg-blue-500/10'
-                    : 'border-white/20 hover:border-white/40 hover:bg-white/5'
+                    ? 'bg-gradient-to-r from-white/20 via-gray-200/10 to-white/20 border-white/50 shadow-lg'
+                    : 'bg-gradient-to-br from-gray-800/50 to-gray-900/50 border-gray-700/50 hover:border-gray-500/70 hover:bg-gray-800/70'
                 }`}
               >
                 <input
@@ -369,16 +414,16 @@ export default function MCQTest({ session, onComplete, onAbandon }: MCQTestProps
                   onChange={() => handleOptionSelect(option.id)}
                   className="sr-only"
                 />
-                <div className={`w-5 h-5 rounded-full border-2 mr-4 flex items-center justify-center ${
+                <div className={`w-6 h-6 rounded-full border-2 mr-4 flex items-center justify-center flex-shrink-0 transition-all ${
                   selectedOptions.includes(option.id)
-                    ? 'border-blue-500 bg-blue-500'
-                    : 'border-white/40'
+                    ? 'border-white bg-white'
+                    : 'border-gray-500 group-hover:border-gray-400'
                 }`}>
                   {selectedOptions.includes(option.id) && (
-                    <div className="w-2 h-2 bg-white rounded-full" />
+                    <div className="w-3 h-3 bg-black rounded-full" />
                   )}
                 </div>
-                <span className="text-white flex-1">
+                <span className="text-white flex-1 font-medium text-lg">
                   {String.fromCharCode(65 + index)}. {option.option_text}
                 </span>
               </label>
@@ -386,34 +431,37 @@ export default function MCQTest({ session, onComplete, onAbandon }: MCQTestProps
           </div>
 
           {/* Navigation */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-4">
             <button
               onClick={handlePreviousQuestion}
               disabled={isFirstQuestion}
-              className="px-6 py-3 border border-white/20 text-white rounded-lg hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-3 bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 border border-gray-600/50 hover:border-gray-500/70 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               Previous
             </button>
 
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-wrap">
               <button
                 onClick={handleAbandonTest}
-                className="px-6 py-3 border border-red-500/50 text-red-400 rounded-lg hover:bg-red-500/10 transition-colors"
+                className="px-6 py-3 bg-gradient-to-r from-red-800 via-red-700 to-red-800 border border-red-700/50 hover:border-red-600/70 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-xl"
               >
-                Abandon Test
+                Abandon
               </button>
               <button
                 onClick={handleSkipQuestion}
-                className="px-6 py-3 border border-yellow-500/50 text-yellow-400 rounded-lg hover:bg-yellow-500/10 transition-colors"
+                className="px-6 py-3 bg-gradient-to-r from-yellow-800 via-yellow-700 to-yellow-800 border border-yellow-700/50 hover:border-yellow-600/70 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-xl"
               >
-                Skip Question
+                Skip
               </button>
               <button
                 onClick={handleNextQuestion}
                 disabled={selectedOptions.length === 0 || isSubmitting}
-                className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group relative px-8 py-3 bg-gradient-to-r from-white via-gray-100 to-white text-black font-black rounded-xl transition-all duration-500 transform hover:scale-105 shadow-2xl shadow-white/25 hover:shadow-white/40 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none overflow-hidden"
               >
-                {isSubmitting ? 'Submitting...' : isLastQuestion ? 'Review & Submit' : 'Next Question'}
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-white to-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <span className="relative z-10">
+                  {isSubmitting ? 'Submitting...' : isLastQuestion ? 'Review & Submit' : 'Next Question'}
+                </span>
               </button>
             </div>
           </div>

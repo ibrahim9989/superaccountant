@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
+import ToastContainer from "@/components/Toast";
 
 const raleway = Space_Grotesk({
   variable: "--font-raleway",
@@ -20,6 +21,11 @@ const display = Bodoni_Moda({
 export const metadata: Metadata = {
   title: "Super Accountant - Professional Accounting Certification",
   description: "Become a certified Super Accountant with our comprehensive 45-day course",
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+  },
 };
 
 export default function RootLayout({
@@ -36,6 +42,7 @@ export default function RootLayout({
           <SiteHeader />
           {children}
           <SiteFooter />
+          <ToastContainer />
         </AuthProvider>
       </body>
     </html>

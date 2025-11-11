@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState, use } from 'react'
+import { useEffect, useState, use, useCallback, useRef } from 'react'
 import { CourseEnrollmentWithDetails, LessonWithDetails, CourseProgress, QuizAttempt } from '@/lib/validations/course'
 import { courseService } from '@/lib/services/courseService'
 import { dailyTestService } from '@/lib/services/dailyTestService'
@@ -26,7 +26,7 @@ export default function LearnPage({ params }: LearnPageProps) {
   const [currentLesson, setCurrentLesson] = useState<LessonWithDetails | null>(null)
   const [courseProgress, setCourseProgress] = useState<CourseProgress | null>(null)
   const [loadingData, setLoadingData] = useState(true)
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(false) // Mobile: closed by default, Desktop: will be handled
   const [showQuiz, setShowQuiz] = useState(false)
   const [showTest, setShowTest] = useState(false)
   const [showQuizHistory, setShowQuizHistory] = useState(false)
@@ -37,8 +37,30 @@ export default function LearnPage({ params }: LearnPageProps) {
   
   // Unwrap params Promise
   const resolvedParams = use(params)
+  
+  // Use ref to prevent duplicate API calls
+  const hasLoadedData = useRef(false)
+  const currentEnrollmentId = useRef<string | null>(null)
 
-  const loadNextAvailableTestDay = async () => {
+  // Handle sidebar state for desktop - open by default on desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) { // lg breakpoint
+        setSidebarOpen(true)
+      } else {
+        setSidebarOpen(false)
+      }
+    }
+    
+    // Set initial state
+    handleResize()
+    
+    // Listen for resize events
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  const loadNextAvailableTestDay = useCallback(async () => {
     if (enrollment) {
       try {
         const nextDay = await dailyTestService.getNextAvailableTestDay(enrollment.id)
@@ -47,23 +69,20 @@ export default function LearnPage({ params }: LearnPageProps) {
         console.error('Error loading next available test day:', error)
       }
     }
-  }
+  }, [enrollment])
 
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login')
+  const loadEnrollmentData = useCallback(async () => {
+    if (!user || !resolvedParams.enrollmentId) return
+    
+    // Only reload if enrollmentId changed or data hasn't been loaded yet
+    if (hasLoadedData.current && currentEnrollmentId.current === resolvedParams.enrollmentId) {
+      return
     }
-  }, [user, loading, router])
-
-  useEffect(() => {
-    if (user && resolvedParams.enrollmentId) {
-      loadEnrollmentData()
-    }
-  }, [user, resolvedParams.enrollmentId])
-
-  const loadEnrollmentData = async () => {
+    
     try {
       setLoadingData(true)
+      hasLoadedData.current = true
+      currentEnrollmentId.current = resolvedParams.enrollmentId
       
       // Load enrollment details
       const enrollmentData = await courseService.getEnrollmentById(resolvedParams.enrollmentId)
@@ -78,25 +97,13 @@ export default function LearnPage({ params }: LearnPageProps) {
       setCourseProgress(progressData)
 
       // Set current lesson (next lesson to take)
-      console.log('🔍 Debugging lesson loading:')
-      console.log('  progressData:', progressData)
-      console.log('  progressData?.next_lesson:', progressData?.next_lesson)
-      console.log('  enrollmentData.course?.modules:', (enrollmentData.course as any)?.modules)
-      console.log('  first module lessons:', (enrollmentData.course as any)?.modules?.[0]?.lessons)
-      
       if (progressData?.next_lesson) {
-        console.log('📚 Loading next lesson from progress:', progressData.next_lesson.id)
         const lessonData = await courseService.getLessonById(progressData.next_lesson.id)
-        console.log('📚 Loaded lesson data:', lessonData)
         // Fetch quiz data if not included
         if (lessonData && !lessonData.quiz) {
-          console.log('Lesson has no quiz data, attempting to fetch quiz for lesson:', progressData.next_lesson.id)
           const quizData = await courseService.getQuizByLessonId(progressData.next_lesson.id)
           if (quizData) {
             lessonData.quiz = quizData
-            console.log('Successfully fetched quiz data for lesson')
-          } else {
-            console.log('No quiz found for lesson - this is normal, not all lessons have quizzes')
           }
         }
         // Fetch flowcharts for this lesson
@@ -120,18 +127,12 @@ export default function LearnPage({ params }: LearnPageProps) {
       } else if ((enrollmentData.course as any)?.modules?.[0]?.lessons?.[0]) {
         // Start with first lesson if no progress
         const firstLesson = (enrollmentData.course as any).modules[0].lessons[0]
-        console.log('📚 Loading first lesson from course:', firstLesson.id)
         const lessonData = await courseService.getLessonById(firstLesson.id)
-        console.log('📚 Loaded lesson data:', lessonData)
         // Fetch quiz data if not included
         if (lessonData && !lessonData.quiz) {
-          console.log('Lesson has no quiz data, attempting to fetch quiz for lesson:', firstLesson.id)
           const quizData = await courseService.getQuizByLessonId(firstLesson.id)
           if (quizData) {
             lessonData.quiz = quizData
-            console.log('Successfully fetched quiz data for lesson')
-          } else {
-            console.log('No quiz found for lesson - this is normal, not all lessons have quizzes')
           }
         }
         // Fetch flowcharts for this lesson
@@ -153,8 +154,6 @@ export default function LearnPage({ params }: LearnPageProps) {
         }
         setCurrentLesson(lessonData)
       } else {
-        console.log('❌ No lesson found - neither from progress nor from course modules')
-        console.log('  This might indicate an issue with course data or progress tracking')
         setCurrentLesson(null)
       }
       
@@ -162,10 +161,26 @@ export default function LearnPage({ params }: LearnPageProps) {
       await loadNextAvailableTestDay()
     } catch (error) {
       console.error('Error loading enrollment data:', error)
+      hasLoadedData.current = false // Reset on error to allow retry
     } finally {
       setLoadingData(false)
     }
-  }
+  }, [user, resolvedParams.enrollmentId, router, loadNextAvailableTestDay])
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login')
+      return
+    }
+    
+    if (user && resolvedParams.enrollmentId) {
+      // Reset hasLoadedData if enrollmentId changes
+      if (currentEnrollmentId.current !== resolvedParams.enrollmentId) {
+        hasLoadedData.current = false
+      }
+      loadEnrollmentData()
+    }
+  }, [user, loading, router, resolvedParams.enrollmentId, loadEnrollmentData])
 
   const handleLessonSelect = async (lessonId: string) => {
     try {
@@ -301,8 +316,14 @@ export default function LearnPage({ params }: LearnPageProps) {
 
   if (loading || loadingData) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-black flex items-center justify-center relative">
+        <div className="absolute inset-0 opacity-40">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-white/5 via-gray-800/10 to-black/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-black/10 via-gray-700/15 to-white/5 rounded-full blur-3xl" />
+        </div>
+        <div className="relative z-10">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-800 border-t-white"></div>
+        </div>
       </div>
     )
   }
@@ -312,32 +333,43 @@ export default function LearnPage({ params }: LearnPageProps) {
   }
 
   return (
-    <div className="h-screen w-full relative flex flex-col">
-      {/* Azure Depths Background */}
-      <div
-        className="absolute inset-0 z-0"
-        style={{
-          background: "radial-gradient(125% 125% at 50% 10%, #000000 40%, #010133 100%)",
-        }}
-      />
+    <div className="h-screen w-full relative flex flex-col bg-black">
+      {/* Luxury Background Effects */}
+      <div className="absolute inset-0 opacity-40">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-white/5 via-gray-800/10 to-black/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-black/10 via-gray-700/15 to-white/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[1200px] bg-gradient-to-br from-gray-900/10 via-transparent to-gray-900/10 rounded-full blur-3xl" />
+      </div>
+
+      {/* Subtle Pattern Overlay */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='50' cy='50' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }} />
+      </div>
 
       {/* Header */}
-      <header className="relative z-10 bg-white/5 backdrop-blur-sm border-b border-white/10">
+      <header className="relative z-10 bg-gradient-to-br from-gray-900/80 via-gray-800/80 to-gray-900/80 backdrop-blur-sm border-b border-gray-600/50">
         <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
           <div className="flex items-center space-x-4">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="text-white hover:text-gray-300 transition-colors duration-200"
+              className="text-white hover:text-gray-300 transition-colors duration-200 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
+              aria-label="Toggle sidebar"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                {sidebarOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
               </svg>
             </button>
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-azure-accent to-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">SA</span>
+              <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+                <span className="text-black font-bold text-sm">SA</span>
               </div>
-              <h1 className="text-xl font-semibold text-white">
+              <h1 className="text-xl font-bold text-white">
                 {enrollment.course?.title}
               </h1>
             </div>
@@ -346,25 +378,25 @@ export default function LearnPage({ params }: LearnPageProps) {
           <div className="flex items-center space-x-4">
             {/* Progress Bar */}
             <div className="hidden md:flex items-center space-x-3">
-              <span className="text-sm text-gray-300">
+              <span className="text-sm text-gray-300 font-medium">
                 {courseProgress?.lessons_completed || 0} / {courseProgress?.total_lessons || 0}
               </span>
-              <div className="w-32 h-2 bg-gray-700 rounded-full overflow-hidden">
+              <div className="w-32 h-2 bg-gray-800/50 rounded-full overflow-hidden border border-gray-700/50">
                 <div
-                  className="h-full bg-blue-500 transition-all duration-300"
+                  className="h-full bg-gradient-to-r from-white via-gray-200 to-white transition-all duration-300"
                   style={{
                     width: `${courseProgress?.overall_progress || 0}%`
                   }}
                 />
               </div>
-              <span className="text-sm text-gray-300">
+              <span className="text-sm text-gray-300 font-medium">
                 {Math.round(courseProgress?.overall_progress || 0)}%
               </span>
             </div>
             
             <button
               onClick={() => router.push('/dashboard')}
-              className="text-gray-300 hover:text-white transition-colors duration-200"
+              className="px-4 py-2 bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 border border-gray-600/50 hover:border-gray-500/70 text-white/90 hover:text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-xl"
             >
               Dashboard
             </button>
@@ -373,25 +405,42 @@ export default function LearnPage({ params }: LearnPageProps) {
       </header>
 
       <div className="relative z-10 flex flex-1">
+        {/* Sidebar - Mobile: Overlay, Desktop: Sidebar */}
+        {/* Mobile Overlay Backdrop */}
+        {sidebarOpen && (
+          <div 
+            className="lg:hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-40"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+        
         {/* Sidebar */}
-        <div className={`${sidebarOpen ? 'w-80' : 'w-0'} transition-all duration-300 overflow-hidden bg-gradient-to-b from-blue-900/20 to-blue-800/30 backdrop-blur-sm border-r border-blue-500/20`}>
+        <div className={`
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} 
+          ${sidebarOpen ? 'w-80' : 'w-0 lg:w-80'}
+          fixed lg:relative
+          top-0 left-0 h-full lg:h-auto
+          transition-all duration-300 overflow-hidden 
+          bg-gradient-to-b from-gray-900/95 via-gray-800/95 to-gray-900/95 backdrop-blur-sm 
+          border-r border-gray-600/50 z-50 lg:z-auto
+        `}>
           <div className="h-full overflow-y-auto p-4">
             <div className="space-y-6">
               {/* Course Progress */}
-              <div className="bg-blue-800/20 rounded-lg p-4 border border-blue-600/20">
-                <h3 className="text-white font-semibold mb-3">Course Progress</h3>
-                <div className="space-y-2">
+              <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 rounded-2xl p-4 border border-gray-600/50 shadow-xl">
+                <h3 className="text-white font-black mb-3 text-lg">Course Progress</h3>
+                <div className="space-y-3">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-300">Overall Progress</span>
-                    <span className="text-white">{Math.round(courseProgress?.overall_progress || 0)}%</span>
+                    <span className="text-gray-300 font-medium">Overall Progress</span>
+                    <span className="text-white font-bold">{Math.round(courseProgress?.overall_progress || 0)}%</span>
                   </div>
-                  <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+                  <div className="w-full h-2 bg-gray-800/50 rounded-full overflow-hidden border border-gray-700/50">
                     <div
-                      className="h-full bg-blue-500 transition-all duration-300"
+                      className="h-full bg-gradient-to-r from-white via-gray-200 to-white transition-all duration-300"
                       style={{ width: `${courseProgress?.overall_progress || 0}%` }}
                     />
                   </div>
-                  <div className="flex justify-between text-xs text-gray-400">
+                  <div className="flex justify-between text-xs text-gray-400 font-medium">
                     <span>{courseProgress?.lessons_completed || 0} completed</span>
                     <span>{courseProgress?.total_lessons || 0} total</span>
                   </div>
@@ -400,35 +449,35 @@ export default function LearnPage({ params }: LearnPageProps) {
 
               {/* Course Modules */}
               <div className="space-y-4">
-                <h3 className="text-white font-semibold">Course Content</h3>
+                <h3 className="text-white font-black text-lg">Course Content</h3>
                 {(enrollment.course as any)?.modules?.map((module: any, moduleIndex: number) => (
                   <div key={module.id} className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-white font-medium text-sm">
+                    <div className="flex items-center justify-between bg-gradient-to-r from-gray-800/50 to-gray-900/50 px-3 py-2 rounded-xl border border-gray-700/50">
+                      <h4 className="text-white font-bold text-sm">
                         Week {module.week_number}: {module.title}
                       </h4>
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-gray-300 font-medium bg-gray-800/50 px-2 py-1 rounded-full">
                         {module.lessons?.length || 0} lessons
                       </span>
                     </div>
                     
-                    <div className="space-y-1 ml-4">
+                    <div className="space-y-1 ml-2">
                       {module.lessons?.map((lesson: any, lessonIndex: number) => (
                         <button
                           key={lesson.id}
                           onClick={() => handleLessonSelect(lesson.id)}
-                          className={`w-full text-left p-2 rounded-lg text-sm transition-colors duration-200 ${
+                          className={`w-full text-left p-3 rounded-xl text-sm transition-all duration-300 ${
                             currentLesson?.id === lesson.id
-                              ? 'bg-blue-600 text-white'
-                              : 'text-gray-300 hover:bg-white/10 hover:text-white'
+                              ? 'bg-gradient-to-r from-white via-gray-100 to-white text-black font-bold shadow-lg'
+                              : 'bg-gradient-to-r from-gray-800/50 to-gray-900/50 text-gray-300 border border-gray-700/50 hover:border-gray-500/70 hover:text-white font-medium'
                           }`}
                         >
                           <div className="flex items-center space-x-2">
-                            <span className="text-xs">
+                            <span className={`text-xs font-bold ${currentLesson?.id === lesson.id ? 'text-black' : 'text-gray-400'}`}>
                               {lessonIndex + 1}
                             </span>
-                            <span className="truncate">{lesson.title}</span>
-                            <span className="text-xs opacity-75">
+                            <span className="truncate flex-1">{lesson.title}</span>
+                            <span className={`text-xs ${currentLesson?.id === lesson.id ? 'text-black/70' : 'text-gray-500'}`}>
                               {lesson.duration_minutes}m
                             </span>
                           </div>

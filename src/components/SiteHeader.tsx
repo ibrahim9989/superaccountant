@@ -1,32 +1,103 @@
+'use client'
+
 import Link from 'next/link'
+import { useState } from 'react'
 
 export default function SiteHeader() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
   return (
     <nav className="bg-black border-b border-gray-800 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex items-center space-x-4">
-            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center">
-              <span className="text-black font-bold text-lg">SA</span>
+          <div className="flex items-center space-x-2 sm:space-x-4">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-lg sm:rounded-xl flex items-center justify-center">
+              <span className="text-black font-bold text-sm sm:text-lg">SA</span>
             </div>
-            <span className="text-white text-xl font-bold">Super Accountant</span>
+            <span className="text-white text-base sm:text-xl font-bold">Super Accountant</span>
           </div>
-          <div className="hidden md:flex items-center space-x-8">
-            <Link href="/#features" className="text-gray-300 hover:text-white transition-colors">Features</Link>
-            <Link href="/#how-it-works" className="text-gray-300 hover:text-white transition-colors">How It Works</Link>
-            <Link href="/#testimonials" className="text-gray-300 hover:text-white transition-colors">Testimonials</Link>
-            <Link href="/#pricing" className="text-gray-300 hover:text-white transition-colors">Pricing</Link>
+          
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex items-center space-x-8">
+            <Link href="/#features" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">
+              Features
+            </Link>
+            <Link href="/#how-it-works" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">
+              How It Works
+            </Link>
+            <Link href="/#testimonials" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">
+              Testimonials
+            </Link>
+            <Link href="/#pricing" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">
+              Pricing
+            </Link>
             <Link
               href="/login"
-              className="bg-white text-black px-6 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+              className="bg-white text-black px-4 py-2 sm:px-6 sm:py-2 rounded-lg hover:bg-gray-200 transition-colors text-sm font-semibold"
             >
               Get Started
             </Link>
           </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="lg:hidden text-white hover:text-gray-300 transition-colors p-2"
+            aria-label="Toggle menu"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {mobileMenuOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
         </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden border-t border-gray-800 py-4 animate-fade-in">
+            <div className="flex flex-col space-y-4">
+              <Link 
+                href="/#features" 
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-gray-300 hover:text-white transition-colors px-4 py-2 text-base font-medium"
+              >
+                Features
+              </Link>
+              <Link 
+                href="/#how-it-works" 
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-gray-300 hover:text-white transition-colors px-4 py-2 text-base font-medium"
+              >
+                How It Works
+              </Link>
+              <Link 
+                href="/#testimonials" 
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-gray-300 hover:text-white transition-colors px-4 py-2 text-base font-medium"
+              >
+                Testimonials
+              </Link>
+              <Link 
+                href="/#pricing" 
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-gray-300 hover:text-white transition-colors px-4 py-2 text-base font-medium"
+              >
+                Pricing
+              </Link>
+              <Link
+                href="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="bg-white text-black px-6 py-3 rounded-lg hover:bg-gray-200 transition-colors text-base font-semibold mx-4 text-center"
+              >
+                Get Started
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   )
 }
-
-

@@ -168,7 +168,13 @@ export default function ProfileFormPage() {
   if (authLoading || isLoadingProfile) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+        <div className="absolute inset-0 opacity-40">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-white/5 via-gray-800/10 to-black/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-black/10 via-gray-700/15 to-white/5 rounded-full blur-3xl" />
+        </div>
+        <div className="relative z-10">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-800 border-t-white"></div>
+        </div>
       </div>
     )
   }
@@ -178,153 +184,180 @@ export default function ProfileFormPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center space-x-3 mb-6">
-            <div className="w-10 h-10 bg-white rounded-sm flex items-center justify-center">
-              <span className="text-black font-bold text-lg">SA</span>
-            </div>
-            <span className="text-white text-2xl font-semibold">Super Accountant</span>
-          </div>
-          <h1 className="text-4xl font-bold mb-4">Complete Your Profile</h1>
-          <p className="text-gray-400">Please fill in all required information to proceed to the assessment</p>
-        </div>
+    <div className="min-h-screen bg-black text-white relative">
+      {/* Luxury Background Effects */}
+      <div className="absolute inset-0 opacity-40">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-white/5 via-gray-800/10 to-black/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-black/10 via-gray-700/15 to-white/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[1200px] bg-gradient-to-br from-gray-900/10 via-transparent to-gray-900/10 rounded-full blur-3xl" />
+      </div>
 
-        {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400">
-            {error}
+      {/* Subtle Pattern Overlay */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='50' cy='50' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }} />
+      </div>
+
+      <div className="relative z-10 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 border border-gray-500/50 rounded-full mb-6 shadow-2xl backdrop-blur-sm">
+              <div className="w-2.5 h-2.5 bg-gradient-to-r from-white to-gray-300 rounded-full mr-3 animate-pulse"></div>
+              <span className="text-white text-xs font-bold tracking-[0.22em] uppercase">PROFILE COMPLETION</span>
+              <div className="w-2.5 h-2.5 bg-gradient-to-r from-gray-300 to-white rounded-full ml-3 animate-pulse"></div>
+            </div>
+            <h1 className="text-5xl md:text-6xl font-black text-white mb-6 leading-tight bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
+              Complete Your Profile
+            </h1>
+            <p className="text-xl text-gray-300 font-light">Please fill in all required information to proceed to the assessment</p>
           </div>
-        )}
+
+          {error && (
+            <div className="mb-6 p-6 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 border border-red-500/30 rounded-2xl text-red-400 shadow-xl">
+              <div className="flex items-center">
+                <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="font-semibold">{error}</span>
+              </div>
+            </div>
+          )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
           {/* Personal Information */}
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-            <h2 className="text-2xl font-semibold mb-6">Personal Information</h2>
+          <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-gray-600/50 rounded-3xl p-8 shadow-2xl">
+            <h2 className="text-3xl font-black text-white mb-8 bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
+              Personal Information
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium mb-2">First Name *</label>
+                <label className="block text-sm font-bold text-gray-300 mb-3 tracking-wide uppercase">First Name *</label>
                 <input
                   {...register('firstName')}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20"
+                  className="w-full px-5 py-4 bg-gray-900/50 border border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-gray-500/70 transition-all"
                   placeholder="John"
                 />
-                {errors.firstName && <p className="mt-1 text-sm text-red-400">{errors.firstName.message}</p>}
+                {errors.firstName && <p className="mt-2 text-sm text-red-400 font-medium">{errors.firstName.message}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Last Name *</label>
+                <label className="block text-sm font-bold text-gray-300 mb-3 tracking-wide uppercase">Last Name *</label>
                 <input
                   {...register('lastName')}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20"
+                  className="w-full px-5 py-4 bg-gray-900/50 border border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-gray-500/70 transition-all"
                   placeholder="Doe"
                 />
-                {errors.lastName && <p className="mt-1 text-sm text-red-400">{errors.lastName.message}</p>}
+                {errors.lastName && <p className="mt-2 text-sm text-red-400 font-medium">{errors.lastName.message}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Email *</label>
+                <label className="block text-sm font-bold text-gray-300 mb-3 tracking-wide uppercase">Email *</label>
                 <input
                   {...register('email')}
                   type="email"
                   defaultValue={user.email || ''}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20"
+                  className="w-full px-5 py-4 bg-gray-900/50 border border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-gray-500/70 transition-all"
                   placeholder="john@example.com"
                 />
-                {errors.email && <p className="mt-1 text-sm text-red-400">{errors.email.message}</p>}
+                {errors.email && <p className="mt-2 text-sm text-red-400 font-medium">{errors.email.message}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Phone *</label>
+                <label className="block text-sm font-bold text-gray-300 mb-3 tracking-wide uppercase">Phone *</label>
                 <input
                   {...register('phone')}
                   type="tel"
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20"
+                  className="w-full px-5 py-4 bg-gray-900/50 border border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-gray-500/70 transition-all"
                   placeholder="+1234567890"
                 />
-                {errors.phone && <p className="mt-1 text-sm text-red-400">{errors.phone.message}</p>}
+                {errors.phone && <p className="mt-2 text-sm text-red-400 font-medium">{errors.phone.message}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Date of Birth *</label>
+                <label className="block text-sm font-bold text-gray-300 mb-3 tracking-wide uppercase">Date of Birth *</label>
                 <input
                   {...register('dateOfBirth')}
                   type="date"
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20"
+                  className="w-full px-5 py-4 bg-gray-900/50 border border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-gray-500/70 transition-all"
                 />
-                {errors.dateOfBirth && <p className="mt-1 text-sm text-red-400">{errors.dateOfBirth.message}</p>}
+                {errors.dateOfBirth && <p className="mt-2 text-sm text-red-400 font-medium">{errors.dateOfBirth.message}</p>}
               </div>
             </div>
           </div>
 
           {/* Address */}
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-            <h2 className="text-2xl font-semibold mb-6">Address</h2>
+          <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-gray-600/50 rounded-3xl p-8 shadow-2xl">
+            <h2 className="text-3xl font-black text-white mb-8 bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
+              Address
+            </h2>
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium mb-2">Street Address *</label>
+                <label className="block text-sm font-bold text-gray-300 mb-3 tracking-wide uppercase">Street Address *</label>
                 <input
                   {...register('address')}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20"
+                  className="w-full px-5 py-4 bg-gray-900/50 border border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-gray-500/70 transition-all"
                   placeholder="123 Main St"
                 />
-                {errors.address && <p className="mt-1 text-sm text-red-400">{errors.address.message}</p>}
+                {errors.address && <p className="mt-2 text-sm text-red-400 font-medium">{errors.address.message}</p>}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <label className="block text-sm font-medium mb-2">City *</label>
+                  <label className="block text-sm font-bold text-gray-300 mb-3 tracking-wide uppercase">City *</label>
                   <input
                     {...register('city')}
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20"
+                    className="w-full px-5 py-4 bg-gray-900/50 border border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-gray-500/70 transition-all"
                     placeholder="New York"
                   />
-                  {errors.city && <p className="mt-1 text-sm text-red-400">{errors.city.message}</p>}
+                  {errors.city && <p className="mt-2 text-sm text-red-400 font-medium">{errors.city.message}</p>}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">State *</label>
+                  <label className="block text-sm font-bold text-gray-300 mb-3 tracking-wide uppercase">State *</label>
                   <input
                     {...register('state')}
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20"
+                    className="w-full px-5 py-4 bg-gray-900/50 border border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-gray-500/70 transition-all"
                     placeholder="NY"
                   />
-                  {errors.state && <p className="mt-1 text-sm text-red-400">{errors.state.message}</p>}
+                  {errors.state && <p className="mt-2 text-sm text-red-400 font-medium">{errors.state.message}</p>}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">ZIP Code *</label>
+                  <label className="block text-sm font-bold text-gray-300 mb-3 tracking-wide uppercase">ZIP Code *</label>
                   <input
                     {...register('zipCode')}
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20"
+                    className="w-full px-5 py-4 bg-gray-900/50 border border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-gray-500/70 transition-all"
                     placeholder="10001"
                   />
-                  {errors.zipCode && <p className="mt-1 text-sm text-red-400">{errors.zipCode.message}</p>}
+                  {errors.zipCode && <p className="mt-2 text-sm text-red-400 font-medium">{errors.zipCode.message}</p>}
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Country *</label>
+                <label className="block text-sm font-bold text-gray-300 mb-3 tracking-wide uppercase">Country *</label>
                 <input
                   {...register('country')}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20"
+                  className="w-full px-5 py-4 bg-gray-900/50 border border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-gray-500/70 transition-all"
                   placeholder="United States"
                 />
-                {errors.country && <p className="mt-1 text-sm text-red-400">{errors.country.message}</p>}
+                {errors.country && <p className="mt-2 text-sm text-red-400 font-medium">{errors.country.message}</p>}
               </div>
             </div>
           </div>
 
           {/* Professional Background */}
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-            <h2 className="text-2xl font-semibold mb-6">Professional Background</h2>
+          <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-gray-600/50 rounded-3xl p-8 shadow-2xl">
+            <h2 className="text-3xl font-black text-white mb-8 bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
+              Professional Background
+            </h2>
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium mb-2">Education Level *</label>
+                <label className="block text-sm font-bold text-gray-300 mb-3 tracking-wide uppercase">Education Level *</label>
                 <select
                   {...register('education')}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20"
+                  className="w-full px-5 py-4 bg-gray-900/50 border border-gray-700/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-gray-500/70 transition-all"
                 >
                   <option value="">Select education level</option>
                   <option value="high_school">High School</option>
@@ -333,14 +366,14 @@ export default function ProfileFormPage() {
                   <option value="master">Master's Degree</option>
                   <option value="doctorate">Doctorate</option>
                 </select>
-                {errors.education && <p className="mt-1 text-sm text-red-400">{errors.education.message}</p>}
+                {errors.education && <p className="mt-2 text-sm text-red-400 font-medium">{errors.education.message}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Work Experience *</label>
+                <label className="block text-sm font-bold text-gray-300 mb-3 tracking-wide uppercase">Work Experience *</label>
                 <select
                   {...register('workExperience')}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20"
+                  className="w-full px-5 py-4 bg-gray-900/50 border border-gray-700/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-gray-500/70 transition-all"
                 >
                   <option value="">Select work experience</option>
                   <option value="none">No Experience</option>
@@ -349,24 +382,24 @@ export default function ProfileFormPage() {
                   <option value="5-10">5-10 years</option>
                   <option value="10+">10+ years</option>
                 </select>
-                {errors.workExperience && <p className="mt-1 text-sm text-red-400">{errors.workExperience.message}</p>}
+                {errors.workExperience && <p className="mt-2 text-sm text-red-400 font-medium">{errors.workExperience.message}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Current Occupation *</label>
+                <label className="block text-sm font-bold text-gray-300 mb-3 tracking-wide uppercase">Current Occupation *</label>
                 <input
                   {...register('currentOccupation')}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20"
+                  className="w-full px-5 py-4 bg-gray-900/50 border border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-gray-500/70 transition-all"
                   placeholder="Software Engineer"
                 />
-                {errors.currentOccupation && <p className="mt-1 text-sm text-red-400">{errors.currentOccupation.message}</p>}
+                {errors.currentOccupation && <p className="mt-2 text-sm text-red-400 font-medium">{errors.currentOccupation.message}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Accounting Experience *</label>
+                <label className="block text-sm font-bold text-gray-300 mb-3 tracking-wide uppercase">Accounting Experience *</label>
                 <select
                   {...register('accountingExperience')}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20"
+                  className="w-full px-5 py-4 bg-gray-900/50 border border-gray-700/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-gray-500/70 transition-all"
                 >
                   <option value="">Select accounting experience</option>
                   <option value="none">No Experience</option>
@@ -375,84 +408,89 @@ export default function ProfileFormPage() {
                   <option value="advanced">Advanced</option>
                   <option value="professional">Professional/CPA</option>
                 </select>
-                {errors.accountingExperience && <p className="mt-1 text-sm text-red-400">{errors.accountingExperience.message}</p>}
+                {errors.accountingExperience && <p className="mt-2 text-sm text-red-400 font-medium">{errors.accountingExperience.message}</p>}
               </div>
             </div>
           </div>
 
           {/* Motivation & Goals */}
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-            <h2 className="text-2xl font-semibold mb-6">Motivation & Goals</h2>
+          <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-gray-600/50 rounded-3xl p-8 shadow-2xl">
+            <h2 className="text-3xl font-black text-white mb-8 bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
+              Motivation & Goals
+            </h2>
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium mb-2">Why do you want to join this program? * (Min 50 characters)</label>
+                <label className="block text-sm font-bold text-gray-300 mb-3 tracking-wide uppercase">Why do you want to join this program? * (Min 50 characters)</label>
                 <textarea
                   {...register('motivation')}
                   rows={4}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20"
+                  className="w-full px-5 py-4 bg-gray-900/50 border border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-gray-500/70 transition-all resize-none"
                   placeholder="Explain your motivation..."
                 />
-                {errors.motivation && <p className="mt-1 text-sm text-red-400">{errors.motivation.message}</p>}
+                {errors.motivation && <p className="mt-2 text-sm text-red-400 font-medium">{errors.motivation.message}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">What are your career goals? * (Min 50 characters)</label>
+                <label className="block text-sm font-bold text-gray-300 mb-3 tracking-wide uppercase">What are your career goals? * (Min 50 characters)</label>
                 <textarea
                   {...register('goals')}
                   rows={4}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20"
+                  className="w-full px-5 py-4 bg-gray-900/50 border border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-gray-500/70 transition-all resize-none"
                   placeholder="Describe your goals..."
                 />
-                {errors.goals && <p className="mt-1 text-sm text-red-400">{errors.goals.message}</p>}
+                {errors.goals && <p className="mt-2 text-sm text-red-400 font-medium">{errors.goals.message}</p>}
               </div>
             </div>
           </div>
 
           {/* Emergency Contact */}
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-            <h2 className="text-2xl font-semibold mb-6">Emergency Contact</h2>
+          <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-gray-600/50 rounded-3xl p-8 shadow-2xl">
+            <h2 className="text-3xl font-black text-white mb-8 bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
+              Emergency Contact
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label className="block text-sm font-medium mb-2">Name *</label>
+                <label className="block text-sm font-bold text-gray-300 mb-3 tracking-wide uppercase">Name *</label>
                 <input
                   {...register('emergencyContactName')}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20"
+                  className="w-full px-5 py-4 bg-gray-900/50 border border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-gray-500/70 transition-all"
                   placeholder="Jane Doe"
                 />
-                {errors.emergencyContactName && <p className="mt-1 text-sm text-red-400">{errors.emergencyContactName.message}</p>}
+                {errors.emergencyContactName && <p className="mt-2 text-sm text-red-400 font-medium">{errors.emergencyContactName.message}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Phone *</label>
+                <label className="block text-sm font-bold text-gray-300 mb-3 tracking-wide uppercase">Phone *</label>
                 <input
                   {...register('emergencyContactPhone')}
                   type="tel"
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20"
+                  className="w-full px-5 py-4 bg-gray-900/50 border border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-gray-500/70 transition-all"
                   placeholder="+1234567890"
                 />
-                {errors.emergencyContactPhone && <p className="mt-1 text-sm text-red-400">{errors.emergencyContactPhone.message}</p>}
+                {errors.emergencyContactPhone && <p className="mt-2 text-sm text-red-400 font-medium">{errors.emergencyContactPhone.message}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Relation *</label>
+                <label className="block text-sm font-bold text-gray-300 mb-3 tracking-wide uppercase">Relation *</label>
                 <input
                   {...register('emergencyContactRelation')}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20"
+                  className="w-full px-5 py-4 bg-gray-900/50 border border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-gray-500/70 transition-all"
                   placeholder="Mother"
                 />
-                {errors.emergencyContactRelation && <p className="mt-1 text-sm text-red-400">{errors.emergencyContactRelation.message}</p>}
+                {errors.emergencyContactRelation && <p className="mt-2 text-sm text-red-400 font-medium">{errors.emergencyContactRelation.message}</p>}
               </div>
             </div>
           </div>
 
           {/* Submit Button */}
-          <div className="flex justify-center pt-6">
+          <div className="flex justify-center pt-8">
             <button
               type="submit"
               disabled={submitting}
-              className="px-12 py-4 bg-white text-black font-semibold rounded-full hover:bg-white/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-lg"
+              className="group relative px-12 py-5 bg-gradient-to-r from-white via-gray-100 to-white text-black font-black rounded-2xl text-lg transition-all duration-500 transform hover:scale-105 shadow-2xl shadow-white/25 hover:shadow-white/40 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none overflow-hidden"
             >
-              {submitting ? 'Saving...' : 'Continue to Assessment'}
+              <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-white to-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <span className="relative z-10">{submitting ? 'Saving...' : 'Continue to Assessment'}</span>
             </button>
           </div>
         </form>
