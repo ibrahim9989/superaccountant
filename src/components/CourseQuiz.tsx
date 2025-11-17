@@ -85,25 +85,45 @@ export default function CourseQuiz({ quiz, enrollmentId, onQuizComplete, onClose
         return
       }
       
-      const attempt = await courseService.startQuizAttempt(enrollmentId, quiz.id)
-      setCurrentAttempt(attempt)
+      // Parallelize quiz attempt creation and questions loading
+      const [attemptResult, questionsResult] = await Promise.allSettled([
+        courseService.startQuizAttempt(enrollmentId, quiz.id),
+        // Load questions if not already included
+        quiz.questions && quiz.questions.length > 0
+          ? Promise.resolve(quiz.questions)
+          : (async () => {
+              const supabase = getSupabaseClient()
+              const { data: questionsData, error } = await supabase
+                .from('quiz_questions')
+                .select('*')
+                .eq('quiz_id', quiz.id)
+                .eq('is_active', true)
+                .order('order_index')
+              
+              if (error) {
+                console.error('Error loading quiz questions:', error)
+                return []
+              }
+              return questionsData || []
+            })()
+      ])
 
-      if (quiz.questions && quiz.questions.length > 0) {
-        setQuestions(quiz.questions)
+      // Process attempt
+      if (attemptResult.status === 'fulfilled') {
+        setCurrentAttempt(attemptResult.value)
       } else {
-          const supabase = getSupabaseClient()
-          const { data: questionsData, error } = await supabase
-            .from('quiz_questions')
-            .select('*')
-            .eq('quiz_id', quiz.id)
-            .eq('is_active', true)
-            .order('order_index')
+        console.error('Error starting quiz attempt:', attemptResult.reason)
+        showToast('Failed to start quiz. Please try again.', 'error')
+        setLoading(false)
+        return
+      }
 
-          if (error) {
-            console.error('Error loading quiz questions:', error)
-            return
-        }
-        setQuestions(questionsData || [])
+      // Process questions
+      if (questionsResult.status === 'fulfilled') {
+        setQuestions(questionsResult.value)
+      } else {
+        console.error('Error loading questions:', questionsResult.reason)
+        setQuestions([])
       }
       
       if (quiz.time_limit_minutes) {

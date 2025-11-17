@@ -41,6 +41,9 @@ export default function LearnPage({ params }: LearnPageProps) {
   // Use ref to prevent duplicate API calls
   const hasLoadedData = useRef(false)
   const currentEnrollmentId = useRef<string | null>(null)
+  
+  // Cache for lesson data to avoid redundant fetches
+  const lessonCache = useRef<Map<string, LessonWithDetails>>(new Map())
 
   // Handle sidebar state for desktop - open by default on desktop
   useEffect(() => {
@@ -84,81 +87,85 @@ export default function LearnPage({ params }: LearnPageProps) {
       hasLoadedData.current = true
       currentEnrollmentId.current = resolvedParams.enrollmentId
       
-      // Load enrollment details
-      const enrollmentData = await courseService.getEnrollmentById(resolvedParams.enrollmentId)
+      // Parallelize initial data loading
+      const [enrollmentData, progressData] = await Promise.all([
+        courseService.getEnrollmentById(resolvedParams.enrollmentId),
+        courseService.getCourseProgress(resolvedParams.enrollmentId)
+      ])
+
       if (!enrollmentData) {
         router.push('/courses')
         return
       }
       setEnrollment(enrollmentData)
-
-      // Load course progress
-      const progressData = await courseService.getCourseProgress(resolvedParams.enrollmentId)
       setCourseProgress(progressData)
 
-      // Set current lesson (next lesson to take)
-      if (progressData?.next_lesson) {
-        const lessonData = await courseService.getLessonById(progressData.next_lesson.id)
-        // Fetch quiz data if not included
-        if (lessonData && !lessonData.quiz) {
-          const quizData = await courseService.getQuizByLessonId(progressData.next_lesson.id)
-          if (quizData) {
-            lessonData.quiz = quizData
-          }
-        }
-        // Fetch flowcharts for this lesson
-        try {
-          const flowchartsResponse = await fetch(`/api/lessons/${progressData.next_lesson.id}/flowcharts`, {
-            cache: 'no-store'
-          })
-          if (flowchartsResponse.ok) {
-            const flowchartsData = await flowchartsResponse.json()
-            if (lessonData) {
-              (lessonData as any).flowcharts = flowchartsData.data || []
+      // Determine which lesson to load
+      const lessonIdToLoad = progressData?.next_lesson?.id || 
+        (enrollmentData.course as any)?.modules?.[0]?.lessons?.[0]?.id
+
+      if (lessonIdToLoad) {
+        // Load lesson data with all related data in parallel
+        const [lessonData, flowchartsResponse] = await Promise.allSettled([
+          courseService.getLessonById(lessonIdToLoad),
+          fetch(`/api/lessons/${lessonIdToLoad}/flowcharts`, { cache: 'no-store' }).catch(() => null)
+        ])
+
+        let finalLessonData: LessonWithDetails | null = null
+
+        if (lessonData.status === 'fulfilled' && lessonData.value) {
+          finalLessonData = lessonData.value
+
+          // Process flowcharts
+          if (finalLessonData) {
+            if (flowchartsResponse.status === 'fulfilled' && flowchartsResponse.value) {
+              try {
+                const response = flowchartsResponse.value
+                if (response) {
+                  const flowchartsData = await response.json()
+                  Object.assign(finalLessonData, { flowcharts: flowchartsData.data || [] })
+                } else {
+                  Object.assign(finalLessonData, { flowcharts: [] })
+                }
+              } catch (e) {
+                Object.assign(finalLessonData, { flowcharts: [] })
+              }
+            } else {
+              Object.assign(finalLessonData, { flowcharts: [] })
             }
           }
-        } catch (error) {
-          console.error('Error fetching flowcharts:', error)
-          if (lessonData) {
-            (lessonData as any).flowcharts = []
+
+          // Fetch quiz only if not included (in background, don't block)
+          if (!finalLessonData.quiz) {
+            courseService.getQuizByLessonId(lessonIdToLoad)
+              .then(quizData => {
+                if (quizData && finalLessonData) {
+                  finalLessonData.quiz = quizData
+                  // Update cache with quiz data
+                  lessonCache.current.set(lessonIdToLoad, { ...finalLessonData })
+                  setCurrentLesson({ ...finalLessonData })
+                }
+              })
+              .catch(() => {
+                // Quiz might not exist, that's okay
+              })
           }
+
+          // Cache the lesson data for future use
+          if (finalLessonData) {
+            lessonCache.current.set(lessonIdToLoad, finalLessonData)
+          }
+
+          setCurrentLesson(finalLessonData)
+        } else {
+          setCurrentLesson(null)
         }
-        setCurrentLesson(lessonData)
-      } else if ((enrollmentData.course as any)?.modules?.[0]?.lessons?.[0]) {
-        // Start with first lesson if no progress
-        const firstLesson = (enrollmentData.course as any).modules[0].lessons[0]
-        const lessonData = await courseService.getLessonById(firstLesson.id)
-        // Fetch quiz data if not included
-        if (lessonData && !lessonData.quiz) {
-          const quizData = await courseService.getQuizByLessonId(firstLesson.id)
-          if (quizData) {
-            lessonData.quiz = quizData
-          }
-        }
-        // Fetch flowcharts for this lesson
-        try {
-          const flowchartsResponse = await fetch(`/api/lessons/${firstLesson.id}/flowcharts`, {
-            cache: 'no-store'
-          })
-          if (flowchartsResponse.ok) {
-            const flowchartsData = await flowchartsResponse.json()
-            if (lessonData) {
-              (lessonData as any).flowcharts = flowchartsData.data || []
-            }
-          }
-        } catch (error) {
-          console.error('Error fetching flowcharts:', error)
-          if (lessonData) {
-            (lessonData as any).flowcharts = []
-          }
-        }
-        setCurrentLesson(lessonData)
       } else {
         setCurrentLesson(null)
       }
       
-      // Load next available test day
-      await loadNextAvailableTestDay()
+      // Load next available test day in background
+      loadNextAvailableTestDay().catch(err => console.error('Error loading next test day:', err))
     } catch (error) {
       console.error('Error loading enrollment data:', error)
       hasLoadedData.current = false // Reset on error to allow retry
@@ -184,92 +191,105 @@ export default function LearnPage({ params }: LearnPageProps) {
 
   const handleLessonSelect = async (lessonId: string) => {
     try {
-      console.log('Loading lesson:', lessonId)
-      const lessonData = await courseService.getLessonById(lessonId)
-      console.log('Loaded lesson data:', lessonData)
-      console.log('Lesson has quiz:', lessonData?.quiz)
-      console.log('Quiz ID:', lessonData?.quiz?.id)
-      console.log('Lesson has assignment:', lessonData?.assignment)
-      console.log('Assignment type:', typeof lessonData?.assignment)
-      console.log('Assignment is array:', Array.isArray(lessonData?.assignment))
-      if (lessonData?.assignment) {
-        if (Array.isArray(lessonData.assignment)) {
-          console.log('Assignment array length:', lessonData.assignment.length)
-          console.log('First assignment:', lessonData.assignment[0])
-        } else {
-          console.log('Assignment object:', lessonData.assignment)
+      // Check cache first for instant loading
+      const cachedLesson = lessonCache.current.get(lessonId)
+      if (cachedLesson) {
+        setCurrentLesson(cachedLesson)
+        // Update progress in background
+        if (enrollment) {
+          courseService.updateLessonProgress(enrollment.id, lessonId, {
+            status: 'in_progress',
+          }).catch(err => console.error('Error updating lesson progress:', err))
+        }
+        return
+      }
+
+      // Optimistically show loading state
+      setLoadingData(true)
+      
+      // Parallelize all data fetching for maximum performance
+      const [lessonDataResult, contentResponse, flowchartsResponse] = await Promise.allSettled([
+        courseService.getLessonById(lessonId),
+        fetch(`/api/lessons/${lessonId}/content`, { cache: 'no-store' }).catch(() => null),
+        fetch(`/api/lessons/${lessonId}/flowcharts`, { cache: 'no-store' }).catch(() => null)
+      ])
+
+      let finalLessonData: LessonWithDetails | null = null
+
+      // Process lesson data
+      if (lessonDataResult.status === 'fulfilled' && lessonDataResult.value) {
+        finalLessonData = lessonDataResult.value
+      } else {
+        console.error('Error loading lesson:', lessonDataResult.status === 'rejected' ? lessonDataResult.reason : 'Unknown error')
+        setLoadingData(false)
+        return
+      }
+
+      // Process content in parallel (only if not already included)
+      if (contentResponse.status === 'fulfilled' && contentResponse.value) {
+        try {
+          const response = contentResponse.value
+          if (response && finalLessonData && (!finalLessonData.content || finalLessonData.content.length === 0)) {
+            const contentData = await response.json()
+            finalLessonData.content = contentData.data || []
+          }
+        } catch (e) {
+          // Content might already be in lessonData, ignore error
         }
       }
-      console.log('Assignment ID:', lessonData?.assignment?.id)
-      console.log('Assignment title:', lessonData?.assignment?.title)
-      
-      // Fetch lesson content using server-side API (bypasses RLS)
-      // Note: getLessonById already includes content, but we'll fetch it separately as a fallback
-      try {
-        const contentResponse = await fetch(`/api/lessons/${lessonId}/content`, {
-          cache: 'no-store'
-        })
-        if (contentResponse.ok) {
-          const contentData = await contentResponse.json()
-          console.log('Fetched lesson content:', contentData.data)
-          if (lessonData) {
-            lessonData.content = contentData.data || []
+
+      // Process flowcharts in parallel
+      if (finalLessonData) {
+        if (flowchartsResponse.status === 'fulfilled' && flowchartsResponse.value) {
+          try {
+            const response = flowchartsResponse.value
+            if (response) {
+              const flowchartsData = await response.json()
+              Object.assign(finalLessonData, { flowcharts: flowchartsData.data || [] })
+            } else {
+              Object.assign(finalLessonData, { flowcharts: [] })
+            }
+          } catch (e) {
+            Object.assign(finalLessonData, { flowcharts: [] })
           }
         } else {
-          const errorText = await contentResponse.text()
-          console.error('Failed to fetch lesson content:', contentResponse.status, errorText)
-          // If content is already in lessonData, use it
-          if (lessonData && !lessonData.content && Array.isArray((lessonData as any).content)) {
-            // Content might already be loaded from getLessonById
-            console.log('Using content from lessonData:', (lessonData as any).content)
-          }
-        }
-      } catch (contentError) {
-        console.error('Error fetching lesson content:', contentError)
-        // Don't fail the entire lesson load if content fetch fails
-        // Content might already be included in lessonData from getLessonById
-      }
-      
-      // Fetch flowcharts for this lesson
-      try {
-        const flowchartsResponse = await fetch(`/api/lessons/${lessonId}/flowcharts`, {
-          cache: 'no-store'
-        })
-        if (flowchartsResponse.ok) {
-          const flowchartsData = await flowchartsResponse.json()
-          console.log('Fetched lesson flowcharts:', flowchartsData.data)
-          if (lessonData) {
-            (lessonData as any).flowcharts = flowchartsData.data || []
-          }
-        }
-      } catch (flowchartsError) {
-        console.error('Error fetching lesson flowcharts:', flowchartsError)
-        // Don't fail the entire lesson load if flowcharts fetch fails
-        if (lessonData) {
-          (lessonData as any).flowcharts = []
+          Object.assign(finalLessonData, { flowcharts: [] })
         }
       }
-      
-      // If lesson doesn't have quiz data, try to fetch it directly
-      if (lessonData && !lessonData.quiz) {
-        console.log('No quiz in lesson data, fetching quiz directly...')
-        const quizData = await courseService.getQuizByLessonId(lessonId)
-        if (quizData) {
-          lessonData.quiz = quizData
-          console.log('Added quiz data to lesson:', quizData)
-        }
+
+      // Fetch quiz only if not already included (in background, don't block UI)
+      if (finalLessonData && !finalLessonData.quiz) {
+        courseService.getQuizByLessonId(lessonId)
+          .then(quizData => {
+            if (quizData && finalLessonData) {
+              finalLessonData.quiz = quizData
+              // Update cache with quiz data
+              lessonCache.current.set(lessonId, { ...finalLessonData })
+              setCurrentLesson({ ...finalLessonData })
+            }
+          })
+          .catch(() => {
+            // Quiz might not exist, that's okay
+          })
       }
+
+      // Cache the lesson data for future use
+      if (finalLessonData) {
+        lessonCache.current.set(lessonId, finalLessonData)
+      }
+
+      setCurrentLesson(finalLessonData)
       
-      setCurrentLesson(lessonData)
-      
-      // Update lesson progress to "in_progress"
+      // Update lesson progress in background (don't wait for it)
       if (enrollment) {
-        await courseService.updateLessonProgress(enrollment.id, lessonId, {
+        courseService.updateLessonProgress(enrollment.id, lessonId, {
           status: 'in_progress',
-        })
+        }).catch(err => console.error('Error updating lesson progress:', err))
       }
     } catch (error) {
       console.error('Error loading lesson:', error)
+    } finally {
+      setLoadingData(false)
     }
   }
 
