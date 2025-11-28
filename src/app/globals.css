@@ -8,7 +8,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-raleway);
+  --font-sans: var(--font-poppins);
+  --font-display: "Arno Pro", "Georgia", "Times New Roman", serif;
 }
 
 * {
@@ -22,7 +23,7 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-raleway), system-ui, sans-serif;
+  font-family: var(--font-poppins), Poppins, system-ui, sans-serif;
   font-weight: 300;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;

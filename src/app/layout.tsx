@@ -1,21 +1,15 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Bodoni_Moda } from "next/font/google";
+import { Poppins } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import ToastContainer from "@/components/Toast";
 
-const raleway = Space_Grotesk({
-  variable: "--font-raleway",
+const poppins = Poppins({
+  variable: "--font-poppins",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-});
-
-const display = Bodoni_Moda({
-  variable: "--font-display",
-  subsets: ["latin"],
-  weight: ["400", "600", "700"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
 });
 
 export const metadata: Metadata = {
@@ -35,9 +29,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={poppins.variable}>
       <body
-        className={`${raleway.variable} ${display.variable} font-sans antialiased`}
+        className="font-sans antialiased"
       >
         <AuthProvider>
           <SiteHeader />
