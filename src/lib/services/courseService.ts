@@ -70,11 +70,15 @@ export class CourseService {
       .select('*')
       .order('created_at', { ascending: false })
 
-    if (filters?.category_id) {
-      query = query.eq('category_id', filters.category_id)
-    }
+    // Default to showing only active courses unless explicitly specified
     if (filters?.is_active !== undefined) {
       query = query.eq('is_active', filters.is_active)
+    } else {
+      query = query.eq('is_active', true)
+    }
+
+    if (filters?.category_id) {
+      query = query.eq('category_id', filters.category_id)
     }
     if (filters?.is_featured !== undefined) {
       query = query.eq('is_featured', filters.is_featured)
@@ -87,10 +91,27 @@ export class CourseService {
 
     if (error) {
       console.error('Error fetching courses:', error)
+      console.error('Error details:', JSON.stringify(error, null, 2))
       throw new Error(`Failed to fetch courses: ${error.message}`)
     }
 
     console.log('Fetched courses:', data?.length || 0)
+    console.log('Courses data:', data)
+    
+    // If no courses found, try without is_active filter to debug
+    if ((data?.length || 0) === 0) {
+      console.warn('No active courses found. Checking all courses (including inactive)...')
+      const { data: allData, error: allError } = await supabase
+        .from('courses')
+        .select('*')
+        .order('created_at', { ascending: false })
+      
+      if (!allError && allData) {
+        console.log('Total courses in database (including inactive):', allData.length)
+        console.log('All courses:', allData.map(c => ({ id: c.id, title: c.title, is_active: c.is_active })))
+      }
+    }
+    
     return data || []
   }
 

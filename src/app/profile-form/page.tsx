@@ -9,7 +9,7 @@ import { profileSchema, type ProfileFormData } from '@/lib/validations/profile'
 import { getSupabaseClient } from '@/lib/supabase/client'
 
 export default function ProfileFormPage() {
-  const { user, loading: authLoading } = useAuth()
+  const { user, loading: authLoading, signOut } = useAuth()
   const router = useRouter()
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -198,6 +198,25 @@ export default function ProfileFormPage() {
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='50' cy='50' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }} />
       </div>
+
+      {/* Navigation */}
+      <nav className="relative z-10 flex items-center justify-between p-6 lg:px-12">
+        <div className="flex items-center space-x-2">
+          <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+            <span className="text-black font-bold text-sm">SA</span>
+          </div>
+          <span className="text-white text-xl font-semibold">Super Accountant</span>
+        </div>
+        <button
+          onClick={async () => {
+            await signOut()
+            router.push('/login')
+          }}
+          className="px-6 py-3 bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 border border-gray-600/50 hover:border-gray-500/70 text-white/90 hover:text-white rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-xl"
+        >
+          Sign Out
+        </button>
+      </nav>
 
       <div className="relative z-10 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
