@@ -91,7 +91,17 @@ export class CourseService {
 
     if (error) {
       console.error('Error fetching courses:', error)
+      console.error('Error code:', error.code)
+      console.error('Error message:', error.message)
       console.error('Error details:', JSON.stringify(error, null, 2))
+      
+      // If it's an RLS error, provide helpful message
+      if (error.code === '42501' || error.message?.includes('permission') || error.message?.includes('policy')) {
+        console.error('RLS POLICY ERROR: User does not have permission to read courses table.')
+        console.error('Please run the SQL in fix-courses-rls.sql to fix RLS policies.')
+        throw new Error('Permission denied: RLS policies are blocking access to courses. Please contact administrator.')
+      }
+      
       throw new Error(`Failed to fetch courses: ${error.message}`)
     }
 
@@ -106,9 +116,18 @@ export class CourseService {
         .select('*')
         .order('created_at', { ascending: false })
       
-      if (!allError && allData) {
+      if (allError) {
+        console.error('Error fetching all courses:', allError)
+        console.error('This is likely an RLS policy issue. Error:', allError.message)
+        if (allError.code === '42501' || allError.message?.includes('permission')) {
+          console.error('RLS POLICY ERROR: User does not have permission to read courses table.')
+          console.error('Please run the SQL in fix-courses-rls.sql to fix RLS policies.')
+        }
+      } else if (allData) {
         console.log('Total courses in database (including inactive):', allData.length)
         console.log('All courses:', allData.map(c => ({ id: c.id, title: c.title, is_active: c.is_active })))
+      } else {
+        console.warn('No courses returned even without filters - likely RLS policy blocking access')
       }
     }
     
