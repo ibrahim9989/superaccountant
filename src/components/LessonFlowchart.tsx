@@ -41,7 +41,7 @@ export default function LessonFlowchart({ flowcharts }: LessonFlowchartProps) {
       {/* Hamburger Menu Button - Beside video player */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 border border-gray-600/50 hover:border-gray-500/70 text-white p-3 rounded-r-lg shadow-xl transition-all duration-300 flex items-center justify-center flex-shrink-0 hover:scale-105"
+        className="bg-gradient-to-br from-[#264174]/50 to-[#DC2626]/40 border border-white/20 hover:border-white/30 text-white p-3 rounded-r-lg transition-all duration-300 flex items-center justify-center flex-shrink-0 hover:scale-105"
         style={{ minHeight: '100%' }}
         aria-label={isOpen ? "Close flowchart" : "Open flowchart"}
       >
@@ -62,20 +62,20 @@ export default function LessonFlowchart({ flowcharts }: LessonFlowchartProps) {
 
       {/* Sidebar - Slides in from right, pushes video to the left */}
       <div
-        className={`bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border-r border-gray-600/50 transition-all duration-300 ease-in-out shadow-2xl overflow-hidden flex-shrink-0 ${
-          isOpen ? 'w-full max-w-md' : 'w-0'
+        className={`bg-gradient-to-br from-[#2B2A29] to-[#264174]/30 border-r border-white/10 transition-all duration-300 ease-in-out shadow-2xl overflow-hidden flex-shrink-0 ${
+          isOpen ? 'w-full max-w-2xl' : 'w-0'
         }`}
         style={{ minHeight: '100%' }}
       >
         <div className="flex flex-col h-full min-h-full">
           {/* Header */}
-          <div className="bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 border-b border-gray-600/50 px-6 py-4 flex items-center justify-between flex-shrink-0">
+          <div className="bg-gradient-to-br from-[#264174]/50 to-[#DC2626]/40 border-b border-white/10 px-6 py-4 flex items-center justify-between flex-shrink-0">
             <div className="flex-1 min-w-0">
-              <h2 className="text-xl font-black text-white truncate bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
+              <h2 className="text-xl font-black text-white truncate">
                 {flowchartName}
               </h2>
               {validFlowcharts.length > 1 && (
-                <p className="text-xs text-gray-300 mt-1 font-medium">
+                <p className="text-xs text-white/80 mt-1 font-medium">
                   {selectedFlowchartIndex + 1} of {validFlowcharts.length}
                 </p>
               )}
@@ -87,7 +87,7 @@ export default function LessonFlowchart({ flowcharts }: LessonFlowchartProps) {
                   <button
                     onClick={() => setSelectedFlowchartIndex(Math.max(0, selectedFlowchartIndex - 1))}
                     disabled={selectedFlowchartIndex === 0}
-                    className="p-2 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-300 hover:text-white hover:border-gray-500/70 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="p-2 bg-white/10 border border-white/20 rounded-lg text-white/90 hover:text-white hover:border-white/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label="Previous flowchart"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -97,7 +97,7 @@ export default function LessonFlowchart({ flowcharts }: LessonFlowchartProps) {
                   <button
                     onClick={() => setSelectedFlowchartIndex(Math.min(validFlowcharts.length - 1, selectedFlowchartIndex + 1))}
                     disabled={selectedFlowchartIndex === validFlowcharts.length - 1}
-                    className="p-2 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-300 hover:text-white hover:border-gray-500/70 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="p-2 bg-white/10 border border-white/20 rounded-lg text-white/90 hover:text-white hover:border-white/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label="Next flowchart"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,7 +109,7 @@ export default function LessonFlowchart({ flowcharts }: LessonFlowchartProps) {
               {isImage && (
                 <button
                   onClick={() => setShowZoomedImage(true)}
-                  className="p-2 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-300 hover:text-white hover:border-gray-500/70 transition-all duration-300 flex-shrink-0"
+                  className="p-2 bg-white/10 border border-white/20 rounded-lg text-white/90 hover:text-white hover:border-white/30 transition-all duration-300 flex-shrink-0"
                   aria-label="View zoomed image"
                   title="View Zoomed Image"
                 >
@@ -129,8 +129,11 @@ export default function LessonFlowchart({ flowcharts }: LessonFlowchartProps) {
                 </button>
               )}
               <button
-                onClick={() => setIsOpen(false)}
-                className="p-2 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-300 hover:text-white hover:border-gray-500/70 transition-all duration-300 ml-2 flex-shrink-0"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setIsOpen(false)
+                }}
+                className="p-2 bg-white/10 border border-white/20 rounded-lg text-white/90 hover:text-white hover:border-white/30 hover:bg-[#DC2626]/50 transition-all duration-300 ml-2 flex-shrink-0"
                 aria-label="Close flowchart"
               >
                 <svg
@@ -152,7 +155,7 @@ export default function LessonFlowchart({ flowcharts }: LessonFlowchartProps) {
 
           {/* Flowchart list for multiple flowcharts */}
           {validFlowcharts.length > 1 && (
-            <div className="bg-gradient-to-r from-gray-800/50 to-gray-900/50 border-b border-gray-600/50 px-4 py-3 flex-shrink-0 overflow-x-auto">
+            <div className="bg-white/5 border-b border-white/10 px-4 py-3 flex-shrink-0 overflow-x-auto">
               <div className="flex gap-2">
                 {validFlowcharts.map((fc, index) => (
                   <button
@@ -160,8 +163,8 @@ export default function LessonFlowchart({ flowcharts }: LessonFlowchartProps) {
                     onClick={() => setSelectedFlowchartIndex(index)}
                     className={`px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 whitespace-nowrap ${
                       index === selectedFlowchartIndex
-                        ? 'bg-gradient-to-r from-white via-gray-100 to-white text-black shadow-lg'
-                        : 'bg-gradient-to-r from-gray-800 to-gray-900 border border-gray-700/50 text-gray-300 hover:border-gray-500/70 hover:text-white'
+                        ? 'bg-white text-[#264174] shadow-lg'
+                        : 'bg-white/10 border border-white/20 text-white/90 hover:border-white/30 hover:text-white'
                     }`}
                   >
                     {fc.flowchart_title || `Flowchart ${index + 1}`}
@@ -172,38 +175,62 @@ export default function LessonFlowchart({ flowcharts }: LessonFlowchartProps) {
           )}
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto p-6 bg-[#2B2A29]">
             {isImage ? (
-              <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 border border-gray-700/50 rounded-2xl p-4 shadow-xl">
+              <div className="bg-gradient-to-br from-[#264174]/50 to-[#DC2626]/40 border border-white/10 rounded-2xl p-4">
                 <img
                   src={flowchartUrl}
                   alt={flowchartName}
                   className="max-w-full h-auto rounded-xl cursor-pointer hover:opacity-90 transition-opacity"
                   onClick={() => setShowZoomedImage(true)}
                 />
-                <p className="text-xs text-gray-400 mt-3 text-center font-medium">Click image or button above to view zoomed</p>
+                <p className="text-xs text-white/70 mt-3 text-center font-medium">Click image or button above to view zoomed</p>
               </div>
             ) : isPdf ? (
-              <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 border border-gray-700/50 rounded-2xl p-4 h-full shadow-xl">
-                <iframe
-                  src={flowchartUrl}
-                  className="w-full h-full min-h-[600px] rounded-xl"
-                  title={flowchartName}
-                />
+              <div className="bg-gradient-to-br from-[#264174]/50 to-[#DC2626]/40 border border-white/10 rounded-2xl p-4 shadow-xl flex flex-col" style={{ height: 'calc(100vh - 200px)', minHeight: '600px' }}>
+                <div className="mb-4 flex items-center justify-between flex-shrink-0">
+                  <p className="text-white/90 text-sm font-medium">Click anywhere on the PDF to open in a new tab</p>
+                  <a
+                    href={flowchartUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2 bg-[#DC2626] text-white rounded-lg font-semibold hover:bg-[#B91C1C] transition-colors text-sm"
+                  >
+                    Open PDF
+                  </a>
+                </div>
+                <div 
+                  className="bg-white rounded-xl overflow-hidden cursor-pointer hover:opacity-95 transition-opacity relative flex-1"
+                  onClick={() => window.open(flowchartUrl, '_blank')}
+                  style={{ 
+                    width: '100%',
+                    minHeight: 0
+                  }}
+                >
+                  <iframe
+                    src={`${flowchartUrl}#toolbar=1&navpanes=0&scrollbar=1&zoom=page-fit`}
+                    className="w-full h-full border-0"
+                    title={flowchartName}
+                    style={{ 
+                      width: '100%', 
+                      height: '100%',
+                      display: 'block'
+                    }}
+                  />
+                </div>
               </div>
             ) : (
-              <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 border border-gray-700/50 rounded-2xl p-6 shadow-xl">
-                <p className="text-gray-300 mb-4 font-light text-lg">
+              <div className="bg-gradient-to-br from-[#264174]/50 to-[#DC2626]/40 border border-white/10 rounded-2xl p-6">
+                <p className="text-white/90 mb-4 font-medium text-lg">
                   Click the link below to view the flowchart:
                 </p>
                 <a
                   href={flowchartUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block group relative px-6 py-3 bg-gradient-to-r from-white via-gray-100 to-white text-black font-black rounded-2xl transition-all duration-500 transform hover:scale-105 shadow-2xl shadow-white/25 hover:shadow-white/40 overflow-hidden"
+                  className="inline-block px-6 py-3 bg-[#DC2626] text-white font-semibold rounded-lg transition-colors hover:bg-[#B91C1C]"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-white to-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <span className="relative z-10">Open Flowchart</span>
+                  Open Flowchart
                 </a>
               </div>
             )}
@@ -222,17 +249,17 @@ export default function LessonFlowchart({ flowcharts }: LessonFlowchartProps) {
 
           {/* Popup Modal */}
           <div 
-            className="fixed inset-0 z-[70] flex flex-col bg-black animate-fade-in"
+            className="fixed inset-0 z-[70] flex flex-col bg-[#2B2A29] animate-fade-in"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 border-b border-gray-600/50 px-6 py-4 flex items-center justify-between flex-shrink-0">
-              <h2 className="text-xl font-black text-white bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
+            <div className="bg-gradient-to-br from-[#264174]/50 to-[#DC2626]/40 border-b border-white/10 px-6 py-4 flex items-center justify-between flex-shrink-0">
+              <h2 className="text-xl font-black text-white">
                 {flowchartName}
               </h2>
               <button
                 onClick={() => setShowZoomedImage(false)}
-                className="p-2 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-300 hover:text-white hover:border-gray-500/70 transition-all duration-300 flex-shrink-0"
+                className="p-2 bg-white/10 border border-white/20 rounded-lg text-white/90 hover:text-white hover:border-white/30 hover:bg-[#DC2626]/50 transition-all duration-300 flex-shrink-0"
                 aria-label="Close zoomed view"
               >
                 <svg

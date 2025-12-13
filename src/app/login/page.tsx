@@ -59,106 +59,78 @@ function LoginContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen w-full relative bg-black">
-        <div className="absolute inset-0 opacity-40">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-white/5 via-gray-800/10 to-black/5 rounded-full blur-3xl" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-black/10 via-gray-700/15 to-white/5 rounded-full blur-3xl" />
-        </div>
-        <div className="relative z-10 flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-800 border-t-white"></div>
-        </div>
+      <div className="min-h-screen w-full bg-gradient-to-br from-[#1e3a5f] to-[#DC2626] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen w-full relative bg-black">
-      {/* Luxury Background Effects */}
-      <div className="absolute inset-0 opacity-40">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-white/5 via-gray-800/10 to-black/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-black/10 via-gray-700/15 to-white/5 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[1200px] bg-gradient-to-br from-gray-900/10 via-transparent to-gray-900/10 rounded-full blur-3xl" />
-      </div>
+    <div className="min-h-screen bg-[#2B2A29] text-white">
+      {/* Hero Section with Background Effects */}
+      <section className="relative bg-gradient-to-br from-[#1e3a5f] via-[#264174] to-[#DC2626] py-12 sm:py-16 md:py-20 overflow-hidden">
+        {/* Background Effects */}
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
+        </div>
 
-      {/* Subtle Pattern Overlay */}
-      <div className="absolute inset-0 opacity-[0.02]">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='50' cy='50' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }} />
-      </div>
-
-      {/* Navigation */}
-      <nav className="relative z-10 flex items-center justify-between p-6 lg:px-12">
-        <Link href="/" className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-            <span className="text-black font-bold text-sm">SA</span>
-          </div>
-          <span className="text-white text-xl font-semibold">Super Accountant</span>
-        </Link>
-      </nav>
-
-      {/* Login Form */}
-      <div className="relative z-10 flex items-center justify-center min-h-[80vh] px-6">
-        <div className="max-w-md w-full">
-          {/* Premium Badge */}
-          <div className="text-center mb-6">
-            <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 border border-gray-500/50 rounded-full mb-6 shadow-2xl backdrop-blur-sm">
-              <div className="w-2.5 h-2.5 bg-gradient-to-r from-white to-gray-300 rounded-full mr-3 animate-pulse"></div>
-              <span className="text-white text-xs font-bold tracking-[0.22em] uppercase">ELITE ACCOUNTING MASTERY</span>
-              <div className="w-2.5 h-2.5 bg-gradient-to-r from-gray-300 to-white rounded-full ml-3 animate-pulse"></div>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-gray-600/50 rounded-3xl p-10 shadow-2xl backdrop-blur-sm">
-            <div className="text-center mb-10">
-              <h1 className="text-5xl md:text-6xl font-black text-white mb-4 leading-tight bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
-                Welcome Back
-              </h1>
-              <p className="text-xl text-gray-300 font-light">
-                Sign in to continue your Super Accountant journey
-              </p>
-            </div>
-
-            <div className="space-y-6">
-              <button
-              onClick={signInWithGoogle}
-                className="group relative w-full flex items-center justify-center px-8 py-5 bg-gradient-to-r from-white via-gray-100 to-white text-black font-bold rounded-2xl transition-all duration-500 transform hover:scale-105 shadow-2xl shadow-white/25 hover:shadow-white/40 overflow-hidden"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-white to-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <span className="relative z-10 flex items-center">
-                  <span className="w-6 h-6 mr-3 rounded-full border-2 border-gray-900 flex items-center justify-center text-xs font-black">G</span>
-                Continue with Google
-                </span>
-              </button>
-
-              <div className="text-center pt-4">
-                <p className="text-gray-400 text-sm">
-                  By signing in, you agree to our{' '}
-                  <a href="#" className="text-white underline decoration-gray-500/40 underline-offset-4 hover:decoration-white transition-colors font-medium">
-                    Terms of Service
-                  </a>{' '}
-                  and{' '}
-                  <a href="#" className="text-white underline decoration-gray-500/40 underline-offset-4 hover:decoration-white transition-colors font-medium">
-                    Privacy Policy
-                  </a>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-md mx-auto">
+            {/* Login Form */}
+            <div className="bg-gradient-to-br from-[#264174]/95 via-[#DC2626]/90 to-[#264174]/95 p-8 md:p-10 rounded-2xl border-2 border-white/20 shadow-2xl">
+              <div className="text-center mb-8">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-4 leading-tight">
+                  Welcome Back
+                </h1>
+                <p className="text-base sm:text-lg text-white/90 font-medium">
+                  Sign in to continue your Super Accountant journey
                 </p>
               </div>
+
+              <div className="space-y-6">
+                <button
+                  onClick={signInWithGoogle}
+                  className="w-full bg-white text-gray-900 px-8 py-5 rounded-xl text-lg font-bold hover:bg-gray-100 transition-all duration-300 flex items-center justify-center shadow-2xl shadow-white/20 hover:shadow-white/30 hover:scale-[1.02] border-2 border-white/50"
+                >
+                  <svg className="w-6 h-6 mr-3" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                  </svg>
+                  Continue with Google
+                </button>
+
+                <div className="text-center pt-4">
+                  <p className="text-white/80 text-sm">
+                    By signing in, you agree to our{' '}
+                    <Link href="/terms-of-service" className="text-white underline decoration-white/40 underline-offset-4 hover:decoration-white transition-colors font-medium">
+                      Terms of Service
+                    </Link>{' '}
+                    and{' '}
+                    <Link href="/privacy-policy" className="text-white underline decoration-white/40 underline-offset-4 hover:decoration-white transition-colors font-medium">
+                      Privacy Policy
+                    </Link>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="text-center mt-8">
+              <Link
+                href="/"
+                className="inline-flex items-center text-white/80 hover:text-white transition-colors text-sm font-medium group"
+              >
+                <svg className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to Home
+              </Link>
             </div>
           </div>
-
-          <div className="text-center mt-8">
-            <Link
-              href="/"
-              className="inline-flex items-center text-gray-400 hover:text-white transition-colors text-sm font-medium group"
-            >
-              <svg className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              Back to Home
-            </Link>
-          </div>
         </div>
-      </div>
+      </section>
     </div>
   )
 }

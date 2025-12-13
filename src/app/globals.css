@@ -159,3 +159,56 @@ h1, h2, h3, h4, h5, h6 {
   background-size: 1000px 100%;
   animation: shimmer 2s infinite;
 }
+
+/* Custom select dropdown styling for dark theme */
+select {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 12px;
+  padding-right: 2.5rem !important;
+  color-scheme: dark;
+}
+
+/* Style dropdown options for dark theme */
+select option {
+  background-color: #1e1e1e !important;
+  color: white !important;
+  padding: 0.75rem;
+}
+
+/* Selected option styling - monochrome (white/gray) */
+select option:checked {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+}
+
+/* Hover state for options */
+select option:hover {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+select:focus {
+  outline: none;
+}
+
+/* For Firefox - remove default blue focus ring */
+select:-moz-focusring {
+  color: transparent;
+  text-shadow: 0 0 0 white;
+}
+
+/* Ensure select maintains dark theme on all browsers */
+select::-ms-expand {
+  display: none;
+}
+
+/* Webkit browsers (Chrome, Safari) */
+select::-webkit-select-placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}

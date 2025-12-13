@@ -3,12 +3,16 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState } from 'react'
+import { useAuth } from '@/contexts/AuthContext'
+import { useRouter } from 'next/navigation'
 
 export default function SiteHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { user, signOut } = useAuth()
+  const router = useRouter()
 
   return (
-    <nav className="bg-white border-b border-[#DC2626]/50 sticky top-0 z-50 h-16 overflow-hidden">
+    <nav className="bg-white border-b border-[#DC2626]/50 sticky top-0 z-50 h-12 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
         <div className="flex justify-between items-center h-full">
           <Link href="/" className="flex items-center h-full overflow-visible">
@@ -36,12 +40,32 @@ export default function SiteHeader() {
             <Link href="/#pricing" className="text-gray-700 hover:text-[#DC2626] transition-colors text-sm font-medium">
               Pricing
             </Link>
-            <Link
-              href="/login"
-              className="bg-[#DC2626] text-white px-4 py-2 sm:px-6 sm:py-2 rounded-lg hover:bg-[#B91C1C] transition-colors text-sm font-semibold"
-            >
-              Get Started
-            </Link>
+            {user ? (
+              <div className="flex items-center space-x-4">
+                <Link
+                  href="/dashboard"
+                  className="text-gray-700 hover:text-[#DC2626] transition-colors text-sm font-medium"
+                >
+                  Dashboard
+                </Link>
+                <button
+                  onClick={async () => {
+                    await signOut()
+                    router.push('/login')
+                  }}
+                  className="bg-[#DC2626] text-white px-4 py-2 sm:px-6 sm:py-2 rounded-lg hover:bg-[#B91C1C] transition-colors text-sm font-semibold"
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className="bg-[#DC2626] text-white px-4 py-2 sm:px-6 sm:py-2 rounded-lg hover:bg-[#B91C1C] transition-colors text-sm font-semibold"
+              >
+                Get Started
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -92,13 +116,35 @@ export default function SiteHeader() {
               >
                 Pricing
               </Link>
-              <Link
-                href="/login"
-                onClick={() => setMobileMenuOpen(false)}
-                className="bg-[#DC2626] text-white px-6 py-3 rounded-lg hover:bg-[#B91C1C] transition-colors text-base font-semibold mx-4 text-center"
-              >
-                Get Started
-              </Link>
+              {user ? (
+                <>
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-gray-700 hover:text-[#DC2626] transition-colors px-4 py-2 text-base font-medium"
+                  >
+                    Dashboard
+                  </Link>
+                  <button
+                    onClick={async () => {
+                      await signOut()
+                      router.push('/login')
+                      setMobileMenuOpen(false)
+                    }}
+                    className="bg-[#DC2626] text-white px-6 py-3 rounded-lg hover:bg-[#B91C1C] transition-colors text-base font-semibold mx-4 text-center"
+                  >
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="bg-[#DC2626] text-white px-6 py-3 rounded-lg hover:bg-[#B91C1C] transition-colors text-base font-semibold mx-4 text-center"
+                >
+                  Get Started
+                </Link>
+              )}
             </div>
           </div>
         )}

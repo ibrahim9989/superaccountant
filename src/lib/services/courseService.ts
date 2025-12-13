@@ -380,9 +380,32 @@ export class CourseService {
   }
 
   async getLessonById(lessonId: string): Promise<LessonWithDetails | null> {
-    const supabase = getSupabaseClient();
+    console.log('🔍 Fetching lesson with ID:', lessonId)
     
-    console.log('Fetching lesson with ID:', lessonId)
+    // First, try using API route with service role (bypasses RLS)
+    try {
+      const apiResponse = await fetch(`/api/lessons/${lessonId}`, {
+        cache: 'no-store'
+      })
+      
+      if (apiResponse.ok) {
+        const apiData = await apiResponse.json()
+        if (apiData.data) {
+          console.log('✅ [API Route] Lesson found:', apiData.data.title)
+          return apiData.data
+        }
+      } else {
+        const errorData = await apiResponse.json().catch(() => ({}))
+        console.warn('⚠️ API route failed, falling back to direct query:', errorData)
+      }
+    } catch (apiError) {
+      console.warn('⚠️ API route error, falling back to direct query:', apiError)
+    }
+    
+    // Fallback: Direct query (may have RLS issues for new users)
+    console.log('🔄 Using direct query fallback for lesson...')
+    
+    const supabase = getSupabaseClient();
     const { data, error } = await supabase
       .from('lessons')
       .select(`
@@ -398,13 +421,19 @@ export class CourseService {
       .single()
 
     if (error) {
-      console.error('Error fetching lesson:', error)
+      console.error('❌ Error fetching lesson:', error)
+      console.error('❌ Error details:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint
+      })
       return null
     }
 
-    console.log('Fetched lesson data:', data)
-    console.log('Lesson quiz data:', data.quiz)
-    console.log('Lesson assignment data:', data.assignment)
+    console.log('✅ Fetched lesson data:', data?.title)
+    console.log('📚 Lesson quiz data:', data?.quiz)
+    console.log('📝 Lesson assignment data:', data?.assignment)
     
     // Handle case where quiz is an array (should be single object)
     if (Array.isArray(data.quiz)) {
@@ -570,28 +599,183 @@ export class CourseService {
 
   async getEnrollmentById(enrollmentId: string): Promise<CourseEnrollmentWithDetails | null> {
     const supabase = getSupabaseClient();
-    const { data, error } = await supabase
+    
+    console.log('🔍 Fetching enrollment:', enrollmentId)
+    
+    // First, try using API route with service role (bypasses RLS)
+    try {
+      const apiResponse = await fetch(`/api/enrollments/${enrollmentId}/modules`, {
+        cache: 'no-store'
+      })
+      
+      if (apiResponse.ok) {
+        const apiData = await apiResponse.json()
+        if (apiData.data && apiData.data.modules) {
+          console.log('✅ [API Route] Modules found:', apiData.data.modules.length)
+          
+          // Get course details
+          const { data: course, error: courseError } = await supabase
+            .from('courses')
+            .select(`
+              *,
+              category:course_categories(*)
+            `)
+            .eq('id', apiData.data.enrollment.course_id)
+            .single()
+
+          if (courseError) {
+            console.error('❌ Error fetching course:', courseError)
+            return null
+          }
+
+          return {
+            ...apiData.data.enrollment,
+            course: {
+              ...course,
+              modules: apiData.data.modules
+            }
+          } as CourseEnrollmentWithDetails
+        }
+      } else {
+        console.warn('⚠️ API route failed, falling back to direct query')
+      }
+    } catch (apiError) {
+      console.warn('⚠️ API route error, falling back to direct query:', apiError)
+    }
+    
+    // Fallback: Direct query (may have RLS issues for new users)
+    console.log('🔄 Using direct query fallback...')
+    
+    // First, get the enrollment
+    const { data: enrollment, error: enrollmentError } = await supabase
       .from('course_enrollments')
-      .select(`
-        *,
-        course:courses(
-          *,
-          category:course_categories(*),
-          modules:course_modules(
-            *,
-            lessons:lessons(*)
-          )
-        )
-      `)
+      .select('*')
       .eq('id', enrollmentId)
       .single()
 
-    if (error) {
-      console.error('Error fetching enrollment:', error)
+    if (enrollmentError) {
+      console.error('❌ Error fetching enrollment:', enrollmentError)
       return null
     }
 
-    return data
+    if (!enrollment) {
+      console.warn('⚠️ Enrollment not found:', enrollmentId)
+      return null
+    }
+
+    console.log('✅ Enrollment found. Course ID:', enrollment.course_id)
+
+    // Then, fetch the course with modules and lessons separately to ensure proper filtering
+    const { data: course, error: courseError } = await supabase
+      .from('courses')
+      .select(`
+        *,
+        category:course_categories(*)
+      `)
+      .eq('id', enrollment.course_id)
+      .single()
+
+    if (courseError) {
+      console.error('❌ Error fetching course:', courseError)
+      return null
+    }
+
+    console.log('✅ Course found:', course?.title)
+
+    // Fetch modules directly first (bypass potential RLS issues with nested queries)
+    // This approach works better for new users who might have RLS restrictions
+    console.log('🔍 Fetching modules for course:', enrollment.course_id)
+    
+    const { data: modulesOnly, error: modulesOnlyError } = await supabase
+      .from('course_modules')
+      .select('*')
+      .eq('course_id', enrollment.course_id)
+      .eq('is_active', true)
+      .order('order_index', { ascending: true })
+
+    if (modulesOnlyError) {
+      console.error('❌ Error fetching modules:', modulesOnlyError)
+      console.error('❌ Error details:', {
+        message: modulesOnlyError.message,
+        code: modulesOnlyError.code,
+        details: modulesOnlyError.details,
+        hint: modulesOnlyError.hint
+      })
+      return {
+        ...enrollment,
+        course: {
+          ...course,
+          modules: []
+        }
+      } as CourseEnrollmentWithDetails
+    }
+
+    console.log('✅ Modules found:', modulesOnly?.length || 0)
+    
+    if (!modulesOnly || modulesOnly.length === 0) {
+      console.warn('⚠️ No modules found for course. Checking if modules exist without is_active filter...')
+      // Try without is_active filter to see if modules exist but are inactive
+      const { data: allModules, error: allModulesError } = await supabase
+        .from('course_modules')
+        .select('id, title, is_active, course_id')
+        .eq('course_id', enrollment.course_id)
+      
+      if (!allModulesError && allModules && allModules.length > 0) {
+        console.warn(`⚠️ Found ${allModules.length} modules, but they might be inactive:`, allModules)
+      } else {
+        console.warn('⚠️ No modules found at all for this course ID')
+      }
+    }
+
+    // Fetch lessons for each module separately to avoid RLS issues
+    const modulesWithLessons = await Promise.all((modulesOnly || []).map(async (module) => {
+      console.log(`🔍 Fetching lessons for module: ${module.id} (${module.title})`)
+      
+      const { data: lessons, error: lessonsError } = await supabase
+        .from('lessons')
+        .select(`
+          *,
+          content:lesson_content(*),
+          quiz:course_quizzes(*),
+          assignment:course_assignments(*)
+        `)
+        .eq('module_id', module.id)
+        .eq('is_active', true)
+        .order('order_index', { ascending: true })
+
+      if (lessonsError) {
+        console.error(`❌ Error fetching lessons for module ${module.id}:`, lessonsError)
+        console.error('❌ Error details:', {
+          message: lessonsError.message,
+          code: lessonsError.code,
+          details: lessonsError.details,
+          hint: lessonsError.hint
+        })
+        return { ...module, lessons: [] }
+      }
+
+      console.log(`✅ Found ${lessons?.length || 0} lessons for module ${module.title}`)
+      return { ...module, lessons: lessons || [] }
+    }))
+
+    console.log('✅ Final modules with lessons:', modulesWithLessons.length)
+
+    // Attach modules to course
+    const courseWithModules = {
+      ...course,
+      modules: modulesWithLessons
+    }
+
+    console.log('✅ Final modules count:', modulesWithLessons.length)
+    if (modulesWithLessons.length > 0) {
+      console.log('✅ First module lessons:', modulesWithLessons[0]?.lessons?.length || 0)
+      console.log('✅ First module:', modulesWithLessons[0]?.title)
+    }
+
+    return {
+      ...enrollment,
+      course: courseWithModules
+    } as CourseEnrollmentWithDetails
   }
 
   async updateEnrollment(enrollmentId: string, updates: UpdateCourseEnrollment): Promise<CourseEnrollment> {

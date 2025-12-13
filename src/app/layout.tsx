@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
-import SiteHeader from "@/components/SiteHeader";
+import ConditionalHeader from "@/components/ConditionalHeader";
 import SiteFooter from "@/components/SiteFooter";
 import ToastContainer from "@/components/Toast";
 
@@ -34,7 +34,7 @@ export default function RootLayout({
         className="font-sans antialiased"
       >
         <AuthProvider>
-          <SiteHeader />
+          <ConditionalHeader />
           {children}
           <SiteFooter />
           <ToastContainer />

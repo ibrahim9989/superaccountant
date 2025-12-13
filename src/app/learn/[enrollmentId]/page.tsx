@@ -2,6 +2,7 @@
 
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useEffect, useState, use, useCallback, useRef } from 'react'
 import { CourseEnrollmentWithDetails, LessonWithDetails, CourseProgress, QuizAttempt } from '@/lib/validations/course'
 import { courseService } from '@/lib/services/courseService'
@@ -20,7 +21,7 @@ interface LearnPageProps {
 }
 
 export default function LearnPage({ params }: LearnPageProps) {
-  const { user, loading } = useAuth()
+  const { user, loading, signOut } = useAuth()
   const router = useRouter()
   const [enrollment, setEnrollment] = useState<CourseEnrollmentWithDetails | null>(null)
   const [currentLesson, setCurrentLesson] = useState<LessonWithDetails | null>(null)
@@ -45,18 +46,16 @@ export default function LearnPage({ params }: LearnPageProps) {
   // Cache for lesson data to avoid redundant fetches
   const lessonCache = useRef<Map<string, LessonWithDetails>>(new Map())
 
-  // Handle sidebar state for desktop - open by default on desktop
+  // Handle sidebar state for desktop - closed by default, user can toggle
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1024) { // lg breakpoint
-        setSidebarOpen(true)
+        // Keep current state on desktop, don't auto-open
       } else {
+        // On mobile, close sidebar when resizing to mobile
         setSidebarOpen(false)
       }
     }
-    
-    // Set initial state
-    handleResize()
     
     // Listen for resize events
     window.addEventListener('resize', handleResize)
@@ -100,9 +99,50 @@ export default function LearnPage({ params }: LearnPageProps) {
       setEnrollment(enrollmentData)
       setCourseProgress(progressData)
 
+      // Debug: Log course structure
+      console.log('📚 Enrollment Data:', enrollmentData)
+      console.log('📚 Course:', enrollmentData.course)
+      console.log('📚 Modules:', (enrollmentData.course as any)?.modules)
+      console.log('📚 Modules length:', (enrollmentData.course as any)?.modules?.length)
+      
+      // Check if course has modules
+      const modules = (enrollmentData.course as any)?.modules || []
+      if (modules.length === 0) {
+        console.warn('⚠️ WARNING: Course has NO modules! Course ID:', enrollmentData.course?.id)
+        console.warn('⚠️ You need to add modules to this course via the admin panel or database.')
+        console.warn('⚠️ Course title:', enrollmentData.course?.title)
+        setCurrentLesson(null)
+        setLoadingData(false)
+        return
+      }
+      
+      if (modules.length > 0) {
+        console.log('📚 First module:', modules[0])
+        console.log('📚 First module lessons:', modules[0]?.lessons)
+        console.log('📚 First module lessons length:', modules[0]?.lessons?.length)
+        
+        // Check if first module has lessons
+        if (!modules[0]?.lessons || modules[0].lessons.length === 0) {
+          console.warn('⚠️ WARNING: First module has NO lessons! Module ID:', modules[0]?.id)
+          console.warn('⚠️ You need to add lessons to this module via the admin panel or database.')
+          setCurrentLesson(null)
+          setLoadingData(false)
+          return
+        }
+      }
+
       // Determine which lesson to load
       const lessonIdToLoad = progressData?.next_lesson?.id || 
-        (enrollmentData.course as any)?.modules?.[0]?.lessons?.[0]?.id
+        modules[0]?.lessons?.[0]?.id
+
+      console.log('📚 Lesson ID to load:', lessonIdToLoad)
+      
+      if (!lessonIdToLoad) {
+        console.warn('⚠️ WARNING: No lesson ID found to load!')
+        setCurrentLesson(null)
+        setLoadingData(false)
+        return
+      }
 
       if (lessonIdToLoad) {
         // Load lesson data with all related data in parallel
@@ -336,14 +376,8 @@ export default function LearnPage({ params }: LearnPageProps) {
 
   if (loading || loadingData) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center relative">
-        <div className="absolute inset-0 opacity-40">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-white/5 via-gray-800/10 to-black/5 rounded-full blur-3xl" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-black/10 via-gray-700/15 to-white/5 rounded-full blur-3xl" />
-        </div>
-        <div className="relative z-10">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-800 border-t-white"></div>
-        </div>
+      <div className="min-h-screen w-full bg-gradient-to-br from-[#1e3a5f] to-[#DC2626] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
       </div>
     )
   }
@@ -353,189 +387,277 @@ export default function LearnPage({ params }: LearnPageProps) {
   }
 
   return (
-    <div className="h-screen w-full relative flex flex-col bg-black">
-      {/* Luxury Background Effects */}
-      <div className="absolute inset-0 opacity-40">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-white/5 via-gray-800/10 to-black/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-black/10 via-gray-700/15 to-white/5 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[1200px] bg-gradient-to-br from-gray-900/10 via-transparent to-gray-900/10 rounded-full blur-3xl" />
-      </div>
-
-      {/* Subtle Pattern Overlay */}
-      <div className="absolute inset-0 opacity-[0.02]">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='50' cy='50' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }} />
-      </div>
-
-      {/* Header */}
-      <header className="relative z-10 bg-gradient-to-br from-gray-900/80 via-gray-800/80 to-gray-900/80 backdrop-blur-sm border-b border-gray-600/50">
-        <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="text-white hover:text-gray-300 transition-colors duration-200 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
-              aria-label="Toggle sidebar"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {sidebarOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
-            </button>
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-                <span className="text-black font-bold text-sm">SA</span>
+    <div className="h-screen w-full relative flex flex-col bg-[#2B2A29]">
+      {/* Unified Header - Replaces global header, course header, and lesson header */}
+      <header className="relative z-50 bg-gradient-to-br from-[#1e3a5f] via-[#264174] to-[#DC2626] border-b border-white/10">
+        <div className="flex flex-col">
+          {/* Top Row: Logo, Navigation, Actions */}
+          <div className="flex items-center justify-between h-12 px-3 sm:px-4 lg:px-6">
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setSidebarOpen(!sidebarOpen)
+                }}
+                className="text-white hover:text-white/80 transition-colors duration-200 p-1.5 min-w-[36px] min-h-[36px] flex items-center justify-center relative z-50"
+                aria-label="Toggle sidebar"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {sidebarOpen ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  )}
+                </svg>
+              </button>
+              <Link href="/" className="flex items-center">
+                <span className="text-white font-bold text-sm sm:text-base">Super Accountant</span>
+              </Link>
+              {/* Navigation Links - Desktop */}
+              <div className="hidden lg:flex items-center space-x-4 ml-4">
+                <Link href="/#features" className="text-white/90 hover:text-white text-xs font-medium transition-colors">
+                  Features
+                </Link>
+                <Link href="/#how-it-works" className="text-white/90 hover:text-white text-xs font-medium transition-colors">
+                  How It Works
+                </Link>
+                <Link href="/#testimonials" className="text-white/90 hover:text-white text-xs font-medium transition-colors">
+                  Testimonials
+                </Link>
+                <Link href="/#pricing" className="text-white/90 hover:text-white text-xs font-medium transition-colors">
+                  Pricing
+                </Link>
               </div>
-              <h1 className="text-xl font-bold text-white">
-                {enrollment.course?.title}
-              </h1>
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            {/* Progress Bar */}
-            <div className="hidden md:flex items-center space-x-3">
-              <span className="text-sm text-gray-300 font-medium">
-                {courseProgress?.lessons_completed || 0} / {courseProgress?.total_lessons || 0}
-              </span>
-              <div className="w-32 h-2 bg-gray-800/50 rounded-full overflow-hidden border border-gray-700/50">
-                <div
-                  className="h-full bg-gradient-to-r from-white via-gray-200 to-white transition-all duration-300"
-                  style={{
-                    width: `${courseProgress?.overall_progress || 0}%`
-                  }}
-                />
-              </div>
-              <span className="text-sm text-gray-300 font-medium">
-                {Math.round(courseProgress?.overall_progress || 0)}%
-              </span>
             </div>
             
-            <button
-              onClick={() => router.push('/dashboard')}
-              className="px-4 py-2 bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 border border-gray-600/50 hover:border-gray-500/70 text-white/90 hover:text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-xl"
-            >
-              Dashboard
-            </button>
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              {/* Progress Bar */}
+              <div className="hidden md:flex items-center space-x-2">
+                <span className="text-xs text-white/90 font-medium">
+                  {courseProgress?.lessons_completed || 0} / {courseProgress?.total_lessons || 0}
+                </span>
+                <div className="w-20 h-1.5 bg-white/10 rounded-full overflow-hidden border border-white/20">
+                  <div
+                    className="h-full bg-white transition-all duration-300"
+                    style={{
+                      width: `${courseProgress?.overall_progress || 0}%`
+                    }}
+                  />
+                </div>
+                <span className="text-xs text-white/90 font-medium">
+                  {Math.round(courseProgress?.overall_progress || 0)}%
+                </span>
+              </div>
+              
+              <button
+                onClick={() => router.push('/dashboard')}
+                className="px-2.5 py-1 sm:px-3 sm:py-1.5 bg-white/20 hover:bg-white/30 text-white rounded text-xs font-medium transition-colors"
+              >
+                Dashboard
+              </button>
+              {user && (
+                <button
+                  onClick={async () => {
+                    await signOut()
+                    router.push('/login')
+                  }}
+                  className="px-2.5 py-1 sm:px-3 sm:py-1.5 bg-[#DC2626] hover:bg-[#B91C1C] text-white rounded text-xs font-medium transition-colors"
+                >
+                  Sign Out
+                </button>
+              )}
+            </div>
           </div>
+
+          {/* Second Row: Course Title and Lesson Info (if lesson is active) */}
+          {currentLesson && (
+            <div className="flex items-center justify-between px-3 sm:px-4 lg:px-6 py-1.5 border-t border-white/10 bg-gradient-to-r from-[#264174]/30 to-[#DC2626]/30">
+              <div className="flex items-center space-x-3 flex-1 min-w-0">
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-sm sm:text-base font-bold text-white truncate">
+                    {currentLesson.title}
+                  </h2>
+                  <div className="flex items-center gap-2 text-xs text-white/80">
+                    <span className="capitalize">{currentLesson.lesson_type}</span>
+                    {currentLesson.duration_minutes && (
+                      <span>{currentLesson.duration_minutes}m</span>
+                    )}
+                    {currentLesson.is_required && (
+                      <span className="bg-white/10 px-1.5 py-0.5 rounded text-xs border border-white/20">Required</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => handleLessonComplete(currentLesson.id)}
+                className="ml-3 bg-[#DC2626] hover:bg-[#B91C1C] text-white px-3 py-1.5 rounded text-xs font-semibold transition-colors whitespace-nowrap flex-shrink-0"
+              >
+                Mark Complete
+              </button>
+            </div>
+          )}
+
+          {/* Course Title Row (if no lesson active) */}
+          {!currentLesson && (
+            <div className="flex items-center px-3 sm:px-4 lg:px-6 py-1.5 border-t border-white/10">
+              <h1 className="text-sm sm:text-base font-bold text-white">
+                {enrollment.course?.title || 'Course'}
+              </h1>
+            </div>
+          )}
         </div>
       </header>
 
-      <div className="relative z-10 flex flex-1">
+      <div className="relative z-10 flex flex-1 min-h-0">
         {/* Sidebar - Mobile: Overlay, Desktop: Sidebar */}
         {/* Mobile Overlay Backdrop */}
         {sidebarOpen && (
           <div 
             className="lg:hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-40"
+            style={{ top: '64px' }}
             onClick={() => setSidebarOpen(false)}
           />
         )}
         
         {/* Sidebar */}
         <div className={`
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} 
-          ${sidebarOpen ? 'w-80' : 'w-0 lg:w-80'}
-          fixed lg:relative
-          top-0 left-0 h-full lg:h-auto
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
+          ${sidebarOpen ? 'w-80' : 'w-0'}
+          fixed lg:fixed
+          top-0 left-0
+          h-screen
           transition-all duration-300 overflow-hidden 
-          bg-gradient-to-b from-gray-900/95 via-gray-800/95 to-gray-900/95 backdrop-blur-sm 
-          border-r border-gray-600/50 z-50 lg:z-auto
+          bg-gradient-to-b from-[#2B2A29] to-[#264174]/20 backdrop-blur-sm 
+          border-r border-white/10 z-40
+          flex flex-col
         `}>
-          <div className="h-full overflow-y-auto p-4">
-            <div className="space-y-6">
-              {/* Course Progress */}
-              <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 rounded-2xl p-4 border border-gray-600/50 shadow-xl">
-                <h3 className="text-white font-black mb-3 text-lg">Course Progress</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-300 font-medium">Overall Progress</span>
-                    <span className="text-white font-bold">{Math.round(courseProgress?.overall_progress || 0)}%</span>
-                  </div>
-                  <div className="w-full h-2 bg-gray-800/50 rounded-full overflow-hidden border border-gray-700/50">
-                    <div
-                      className="h-full bg-gradient-to-r from-white via-gray-200 to-white transition-all duration-300"
-                      style={{ width: `${courseProgress?.overall_progress || 0}%` }}
-                    />
-                  </div>
-                  <div className="flex justify-between text-xs text-gray-400 font-medium">
-                    <span>{courseProgress?.lessons_completed || 0} completed</span>
-                    <span>{courseProgress?.total_lessons || 0} total</span>
+          <div className="h-full flex flex-col overflow-hidden">
+            {/* Close Button - Mobile only, visible at top of sidebar */}
+            <div className="lg:hidden flex-shrink-0 flex justify-end p-4 border-b border-white/10">
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="p-2 bg-white/10 border border-white/20 rounded-lg text-white hover:text-white hover:border-white/30 hover:bg-[#DC2626]/50 transition-all duration-300"
+                aria-label="Close sidebar"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="flex-1 flex flex-col overflow-hidden p-4">
+              {/* Course Progress - Fixed at top */}
+              <div className="flex-shrink-0 mb-6">
+                <div className="bg-gradient-to-br from-[#264174]/50 to-[#DC2626]/40 rounded-2xl p-4 border border-white/10">
+                  <h3 className="text-white font-black mb-3 text-lg">Course Progress</h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-white/90 font-medium">Overall Progress</span>
+                      <span className="text-white font-bold">{Math.round(courseProgress?.overall_progress || 0)}%</span>
+                    </div>
+                    <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden border border-white/20">
+                      <div
+                        className="h-full bg-white transition-all duration-300"
+                        style={{ width: `${courseProgress?.overall_progress || 0}%` }}
+                      />
+                    </div>
+                    <div className="flex justify-between text-xs text-white/80 font-medium">
+                      <span>{courseProgress?.lessons_completed || 0} completed</span>
+                      <span>{courseProgress?.total_lessons || 0} total</span>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Course Modules */}
-              <div className="space-y-4">
-                <h3 className="text-white font-black text-lg">Course Content</h3>
-                {(enrollment.course as any)?.modules?.map((module: any, moduleIndex: number) => (
-                  <div key={module.id} className="space-y-2">
-                    <div className="flex items-center justify-between bg-gradient-to-r from-gray-800/50 to-gray-900/50 px-3 py-2 rounded-xl border border-gray-700/50">
-                      <h4 className="text-white font-bold text-sm">
-                        Week {module.week_number}: {module.title}
-                      </h4>
-                      <span className="text-xs text-gray-300 font-medium bg-gray-800/50 px-2 py-1 rounded-full">
-                        {module.lessons?.length || 0} lessons
-                      </span>
-                    </div>
-                    
-                    <div className="space-y-1 ml-2">
-                      {module.lessons?.map((lesson: any, lessonIndex: number) => (
-                        <button
-                          key={lesson.id}
-                          onClick={() => handleLessonSelect(lesson.id)}
-                          className={`w-full text-left p-3 rounded-xl text-sm transition-all duration-300 ${
-                            currentLesson?.id === lesson.id
-                              ? 'bg-gradient-to-r from-white via-gray-100 to-white text-black font-bold shadow-lg'
-                              : 'bg-gradient-to-r from-gray-800/50 to-gray-900/50 text-gray-300 border border-gray-700/50 hover:border-gray-500/70 hover:text-white font-medium'
-                          }`}
-                        >
-                          <div className="flex items-center space-x-2">
-                            <span className={`text-xs font-bold ${currentLesson?.id === lesson.id ? 'text-black' : 'text-gray-400'}`}>
-                              {lessonIndex + 1}
-                            </span>
-                            <span className="truncate flex-1">{lesson.title}</span>
-                            <span className={`text-xs ${currentLesson?.id === lesson.id ? 'text-black/70' : 'text-gray-500'}`}>
-                              {lesson.duration_minutes}m
-                            </span>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
+              {/* Course Modules - Scrollable */}
+              <div className="flex-1 overflow-y-auto min-h-0">
+                <div className="space-y-4">
+                <h3 className="text-white font-black text-lg sticky top-0 bg-gradient-to-b from-[#2B2A29] to-transparent pb-2 z-10">Course Content</h3>
+                {(!(enrollment.course as any)?.modules || (enrollment.course as any)?.modules?.length === 0) ? (
+                  <div className="bg-white/10 rounded-xl p-4 border border-white/20">
+                    <p className="text-white/90 text-sm">No modules available yet.</p>
                   </div>
-                ))}
+                ) : (
+                  (enrollment.course as any)?.modules?.map((module: any, moduleIndex: number) => (
+                    <div key={module.id} className="space-y-2">
+                      <div className="flex items-center justify-between bg-white/10 px-3 py-2 rounded-xl border border-white/20">
+                        <h4 className="text-white font-bold text-sm">
+                          Week {module.week_number}: {module.title}
+                        </h4>
+                        <span className="text-xs text-white/90 font-medium bg-white/10 px-2 py-1 rounded-full border border-white/20">
+                          {module.lessons?.length || 0} lessons
+                        </span>
+                      </div>
+                      
+                      <div className="space-y-1 ml-2">
+                        {module.lessons?.map((lesson: any, lessonIndex: number) => (
+                          <button
+                            key={lesson.id}
+                            onClick={() => handleLessonSelect(lesson.id)}
+                            className={`w-full text-left p-3 rounded-lg text-sm transition-all duration-300 ${
+                              currentLesson?.id === lesson.id
+                                ? 'bg-white text-[#264174] font-bold shadow-lg'
+                                : 'bg-white/10 text-white/90 border border-white/20 hover:border-white/30 hover:bg-white/15 font-medium'
+                            }`}
+                          >
+                            <div className="flex items-center space-x-2">
+                              <span className={`text-xs font-bold ${currentLesson?.id === lesson.id ? 'text-[#264174]' : 'text-white/70'}`}>
+                                {lessonIndex + 1}
+                              </span>
+                              <span className="truncate flex-1">{lesson.title}</span>
+                              <span className={`text-xs ${currentLesson?.id === lesson.id ? 'text-[#264174]/70' : 'text-white/70'}`}>
+                                {lesson.duration_minutes}m
+                              </span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))
+                )}
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col">
+        <div className={`flex-1 flex flex-col min-h-0 transition-all duration-300 ${
+          sidebarOpen ? 'lg:ml-80' : 'lg:ml-0'
+        }`}>
           {currentLesson ? (
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col min-h-0">
               {/* Lesson Header */}
-              <div className="bg-white/5 backdrop-blur-sm border-b border-white/10 p-3 sm:p-4 md:p-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+              <div className="flex-shrink-0 bg-gradient-to-br from-[#264174]/50 to-[#DC2626]/40 backdrop-blur-sm border-b border-white/10 p-2 sm:p-3">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
                   <div className="flex-1 min-w-0">
-                    <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-white mb-1 sm:mb-2 pr-2">
+                    <h2 className="text-base sm:text-lg md:text-xl font-black text-white mb-1 pr-2">
                       {currentLesson.title}
                     </h2>
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4 text-xs sm:text-sm text-gray-400">
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs text-white/80">
                       <span className="capitalize">{currentLesson.lesson_type}</span>
                       {currentLesson.duration_minutes && (
                         <span>{currentLesson.duration_minutes} minutes</span>
                       )}
                       {currentLesson.is_required && (
-                        <span className="text-yellow-400">Required</span>
+                        <span className="bg-white/10 px-2 py-1 rounded-full border border-white/20">Required</span>
                       )}
                     </div>
                   </div>
                   
                   <button
                     onClick={() => handleLessonComplete(currentLesson.id)}
-                    className="bg-green-600 hover:bg-green-700 text-white px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 rounded-lg font-semibold text-sm sm:text-base transition-all duration-300 min-h-[44px] whitespace-nowrap"
+                    className="bg-[#DC2626] hover:bg-[#B91C1C] text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-semibold text-xs sm:text-sm transition-colors whitespace-nowrap"
                   >
                     Mark Complete
                   </button>
@@ -543,11 +665,11 @@ export default function LearnPage({ params }: LearnPageProps) {
               </div>
 
               {/* Lesson Content */}
-              <div className="flex-1 p-3 sm:p-4 md:p-6 overflow-y-auto bg-gradient-to-br from-gray-900/50 to-gray-800/30 backdrop-blur-sm">
+              <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 bg-[#2B2A29] min-h-0">
                 {currentLesson.description && (
                   <div className="mb-4 sm:mb-5 md:mb-6">
-                    <h3 className="text-base sm:text-lg font-semibold text-white mb-2 sm:mb-3">Description</h3>
-                    <p className="text-sm sm:text-base text-gray-300 leading-relaxed">
+                    <h3 className="text-base sm:text-lg font-black text-white mb-2 sm:mb-3">Description</h3>
+                    <p className="text-sm sm:text-base text-white/90 leading-relaxed">
                       {currentLesson.description}
                     </p>
                   </div>
@@ -558,14 +680,20 @@ export default function LearnPage({ params }: LearnPageProps) {
                   <div className="mb-4 sm:mb-5 md:mb-6">
                     <h3 className="text-base sm:text-lg font-semibold text-white mb-2 sm:mb-3">Video Content</h3>
                     {/* Container with video and flowchart side by side */}
-                    <div className="flex items-stretch gap-0 rounded-lg overflow-hidden bg-black">
+                    <div className="flex items-stretch gap-0 rounded-lg overflow-hidden bg-black" style={{ minHeight: '600px' }}>
                       {/* Video Player - Responsive width */}
                       <div className={`bg-black rounded-l-lg overflow-hidden transition-all duration-300 ${
-                        ((currentLesson as any).flowchart_file_path || (currentLesson as any).flowchart_url) 
-                          ? 'flex-1 min-w-0' 
+                        ((currentLesson as any).flowcharts && (currentLesson as any).flowcharts.length > 0) || 
+                        ((currentLesson as any).flowchart_file_path || (currentLesson as any).flowchart_url)
+                          ? 'flex-1 min-w-0 flex flex-col' 
                           : 'w-full rounded-r-lg'
                       }`}>
-                        <div className="aspect-video w-full">
+                        <div className={`w-full flex-1 ${
+                          ((currentLesson as any).flowcharts && (currentLesson as any).flowcharts.length > 0) || 
+                          ((currentLesson as any).flowchart_file_path || (currentLesson as any).flowchart_url)
+                            ? '' 
+                            : 'aspect-video'
+                        }`}>
                           <iframe
                             src={(() => {
                               const url = (currentLesson as any).video_url
@@ -668,8 +796,8 @@ export default function LearnPage({ params }: LearnPageProps) {
                       .map((content, index) => {
                         console.log('Rendering content:', content)
                         return (
-                      <div key={content.id} className="bg-white/5 rounded-lg p-3 sm:p-4 md:p-6">
-                        <h4 className="text-base sm:text-lg font-semibold text-white mb-2 sm:mb-3">
+                      <div key={content.id} className="bg-gradient-to-br from-[#264174]/50 to-[#DC2626]/40 rounded-xl p-3 sm:p-4 md:p-6 border border-white/10">
+                        <h4 className="text-base sm:text-lg font-black text-white mb-2 sm:mb-3">
                           {content.title}
                         </h4>
                         
@@ -779,33 +907,32 @@ export default function LearnPage({ params }: LearnPageProps) {
                   </div>
                 ) : (
                   <div className="text-center py-12">
-                    <div className="text-gray-400 text-lg mb-4">
-                      No content available for this lesson yet.
+                    <div className="bg-gradient-to-br from-[#264174]/50 to-[#DC2626]/40 rounded-xl p-6 border border-white/10">
+                      <div className="text-white/90 text-lg mb-4">
+                        No content available for this lesson yet.
+                      </div>
+                      <p className="text-white/70">
+                        Content will be added soon. Please check back later.
+                      </p>
                     </div>
-                    <p className="text-gray-500">
-                      Content will be added soon. Please check back later.
-                    </p>
                   </div>
                 )}
 
                 {/* Quiz Section */}
                 {currentLesson.quiz && (
-                  <div className="mt-8 bg-white/5 rounded-lg p-6">
-                    <h3 className="text-lg font-semibold text-white mb-4">
+                  <div className="mt-8 bg-gradient-to-br from-[#264174]/50 to-[#DC2626]/40 rounded-xl p-6 border border-white/10">
+                    <h3 className="text-lg font-black text-white mb-4">
                       Quiz: {currentLesson.quiz.title || 'Lesson Quiz'}
                     </h3>
-                    <p className="text-gray-300 mb-4">
+                    <p className="text-white/90 mb-4">
                       {currentLesson.quiz.description || 'Test your knowledge of this lesson'}
                     </p>
-                    <div className="flex items-center space-x-4 mb-4 text-sm text-gray-400">
+                    <div className="flex items-center space-x-4 mb-4 text-sm text-white/80">
                       {currentLesson.quiz.time_limit_minutes && (
                         <span>Time Limit: {currentLesson.quiz.time_limit_minutes} minutes</span>
                       )}
                       <span>Passing Score: {currentLesson.quiz.passing_score_percentage || 70}%</span>
                       <span>Max Attempts: {currentLesson.quiz.max_attempts || 3}</span>
-                    </div>
-                    <div className="mb-4 text-xs text-gray-500">
-                      Quiz ID: {currentLesson.quiz?.id || 'Fallback Quiz'}
                     </div>
                     <div className="flex space-x-4">
                       <button 
@@ -817,13 +944,13 @@ export default function LearnPage({ params }: LearnPageProps) {
                           setShowQuiz(true)
                           console.log('showQuiz state should now be true')
                         }}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300"
+                        className="bg-[#DC2626] hover:bg-[#B91C1C] text-white px-6 py-2 rounded-lg font-semibold transition-colors"
                       >
                         Start Quiz
                       </button>
                       <button 
                         onClick={() => setShowQuizHistory(true)}
-                        className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300"
+                        className="bg-white/10 hover:bg-white/20 text-white px-6 py-2 rounded-lg font-semibold transition-colors border border-white/20"
                       >
                         View Quiz History
                       </button>
@@ -832,14 +959,14 @@ export default function LearnPage({ params }: LearnPageProps) {
                 )}
 
                 {/* Daily Test Section */}
-                <div className="mt-8 bg-white/5 rounded-lg p-6">
-                  <h3 className="text-lg font-semibold text-white mb-4">
+                <div className="mt-8 bg-gradient-to-br from-[#264174]/50 to-[#DC2626]/40 rounded-xl p-6 border border-white/10">
+                  <h3 className="text-lg font-black text-white mb-4">
                     Daily Tests
                   </h3>
-                  <p className="text-gray-300 mb-4">
+                  <p className="text-white/90 mb-4">
                     Take daily tests to reinforce your learning and track your progress throughout the 45-day course.
                   </p>
-                  <div className="flex items-center space-x-4 mb-4 text-sm text-gray-400">
+                  <div className="flex items-center space-x-4 mb-4 text-sm text-white/80">
                     <span>📊 Progress Tracking</span>
                     <span>🔥 Streak Counter</span>
                     <span>📈 Performance Analytics</span>
@@ -854,10 +981,10 @@ export default function LearnPage({ params }: LearnPageProps) {
                           onClick={() => setCurrentViewingDay(dayNumber)}
                           className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
                             currentViewingDay === dayNumber
-                              ? 'bg-blue-600 text-white'
+                              ? 'bg-[#DC2626] text-white'
                               : dayNumber <= nextAvailableTestDay
-                              ? 'bg-white/10 text-gray-300 hover:bg-white/20'
-                              : 'bg-gray-600/50 text-gray-500 cursor-not-allowed'
+                              ? 'bg-white/10 text-white/90 hover:bg-white/20 border border-white/20'
+                              : 'bg-white/5 text-white/50 cursor-not-allowed border border-white/10'
                           }`}
                           disabled={dayNumber > nextAvailableTestDay}
                         >
@@ -877,14 +1004,14 @@ export default function LearnPage({ params }: LearnPageProps) {
                           setShowTest(true)
                           setCurrentTestDay(currentViewingDay)
                         }}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300"
+                        className="bg-[#DC2626] hover:bg-[#B91C1C] text-white px-6 py-3 rounded-lg font-semibold transition-colors"
                       >
                         Start Day {currentViewingDay} Quiz
                       </button>
                     ) : (
                       <button
                         disabled
-                        className="bg-gray-600/50 text-gray-500 px-6 py-3 rounded-lg font-semibold cursor-not-allowed"
+                        className="bg-white/5 text-white/50 px-6 py-3 rounded-lg font-semibold cursor-not-allowed border border-white/10"
                       >
                         Day {currentViewingDay} Locked
                       </button>
@@ -893,15 +1020,15 @@ export default function LearnPage({ params }: LearnPageProps) {
 
                   {/* Progress Requirement Message - Show when user is on a day they haven't unlocked */}
                   {currentViewingDay > nextAvailableTestDay && (
-                    <div className="mb-4 bg-red-500/20 border border-red-500/30 rounded-lg p-4">
+                    <div className="mb-4 bg-white/10 border border-white/20 rounded-lg p-4">
                       <div className="flex items-start space-x-3">
-                        <div className="text-red-400 text-xl">🚫</div>
+                        <div className="text-white text-xl">🚫</div>
                         <div>
-                          <h4 className="text-red-400 font-semibold mb-2">Test Access Restricted</h4>
-                          <p className="text-red-300 text-sm mb-2">
+                          <h4 className="text-white font-semibold mb-2">Test Access Restricted</h4>
+                          <p className="text-white/90 text-sm mb-2">
                             You must pass Day {nextAvailableTestDay} with 90% or higher to unlock Day {currentViewingDay} test.
                           </p>
-                          <p className="text-red-200 text-xs">
+                          <p className="text-white/70 text-xs">
                             Complete the Day {nextAvailableTestDay} test above and achieve 90% to continue your progress through the course.
                           </p>
                         </div>
@@ -911,7 +1038,7 @@ export default function LearnPage({ params }: LearnPageProps) {
                   
                   <button 
                     onClick={() => router.push(`/daily-tests/${resolvedParams.enrollmentId}?day=1`)}
-                    className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300"
+                    className="bg-white/10 hover:bg-white/20 text-white px-6 py-2 rounded-lg font-semibold transition-colors border border-white/20"
                   >
                     View All Daily Tests
                   </button>
@@ -923,45 +1050,45 @@ export default function LearnPage({ params }: LearnPageProps) {
                   if (!assignment) return null
                   
                   return (
-                    <div className="mt-8 bg-white/5 rounded-lg p-6">
-                      <h3 className="text-lg font-semibold text-white mb-4">
+                    <div className="mt-8 bg-gradient-to-br from-[#264174]/50 to-[#DC2626]/40 rounded-xl p-6 border border-white/10">
+                      <h3 className="text-lg font-black text-white mb-4">
                         Assignment: {assignment.title}
                       </h3>
-                      <p className="text-gray-300 mb-4">
+                      <p className="text-white/90 mb-4">
                         {assignment.description}
                       </p>
                       {assignment.instructions && (
                         <div className="mb-4">
-                          <h4 className="text-white font-medium mb-2">Instructions:</h4>
-                          <p className="text-gray-300">{assignment.instructions}</p>
+                          <h4 className="text-white font-semibold mb-2">Instructions:</h4>
+                          <p className="text-white/90">{assignment.instructions}</p>
                         </div>
                       )}
                       {assignment.due_date && (
                         <div className="mb-4">
-                          <h4 className="text-white font-medium mb-2">Due Date:</h4>
-                          <p className="text-yellow-400">
+                          <h4 className="text-white font-semibold mb-2">Due Date:</h4>
+                          <p className="text-white/90">
                             {new Date(assignment.due_date).toLocaleDateString()}
                           </p>
                         </div>
                       )}
                       <div className="mb-4">
-                        <h4 className="text-white font-medium mb-2">Assignment Details:</h4>
+                        <h4 className="text-white font-semibold mb-2">Assignment Details:</h4>
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
-                            <span className="text-gray-400">Type:</span>
+                            <span className="text-white/80">Type:</span>
                             <span className="text-white ml-2 capitalize">
                               {assignment.assignment_type?.replace('_', ' ')}
                             </span>
                           </div>
                           <div>
-                            <span className="text-gray-400">Max Points:</span>
+                            <span className="text-white/80">Max Points:</span>
                             <span className="text-white ml-2">{assignment.max_points}</span>
                           </div>
                         </div>
                         {assignment.attachment_files && Object.keys(assignment.attachment_files).length > 0 && (
                           <div className="mt-3">
-                            <span className="text-gray-400 text-sm">Provided Documents:</span>
-                            <span className="text-blue-400 ml-2 text-sm">
+                            <span className="text-white/80 text-sm">Provided Documents:</span>
+                            <span className="text-white ml-2 text-sm">
                               {Object.keys(assignment.attachment_files).length} file(s)
                             </span>
                           </div>
@@ -969,7 +1096,7 @@ export default function LearnPage({ params }: LearnPageProps) {
                       </div>
                       <button 
                         onClick={handleAssignmentSubmission}
-                        className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300"
+                        className="bg-[#DC2626] hover:bg-[#B91C1C] text-white px-6 py-2 rounded-lg font-semibold transition-colors"
                       >
                         Submit Assignment
                       </button>
@@ -999,27 +1126,44 @@ export default function LearnPage({ params }: LearnPageProps) {
               )}
             </div>
           ) : (
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center">
-                <h2 className="text-2xl font-bold text-white mb-4">No Lesson Available</h2>
-                <p className="text-gray-400 mb-6">
-                  {(enrollment?.course as any)?.modules?.length === 0 
-                    ? "This course doesn't have any modules yet." 
-                    : "Unable to load lesson content. This might be a temporary issue."}
-                </p>
-                <div className="space-y-3">
-                  <button
-                    onClick={() => setSidebarOpen(true)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300 block w-full"
-                  >
-                    Open Course Content
-                  </button>
-                  <button
-                    onClick={() => window.location.reload()}
-                    className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300 block w-full"
-                  >
-                    Refresh Page
-                  </button>
+            <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-[#264174]/20 to-[#DC2626]/20">
+              <div className="text-center max-w-md mx-auto px-4">
+                <div className="bg-gradient-to-br from-[#264174]/50 to-[#DC2626]/40 rounded-2xl p-8 border border-white/10">
+                  <h2 className="text-2xl md:text-3xl font-black text-white mb-4">No Lesson Available</h2>
+                  <p className="text-white/90 mb-6">
+                    {(!(enrollment?.course as any)?.modules || (enrollment?.course as any)?.modules?.length === 0) 
+                      ? "This course doesn't have any modules yet. The course needs to have modules and lessons added before you can start learning. Please contact the administrator or use the admin panel to add course content." 
+                      : (!(enrollment?.course as any)?.modules?.[0]?.lessons || (enrollment?.course as any)?.modules?.[0]?.lessons?.length === 0)
+                      ? "The course modules exist but don't have any lessons yet. Please contact the administrator to add lessons to the modules."
+                      : "Unable to load lesson content. This might be a temporary issue."}
+                  </p>
+                  {(!(enrollment?.course as any)?.modules || (enrollment?.course as any)?.modules?.length === 0) && (
+                    <div className="mt-4 p-4 bg-white/10 rounded-lg border border-white/20">
+                      <p className="text-white/80 text-sm mb-2">
+                        <strong>Course ID:</strong> {(enrollment?.course as any)?.id}
+                      </p>
+                      <p className="text-white/80 text-sm">
+                        <strong>Course Title:</strong> {(enrollment?.course as any)?.title}
+                      </p>
+                      <p className="text-white/70 text-xs mt-2">
+                        Use this information when adding modules via the admin panel.
+                      </p>
+                    </div>
+                  )}
+                  <div className="space-y-3">
+                    <button
+                      onClick={() => setSidebarOpen(true)}
+                      className="w-full bg-[#DC2626] hover:bg-[#B91C1C] text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                    >
+                      Open Course Content
+                    </button>
+                    <button
+                      onClick={() => window.location.reload()}
+                      className="w-full bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-lg font-semibold transition-colors border border-white/20"
+                    >
+                      Refresh Page
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
