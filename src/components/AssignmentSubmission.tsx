@@ -71,13 +71,13 @@ export default function AssignmentSubmission({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-900 rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+      <div className="bg-gradient-to-br from-[#264174]/50 to-[#DC2626]/40 border border-white/10 rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-white">Submit Assignment</h2>
+          <h2 className="text-2xl font-black text-white">Submit Assignment</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="text-white/80 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -85,27 +85,29 @@ export default function AssignmentSubmission({
           </button>
         </div>
 
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold text-white mb-2">{assignment.title}</h3>
-          {assignment.description && (
-            <p className="text-gray-300 mb-4">{assignment.description}</p>
-          )}
+        <div className="mb-6 space-y-4">
+          <div className="bg-white/10 rounded-xl p-4 border border-white/20">
+            <h3 className="text-lg font-bold text-white mb-2">{assignment.title}</h3>
+            {assignment.description && (
+              <p className="text-white/90 mb-4">{assignment.description}</p>
+            )}
+          </div>
           {assignment.instructions && (
-            <div className="mb-4">
-              <h4 className="text-white font-medium mb-2">Instructions:</h4>
-              <p className="text-gray-300">{assignment.instructions}</p>
+            <div className="bg-white/10 rounded-xl p-4 border border-white/20">
+              <h4 className="text-white font-bold mb-2">Instructions:</h4>
+              <div className="text-white/90 whitespace-pre-line">{assignment.instructions}</div>
             </div>
           )}
           
           {/* Assignment Attachments/Documents */}
           {assignment.attachment_files && Object.keys(assignment.attachment_files).length > 0 && (
-            <div className="mb-4">
-              <h4 className="text-white font-medium mb-2">Provided Documents:</h4>
+            <div className="bg-white/10 rounded-xl p-4 border border-white/20">
+              <h4 className="text-white font-bold mb-3">Provided Documents:</h4>
               <div className="space-y-2">
                 {Object.entries(assignment.attachment_files).map(([key, file]: [string, any]) => (
-                  <div key={key} className="flex items-center justify-between bg-gray-800 rounded-lg p-3">
+                  <div key={key} className="flex items-center justify-between bg-white/10 rounded-lg p-3 border border-white/20">
                     <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                      <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center border border-white/20">
                         <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
@@ -113,7 +115,7 @@ export default function AssignmentSubmission({
                       <div>
                         <p className="text-white text-sm font-medium">{file.name || file.title || key}</p>
                         {file.size && (
-                          <p className="text-gray-400 text-xs">
+                          <p className="text-white/70 text-xs">
                             {(file.size / 1024 / 1024).toFixed(2)} MB
                           </p>
                         )}
@@ -123,7 +125,7 @@ export default function AssignmentSubmission({
                       href={file.url || file.download_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition-colors"
+                      className="bg-[#DC2626] hover:bg-[#B91C1C] text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
                     >
                       Download
                     </a>
@@ -133,19 +135,23 @@ export default function AssignmentSubmission({
             </div>
           )}
           
-          {assignment.due_date && (
-            <p className="text-yellow-400 text-sm">
-              Due: {new Date(assignment.due_date).toLocaleDateString()}
-            </p>
-          )}
-          <p className="text-gray-400 text-sm mt-2">
-            Max Points: {assignment.max_points}
-          </p>
+          <div className="flex items-center gap-4 text-sm">
+            {assignment.due_date && (
+              <div className="bg-white/10 rounded-lg px-3 py-2 border border-white/20">
+                <span className="text-white/80">Due: </span>
+                <span className="text-white font-medium">{new Date(assignment.due_date).toLocaleDateString()}</span>
+              </div>
+            )}
+            <div className="bg-white/10 rounded-lg px-3 py-2 border border-white/20">
+              <span className="text-white/80">Max Points: </span>
+              <span className="text-white font-medium">{assignment.max_points}</span>
+            </div>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="submission-text" className="block text-white font-medium mb-2">
+          <div className="bg-white/10 rounded-xl p-4 border border-white/20">
+            <label htmlFor="submission-text" className="block text-white font-bold mb-3">
               Your Submission
             </label>
             <textarea
@@ -153,12 +159,12 @@ export default function AssignmentSubmission({
               value={submissionText}
               onChange={(e) => setSubmissionText(e.target.value)}
               placeholder="Write your assignment submission here..."
-              className="w-full h-40 px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              className="w-full h-40 px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/30 resize-none"
             />
           </div>
 
-          <div>
-            <label htmlFor="submission-files" className="block text-white font-medium mb-2">
+          <div className="bg-white/10 rounded-xl p-4 border border-white/20">
+            <label htmlFor="submission-files" className="block text-white font-bold mb-3">
               Upload Files (Optional)
             </label>
             <input
@@ -166,14 +172,17 @@ export default function AssignmentSubmission({
               id="submission-files"
               multiple
               onChange={handleFileChange}
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#DC2626] file:text-white hover:file:bg-[#B91C1C] focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/30"
             />
             {submissionFiles.length > 0 && (
-              <div className="mt-2">
-                <p className="text-gray-400 text-sm">Selected files:</p>
-                <ul className="text-gray-300 text-sm">
+              <div className="mt-3">
+                <p className="text-white/80 text-sm mb-2">Selected files:</p>
+                <ul className="text-white/90 text-sm space-y-1">
                   {submissionFiles.map((file, index) => (
-                    <li key={index}>• {file.name}</li>
+                    <li key={index} className="flex items-center gap-2">
+                      <span>•</span>
+                      <span>{file.name}</span>
+                    </li>
                   ))}
                 </ul>
               </div>
@@ -181,8 +190,8 @@ export default function AssignmentSubmission({
           </div>
 
           {error && (
-            <div className="bg-red-900/50 border border-red-500 rounded-lg p-4">
-              <p className="text-red-400">{error}</p>
+            <div className="bg-white/10 border border-white/20 rounded-xl p-4">
+              <p className="text-white">{error}</p>
             </div>
           )}
 
@@ -190,14 +199,14 @@ export default function AssignmentSubmission({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-6 py-3 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors"
+              className="flex-1 px-6 py-3 border border-white/20 text-white rounded-lg hover:bg-white/10 transition-colors font-semibold"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-6 py-3 bg-[#DC2626] text-white rounded-lg hover:bg-[#B91C1C] transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
             >
               {isSubmitting ? 'Submitting...' : 'Submit Assignment'}
             </button>

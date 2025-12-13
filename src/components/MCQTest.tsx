@@ -321,33 +321,43 @@ export default function MCQTest({ session, onComplete, onAbandon }: MCQTestProps
   return (
     <div className="min-h-screen bg-[#2B2A29] text-white">
       {/* Header */}
-      <div className="bg-gradient-to-br from-[#1e3a5f] via-[#264174] to-[#DC2626] border-b border-white/10 p-4">
-        <div className="max-w-5xl mx-auto flex items-center justify-between flex-wrap gap-4">
-          <div>
-            <h1 className="text-xl font-black text-white mb-2">
+      <div className="bg-gradient-to-br from-[#1e3a5f] via-[#264174] to-[#DC2626] border-b border-white/10 p-3 sm:p-4">
+        <div className="max-w-5xl mx-auto flex items-center justify-between flex-wrap gap-3 sm:gap-4">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-lg sm:text-xl font-black text-white mb-1.5">
               {session.test_config.name}
             </h1>
-            <div className="flex items-center gap-3 flex-wrap">
-              <p className="text-white/90 text-sm font-medium">
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+              <p className="text-white/90 text-xs sm:text-sm font-medium">
                 Question {currentQuestionIndex + 1} of {session.questions.length}
               </p>
               {answeredQuestions.has(currentQuestion.id) && (
-                <span className="bg-white/20 border border-white/30 text-white px-3 py-1 rounded-full text-xs font-bold">
+                <span className="bg-white/20 border border-white/30 text-white px-2 py-0.5 rounded-full text-xs font-bold">
                   ✓ Answered
                 </span>
               )}
               {skippedQuestions.has(currentQuestion.id) && (
-                <span className="bg-white/20 border border-white/30 text-white px-3 py-1 rounded-full text-xs font-bold">
+                <span className="bg-white/20 border border-white/30 text-white px-2 py-0.5 rounded-full text-xs font-bold">
                   ⏭ Skipped
                 </span>
               )}
             </div>
           </div>
-          <div className="text-right">
-            <div className={`text-2xl font-black font-mono ${isTimeLow ? 'text-white animate-pulse' : 'text-white'}`}>
-              {formatTime(timeRemaining)}
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="text-right">
+              <div className={`text-xl sm:text-2xl font-black font-mono ${isTimeLow ? 'text-white animate-pulse' : 'text-white'}`}>
+                {formatTime(timeRemaining)}
+              </div>
+              <div className="text-white/90 text-xs sm:text-sm font-medium">Time Left</div>
             </div>
-            <div className="text-white/90 text-sm font-medium">Time Remaining</div>
+            <button
+              onClick={() => setShowConfirmDialog(true)}
+              className="text-white/80 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg"
+            >
+              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
         </div>
         

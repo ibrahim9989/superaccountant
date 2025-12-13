@@ -527,7 +527,7 @@ export default function LearnPage({ params }: LearnPageProps) {
           top-0 left-0
           h-screen
           transition-all duration-300 overflow-hidden 
-          bg-gradient-to-b from-[#2B2A29] to-[#264174]/20 backdrop-blur-sm 
+          bg-gradient-to-b from-[#2B2A29] to-[#1e3a5f] 
           border-r border-white/10 z-40
           flex flex-col
         `}>
@@ -637,33 +637,6 @@ export default function LearnPage({ params }: LearnPageProps) {
         }`}>
           {currentLesson ? (
             <div className="flex-1 flex flex-col min-h-0">
-              {/* Lesson Header */}
-              <div className="flex-shrink-0 bg-gradient-to-br from-[#264174]/50 to-[#DC2626]/40 backdrop-blur-sm border-b border-white/10 p-2 sm:p-3">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
-                  <div className="flex-1 min-w-0">
-                    <h2 className="text-base sm:text-lg md:text-xl font-black text-white mb-1 pr-2">
-                      {currentLesson.title}
-                    </h2>
-                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs text-white/80">
-                      <span className="capitalize">{currentLesson.lesson_type}</span>
-                      {currentLesson.duration_minutes && (
-                        <span>{currentLesson.duration_minutes} minutes</span>
-                      )}
-                      {currentLesson.is_required && (
-                        <span className="bg-white/10 px-2 py-1 rounded-full border border-white/20">Required</span>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <button
-                    onClick={() => handleLessonComplete(currentLesson.id)}
-                    className="bg-[#DC2626] hover:bg-[#B91C1C] text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-semibold text-xs sm:text-sm transition-colors whitespace-nowrap"
-                  >
-                    Mark Complete
-                  </button>
-                </div>
-              </div>
-
               {/* Lesson Content */}
               <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 bg-[#2B2A29] min-h-0">
                 {currentLesson.description && (
