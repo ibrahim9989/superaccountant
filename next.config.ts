@@ -1,11 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Disable ESLint during build to prevent warnings from failing deployment
-  eslint: {
-    // Only run ESLint on these directories during production builds
-    ignoreDuringBuilds: true,
-  },
   // Disable TypeScript errors during build (warnings only)
   typescript: {
     // !! WARN !!
@@ -14,7 +9,7 @@ const nextConfig: NextConfig = {
     // !! WARN !!
     ignoreBuildErrors: false,
   },
-  // Optimize file watching to reduce rebuilds
+  // Optimize file watching to reduce rebuilds (for webpack mode)
   webpack: (config, { dev }) => {
     if (dev) {
       // Reduce file watching overhead
@@ -35,6 +30,11 @@ const nextConfig: NextConfig = {
       }
     }
     return config
+  },
+  // Turbopack configuration (required in Next.js 16)
+  turbopack: {
+    // Set root directory to silence workspace warning
+    root: process.cwd(),
   },
   // Reduce rebuild frequency
   experimental: {

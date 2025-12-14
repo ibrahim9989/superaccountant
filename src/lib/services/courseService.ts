@@ -626,8 +626,8 @@ export class CourseService {
           // Get course details
           const { data: course, error: courseError } = await supabase
             .from('courses')
-            .select(`
-              *,
+      .select(`
+        *,
               category:course_categories(*)
             `)
             .eq('id', apiData.data.enrollment.course_id)

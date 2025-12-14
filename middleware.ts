@@ -1,13 +1,14 @@
-// Middleware temporarily disabled to fix auth issues
-// import { type NextRequest } from 'next/server'
-// import { updateSession } from '@/lib/supabase/middleware'
+import { type NextRequest, NextResponse } from 'next/server'
 
-// export async function middleware(request: NextRequest) {
-//   return await updateSession(request)
-// }
+// Minimal middleware for Next.js 16 compatibility
+// Middleware functionality is disabled but file must export a function
+export async function middleware(request: NextRequest) {
+  // Pass through all requests without modification
+  return NextResponse.next()
+}
 
-// export const config = {
-//   matcher: [
-//     '/((?!_next/static|_next/image|favicon.ico|auth|debug|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-//   ],
-// }
+export const config = {
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|auth|debug|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
+}

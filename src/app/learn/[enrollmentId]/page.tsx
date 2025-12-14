@@ -45,7 +45,7 @@ export default function LearnPage({ params }: LearnPageProps) {
   
   // Cache for lesson data to avoid redundant fetches
   const lessonCache = useRef<Map<string, LessonWithDetails>>(new Map())
-  
+
   // Cache for enrollment structure (modules/lessons list)
   const enrollmentCache = useRef<CourseEnrollmentWithDetails | null>(null)
   
@@ -246,14 +246,14 @@ export default function LearnPage({ params }: LearnPageProps) {
               })
           }
 
-        // Cache the lesson data for future use
-        if (finalLessonData) {
-          lessonCache.current.set(lessonIdToLoad, finalLessonData)
+          // Cache the lesson data for future use
+          if (finalLessonData) {
+            lessonCache.current.set(lessonIdToLoad, finalLessonData)
           // Prefetch next lesson in background for faster navigation
           prefetchNextLesson(lessonIdToLoad)
-        }
+          }
 
-        setCurrentLesson(finalLessonData)
+          setCurrentLesson(finalLessonData)
         } else {
           setCurrentLesson(null)
         }
@@ -453,22 +453,22 @@ export default function LearnPage({ params }: LearnPageProps) {
           {/* Top Row: Logo, Navigation, Actions */}
           <div className="flex items-center justify-between h-12 px-3 sm:px-4 lg:px-6">
             <div className="flex items-center space-x-3">
-              <button
+            <button
                 onClick={(e) => {
                   e.stopPropagation()
                   setSidebarOpen(!sidebarOpen)
                 }}
                 className="text-white hover:text-white/80 transition-colors duration-200 p-1.5 min-w-[36px] min-h-[36px] flex items-center justify-center relative z-50"
-                aria-label="Toggle sidebar"
-              >
+              aria-label="Toggle sidebar"
+            >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  {sidebarOpen ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  )}
-                </svg>
-              </button>
+                {sidebarOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
               <Link href="/" className="flex items-center">
                 <span className="text-white font-bold text-sm sm:text-base">Super Accountant</span>
               </Link>
@@ -486,34 +486,34 @@ export default function LearnPage({ params }: LearnPageProps) {
                 <Link href="/#pricing" className="text-white/90 hover:text-white text-xs font-medium transition-colors">
                   Pricing
                 </Link>
-              </div>
             </div>
-            
+          </div>
+          
             <div className="flex items-center space-x-2 sm:space-x-3">
-              {/* Progress Bar */}
+            {/* Progress Bar */}
               <div className="hidden md:flex items-center space-x-2">
                 <span className="text-xs text-white/90 font-medium">
-                  {courseProgress?.lessons_completed || 0} / {courseProgress?.total_lessons || 0}
-                </span>
+                {courseProgress?.lessons_completed || 0} / {courseProgress?.total_lessons || 0}
+              </span>
                 <div className="w-20 h-1.5 bg-white/10 rounded-full overflow-hidden border border-white/20">
-                  <div
+                <div
                     className="h-full bg-white transition-all duration-300"
-                    style={{
-                      width: `${courseProgress?.overall_progress || 0}%`
-                    }}
-                  />
-                </div>
-                <span className="text-xs text-white/90 font-medium">
-                  {Math.round(courseProgress?.overall_progress || 0)}%
-                </span>
+                  style={{
+                    width: `${courseProgress?.overall_progress || 0}%`
+                  }}
+                />
               </div>
-              
-              <button
-                onClick={() => router.push('/dashboard')}
+                <span className="text-xs text-white/90 font-medium">
+                {Math.round(courseProgress?.overall_progress || 0)}%
+              </span>
+            </div>
+            
+            <button
+              onClick={() => router.push('/dashboard')}
                 className="px-2.5 py-1 sm:px-3 sm:py-1.5 bg-white/20 hover:bg-white/30 text-white rounded text-xs font-medium transition-colors"
-              >
-                Dashboard
-              </button>
+            >
+              Dashboard
+            </button>
               {user && (
                 <button
                   onClick={async () => {
@@ -525,7 +525,7 @@ export default function LearnPage({ params }: LearnPageProps) {
                   Sign Out
                 </button>
               )}
-            </div>
+          </div>
           </div>
 
           {/* Second Row: Course Title and Lesson Info (if lesson is active) */}
@@ -618,21 +618,21 @@ export default function LearnPage({ params }: LearnPageProps) {
               {/* Course Progress - Fixed at top */}
               <div className="flex-shrink-0 mb-6">
                 <div className="bg-gradient-to-br from-[#264174]/50 to-[#DC2626]/40 rounded-2xl p-4 border border-white/10">
-                  <h3 className="text-white font-black mb-3 text-lg">Course Progress</h3>
-                  <div className="space-y-3">
-                    <div className="flex justify-between text-sm">
+                <h3 className="text-white font-black mb-3 text-lg">Course Progress</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between text-sm">
                       <span className="text-white/90 font-medium">Overall Progress</span>
-                      <span className="text-white font-bold">{Math.round(courseProgress?.overall_progress || 0)}%</span>
-                    </div>
+                    <span className="text-white font-bold">{Math.round(courseProgress?.overall_progress || 0)}%</span>
+                  </div>
                     <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden border border-white/20">
-                      <div
+                    <div
                         className="h-full bg-white transition-all duration-300"
-                        style={{ width: `${courseProgress?.overall_progress || 0}%` }}
-                      />
-                    </div>
+                      style={{ width: `${courseProgress?.overall_progress || 0}%` }}
+                    />
+                  </div>
                     <div className="flex justify-between text-xs text-white/80 font-medium">
-                      <span>{courseProgress?.lessons_completed || 0} completed</span>
-                      <span>{courseProgress?.total_lessons || 0} total</span>
+                    <span>{courseProgress?.lessons_completed || 0} completed</span>
+                    <span>{courseProgress?.total_lessons || 0} total</span>
                     </div>
                   </div>
                 </div>
@@ -640,7 +640,7 @@ export default function LearnPage({ params }: LearnPageProps) {
 
               {/* Course Modules - Scrollable */}
               <div className="flex-1 overflow-y-auto min-h-0">
-                <div className="space-y-4">
+              <div className="space-y-4">
                 <h3 className="text-white font-black text-lg sticky top-0 bg-gradient-to-b from-[#2B2A29] to-transparent pb-2 z-10">Course Content</h3>
                 {(!(enrollment.course as any)?.modules || (enrollment.course as any)?.modules?.length === 0) ? (
                   <div className="bg-white/10 rounded-xl p-4 border border-white/20">
@@ -648,40 +648,40 @@ export default function LearnPage({ params }: LearnPageProps) {
                   </div>
                 ) : (
                   (enrollment.course as any)?.modules?.map((module: any, moduleIndex: number) => (
-                    <div key={module.id} className="space-y-2">
+                  <div key={module.id} className="space-y-2">
                       <div className="flex items-center justify-between bg-white/10 px-3 py-2 rounded-xl border border-white/20">
-                        <h4 className="text-white font-bold text-sm">
-                          Week {module.week_number}: {module.title}
-                        </h4>
+                      <h4 className="text-white font-bold text-sm">
+                        Week {module.week_number}: {module.title}
+                      </h4>
                         <span className="text-xs text-white/90 font-medium bg-white/10 px-2 py-1 rounded-full border border-white/20">
-                          {module.lessons?.length || 0} lessons
-                        </span>
-                      </div>
-                      
-                      <div className="space-y-1 ml-2">
-                        {module.lessons?.map((lesson: any, lessonIndex: number) => (
-                          <button
-                            key={lesson.id}
-                            onClick={() => handleLessonSelect(lesson.id)}
+                        {module.lessons?.length || 0} lessons
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-1 ml-2">
+                      {module.lessons?.map((lesson: any, lessonIndex: number) => (
+                        <button
+                          key={lesson.id}
+                          onClick={() => handleLessonSelect(lesson.id)}
                             className={`w-full text-left p-3 rounded-lg text-sm transition-all duration-300 ${
-                              currentLesson?.id === lesson.id
+                            currentLesson?.id === lesson.id
                                 ? 'bg-white text-[#264174] font-bold shadow-lg'
                                 : 'bg-white/10 text-white/90 border border-white/20 hover:border-white/30 hover:bg-white/15 font-medium'
-                            }`}
-                          >
-                            <div className="flex items-center space-x-2">
+                          }`}
+                        >
+                          <div className="flex items-center space-x-2">
                               <span className={`text-xs font-bold ${currentLesson?.id === lesson.id ? 'text-[#264174]' : 'text-white/70'}`}>
-                                {lessonIndex + 1}
-                              </span>
-                              <span className="truncate flex-1">{lesson.title}</span>
+                              {lessonIndex + 1}
+                            </span>
+                            <span className="truncate flex-1">{lesson.title}</span>
                               <span className={`text-xs ${currentLesson?.id === lesson.id ? 'text-[#264174]/70' : 'text-white/70'}`}>
-                                {lesson.duration_minutes}m
-                              </span>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
+                              {lesson.duration_minutes}m
+                            </span>
+                          </div>
+                        </button>
+                      ))}
                     </div>
+                  </div>
                   ))
                 )}
                 </div>
@@ -716,7 +716,7 @@ export default function LearnPage({ params }: LearnPageProps) {
                       {/* Video Player - Responsive width */}
                       <div className={`bg-black rounded-l-lg overflow-hidden transition-all duration-300 ${
                         ((currentLesson as any).flowcharts && (currentLesson as any).flowcharts.length > 0) || 
-                        ((currentLesson as any).flowchart_file_path || (currentLesson as any).flowchart_url)
+                        ((currentLesson as any).flowchart_file_path || (currentLesson as any).flowchart_url) 
                           ? 'flex-1 min-w-0 flex flex-col' 
                           : 'w-full rounded-r-lg'
                       }`}>
@@ -941,11 +941,11 @@ export default function LearnPage({ params }: LearnPageProps) {
                   <div className="text-center py-12">
                     <div className="bg-gradient-to-br from-[#264174]/50 to-[#DC2626]/40 rounded-xl p-6 border border-white/10">
                       <div className="text-white/90 text-lg mb-4">
-                        No content available for this lesson yet.
-                      </div>
+                      No content available for this lesson yet.
+                    </div>
                       <p className="text-white/70">
-                        Content will be added soon. Please check back later.
-                      </p>
+                      Content will be added soon. Please check back later.
+                    </p>
                     </div>
                   </div>
                 )}
@@ -1167,8 +1167,8 @@ export default function LearnPage({ params }: LearnPageProps) {
                       ? "This course doesn't have any modules yet. The course needs to have modules and lessons added before you can start learning. Please contact the administrator or use the admin panel to add course content." 
                       : (!(enrollment?.course as any)?.modules?.[0]?.lessons || (enrollment?.course as any)?.modules?.[0]?.lessons?.length === 0)
                       ? "The course modules exist but don't have any lessons yet. Please contact the administrator to add lessons to the modules."
-                      : "Unable to load lesson content. This might be a temporary issue."}
-                  </p>
+                    : "Unable to load lesson content. This might be a temporary issue."}
+                </p>
                   {(!(enrollment?.course as any)?.modules || (enrollment?.course as any)?.modules?.length === 0) && (
                     <div className="mt-4 p-4 bg-white/10 rounded-lg border border-white/20">
                       <p className="text-white/80 text-sm mb-2">
@@ -1182,19 +1182,19 @@ export default function LearnPage({ params }: LearnPageProps) {
                       </p>
                     </div>
                   )}
-                  <div className="space-y-3">
-                    <button
-                      onClick={() => setSidebarOpen(true)}
+                <div className="space-y-3">
+                  <button
+                    onClick={() => setSidebarOpen(true)}
                       className="w-full bg-[#DC2626] hover:bg-[#B91C1C] text-white px-6 py-3 rounded-lg font-semibold transition-colors"
-                    >
-                      Open Course Content
-                    </button>
-                    <button
-                      onClick={() => window.location.reload()}
+                  >
+                    Open Course Content
+                  </button>
+                  <button
+                    onClick={() => window.location.reload()}
                       className="w-full bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-lg font-semibold transition-colors border border-white/20"
-                    >
-                      Refresh Page
-                    </button>
+                  >
+                    Refresh Page
+                  </button>
                   </div>
                 </div>
               </div>

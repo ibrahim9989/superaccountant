@@ -114,7 +114,7 @@ export default function DashboardPage() {
         <div className="absolute inset-0 opacity-30">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
-        </div>
+      </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
@@ -132,85 +132,85 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             <div className="bg-gradient-to-br from-[#264174]/50 to-[#DC2626]/40 rounded-2xl p-6 border border-white/10">
               <div className="text-4xl md:text-5xl font-black text-white mb-2">
-                {totalEnrolled}
+              {totalEnrolled}
               </div>
               <div className="text-white/90 text-lg font-medium">Total Courses</div>
             </div>
             <div className="bg-gradient-to-br from-[#264174]/50 to-[#DC2626]/40 rounded-2xl p-6 border border-white/10">
               <div className="text-4xl md:text-5xl font-black text-white mb-2">
                 {inProgress}
-              </div>
+          </div>
               <div className="text-white/90 text-lg font-medium">In Progress</div>
             </div>
             <div className="bg-gradient-to-br from-[#264174]/50 to-[#DC2626]/40 rounded-2xl p-6 border border-white/10 sm:col-span-2 lg:col-span-1">
               <div className="text-4xl md:text-5xl font-black text-white mb-2">
                 {completed}
-              </div>
-              <div className="text-white/90 text-lg font-medium">Completed</div>
-            </div>
           </div>
-
-          {/* Courses Section */}
-          <div className="bg-gradient-to-br from-[#264174]/50 to-[#DC2626]/40 rounded-2xl p-6 md:p-8 border border-white/10">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 md:mb-8">
-              <h2 className="text-2xl md:text-3xl font-black text-white">
-                My Courses
-              </h2>
-              <Link
-                href="/courses"
-                className="px-6 py-3 bg-[#DC2626] text-white rounded-lg font-semibold hover:bg-[#B91C1C] transition-colors text-center"
-              >
-                Browse Courses
-              </Link>
-            </div>
-            {enrollments.length === 0 ? (
-              <div className="text-center py-16">
-                <div className="inline-flex items-center justify-center w-24 h-24 bg-white/10 rounded-full mb-6 border border-white/20">
-                  <span className="text-4xl">📚</span>
-                </div>
-                <p className="text-white/90 text-xl mb-6">No courses enrolled yet</p>
-                <Link
-                  href="/courses"
-                  className="inline-block px-8 py-4 bg-[#DC2626] text-white rounded-lg font-semibold hover:bg-[#B91C1C] transition-colors"
-                >
-                  Explore Courses
-                </Link>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {enrollments.map((enrollment) => (
-                  <div
-                    key={enrollment.id}
-                    onClick={() => router.push(`/learn/${enrollment.id}`)}
-                    className="bg-white/10 rounded-xl p-4 md:p-6 cursor-pointer hover:bg-white/15 transition-all border border-white/20"
-                  >
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-lg md:text-xl font-bold text-white mb-2">
-                          {(enrollment as any).course?.title || 'Course'}
-                        </h3>
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-                          <span className="text-sm text-white/90 font-medium">
-                            Progress: {Math.round(enrollment.progress_percentage || 0)}%
-                          </span>
-                          <div className="w-full sm:w-32 h-2 bg-white/10 rounded-full overflow-hidden border border-white/20">
-                            <div
-                              className="h-full bg-white transition-all duration-500"
-                              style={{ width: `${enrollment.progress_percentage || 0}%` }}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                      <button className="w-full sm:w-auto px-6 py-3 bg-[#DC2626] text-white rounded-lg font-semibold hover:bg-[#B91C1C] transition-colors text-sm md:text-base">
-                        Continue
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+              <div className="text-white/90 text-lg font-medium">Completed</div>
           </div>
         </div>
+
+        {/* Courses Section */}
+          <div className="bg-gradient-to-br from-[#264174]/50 to-[#DC2626]/40 rounded-2xl p-6 md:p-8 border border-white/10">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 md:mb-8">
+              <h2 className="text-2xl md:text-3xl font-black text-white">
+              My Courses
+            </h2>
+            <Link
+              href="/courses"
+                className="px-6 py-3 bg-[#DC2626] text-white rounded-lg font-semibold hover:bg-[#B91C1C] transition-colors text-center"
+            >
+              Browse Courses
+            </Link>
+          </div>
+          {enrollments.length === 0 ? (
+            <div className="text-center py-16">
+                <div className="inline-flex items-center justify-center w-24 h-24 bg-white/10 rounded-full mb-6 border border-white/20">
+                <span className="text-4xl">📚</span>
+              </div>
+                <p className="text-white/90 text-xl mb-6">No courses enrolled yet</p>
+              <Link
+                href="/courses"
+                  className="inline-block px-8 py-4 bg-[#DC2626] text-white rounded-lg font-semibold hover:bg-[#B91C1C] transition-colors"
+              >
+                Explore Courses
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {enrollments.map((enrollment) => (
+                <div
+                  key={enrollment.id}
+                  onClick={() => router.push(`/learn/${enrollment.id}`)}
+                    className="bg-white/10 rounded-xl p-4 md:p-6 cursor-pointer hover:bg-white/15 transition-all border border-white/20"
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                        <h3 className="text-lg md:text-xl font-bold text-white mb-2">
+                    {(enrollment as any).course?.title || 'Course'}
+                  </h3>
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                          <span className="text-sm text-white/90 font-medium">
+                      Progress: {Math.round(enrollment.progress_percentage || 0)}%
+                    </span>
+                          <div className="w-full sm:w-32 h-2 bg-white/10 rounded-full overflow-hidden border border-white/20">
+                          <div
+                              className="h-full bg-white transition-all duration-500"
+                            style={{ width: `${enrollment.progress_percentage || 0}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                      <button className="w-full sm:w-auto px-6 py-3 bg-[#DC2626] text-white rounded-lg font-semibold hover:bg-[#B91C1C] transition-colors text-sm md:text-base">
+                      Continue
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
       </section>
     </div>
   );

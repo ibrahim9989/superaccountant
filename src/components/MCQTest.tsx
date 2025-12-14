@@ -190,92 +190,92 @@ export default function MCQTest({ session, onComplete, onAbandon }: MCQTestProps
           <div className="absolute inset-0 opacity-30">
             <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
             <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
-          </div>
+        </div>
 
           <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="bg-gradient-to-br from-[#264174]/50 to-[#DC2626]/40 rounded-2xl p-6 md:p-10 border border-white/10">
-              <div className="text-center mb-8">
+            <div className="text-center mb-8">
                 <h2 className="text-2xl md:text-3xl font-black text-white mb-6">
-                  Review Your Answers
-                </h2>
-              </div>
-              
-              <div className="mb-8">
-                <div className="grid grid-cols-2 gap-4 mb-6">
+                Review Your Answers
+              </h2>
+            </div>
+            
+            <div className="mb-8">
+              <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="bg-white/10 rounded-xl p-6 border border-white/20">
                     <div className="text-4xl font-black text-white mb-2">{answeredQuestionsList.length}</div>
                     <div className="text-white/90 text-sm font-medium uppercase tracking-wide">Questions Answered</div>
-                  </div>
+                </div>
                   <div className="bg-white/10 rounded-xl p-6 border border-white/20">
                     <div className="text-4xl font-black text-white mb-2">{stillSkippedQuestions.length}</div>
                     <div className="text-white/90 text-sm font-medium uppercase tracking-wide">Questions Skipped</div>
-                  </div>
                 </div>
-              </div>
-
-              {stillSkippedQuestions.length > 0 && (
-                <div className="mb-8">
-                  <h3 className="text-xl font-black text-white mb-6">
-                    Skipped Questions
-                  </h3>
-                  <div className="space-y-4">
-                    {stillSkippedQuestions.map((question) => (
-                      <div key={question.id} className="bg-white/10 rounded-xl p-5 border border-white/20">
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="text-white font-bold">Question {session.questions.findIndex(q => q.id === question.id) + 1}</span>
-                          <button
-                            onClick={() => {
-                              setCurrentQuestionIndex(session.questions.findIndex(q => q.id === question.id))
-                              setShowReview(false)
-                            }}
-                            className="px-4 py-2 bg-[#DC2626] text-white font-semibold rounded-lg hover:bg-[#B91C1C] transition-colors"
-                          >
-                            Answer Now
-                          </button>
-                        </div>
-                        <p className="text-white/90">{question.question_text}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {answeredQuestionsList.length > 0 && (
-                <div className="mb-8">
-                  <h3 className="text-xl font-black text-white mb-6">
-                    Answered Questions
-                  </h3>
-                  <div className="space-y-3">
-                    {answeredQuestionsList.map((question) => (
-                      <div key={question.id} className="bg-white/10 rounded-xl p-4 border border-white/20">
-                        <div className="flex items-center justify-between">
-                          <span className="text-white font-bold">Question {session.questions.findIndex(q => q.id === question.id) + 1}</span>
-                          <span className="text-white/90 text-sm font-medium">✓ Answered</span>
-                        </div>
-                        <p className="text-white/80 text-sm mt-2">{question.question_text}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="flex justify-center gap-4">
-                <button
-                  onClick={() => setShowReview(false)}
-                  className="px-8 py-4 bg-white/10 text-white font-semibold rounded-lg hover:bg-white/20 transition-colors border border-white/20"
-                >
-                  Continue Test
-                </button>
-                <button
-                  onClick={handleReviewComplete}
-                  disabled={isSubmitting}
-                  className="px-8 py-4 bg-[#DC2626] text-white rounded-lg text-lg font-semibold hover:bg-[#B91C1C] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isSubmitting ? 'Submitting...' : 'Complete Test'}
-                </button>
               </div>
             </div>
+
+            {stillSkippedQuestions.length > 0 && (
+              <div className="mb-8">
+                  <h3 className="text-xl font-black text-white mb-6">
+                  Skipped Questions
+                </h3>
+                <div className="space-y-4">
+                  {stillSkippedQuestions.map((question) => (
+                      <div key={question.id} className="bg-white/10 rounded-xl p-5 border border-white/20">
+                      <div className="flex items-center justify-between mb-3">
+                          <span className="text-white font-bold">Question {session.questions.findIndex(q => q.id === question.id) + 1}</span>
+                        <button
+                          onClick={() => {
+                            setCurrentQuestionIndex(session.questions.findIndex(q => q.id === question.id))
+                            setShowReview(false)
+                          }}
+                            className="px-4 py-2 bg-[#DC2626] text-white font-semibold rounded-lg hover:bg-[#B91C1C] transition-colors"
+                        >
+                          Answer Now
+                        </button>
+                      </div>
+                        <p className="text-white/90">{question.question_text}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {answeredQuestionsList.length > 0 && (
+              <div className="mb-8">
+                  <h3 className="text-xl font-black text-white mb-6">
+                  Answered Questions
+                </h3>
+                <div className="space-y-3">
+                  {answeredQuestionsList.map((question) => (
+                      <div key={question.id} className="bg-white/10 rounded-xl p-4 border border-white/20">
+                      <div className="flex items-center justify-between">
+                          <span className="text-white font-bold">Question {session.questions.findIndex(q => q.id === question.id) + 1}</span>
+                          <span className="text-white/90 text-sm font-medium">✓ Answered</span>
+                      </div>
+                        <p className="text-white/80 text-sm mt-2">{question.question_text}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => setShowReview(false)}
+                  className="px-8 py-4 bg-white/10 text-white font-semibold rounded-lg hover:bg-white/20 transition-colors border border-white/20"
+              >
+                Continue Test
+              </button>
+              <button
+                onClick={handleReviewComplete}
+                disabled={isSubmitting}
+                  className="px-8 py-4 bg-[#DC2626] text-white rounded-lg text-lg font-semibold hover:bg-[#B91C1C] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                  {isSubmitting ? 'Submitting...' : 'Complete Test'}
+              </button>
+            </div>
           </div>
+        </div>
         </section>
       </div>
     )
@@ -295,8 +295,8 @@ export default function MCQTest({ session, onComplete, onAbandon }: MCQTestProps
               Abandon Test?
             </h3>
             <p className="text-white/90">
-              Are you sure you want to abandon this test? Your progress will be lost and this will count as an attempt.
-            </p>
+            Are you sure you want to abandon this test? Your progress will be lost and this will count as an attempt.
+          </p>
           </div>
           <div className="flex gap-4">
             <button
@@ -344,9 +344,9 @@ export default function MCQTest({ session, onComplete, onAbandon }: MCQTestProps
             </div>
           </div>
           <div className="flex items-center gap-3 sm:gap-4">
-            <div className="text-right">
+          <div className="text-right">
               <div className={`text-xl sm:text-2xl font-black font-mono ${isTimeLow ? 'text-white animate-pulse' : 'text-white'}`}>
-                {formatTime(timeRemaining)}
+              {formatTime(timeRemaining)}
               </div>
               <div className="text-white/90 text-xs sm:text-sm font-medium">Time Left</div>
             </div>

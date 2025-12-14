@@ -88,9 +88,9 @@ export default function AssignmentSubmission({
         <div className="mb-6 space-y-4">
           <div className="bg-white/10 rounded-xl p-4 border border-white/20">
             <h3 className="text-lg font-bold text-white mb-2">{assignment.title}</h3>
-            {assignment.description && (
+          {assignment.description && (
               <p className="text-white/90 mb-4">{assignment.description}</p>
-            )}
+          )}
           </div>
           {assignment.instructions && (
             <div className="bg-white/10 rounded-xl p-4 border border-white/20">
@@ -136,12 +136,12 @@ export default function AssignmentSubmission({
           )}
           
           <div className="flex items-center gap-4 text-sm">
-            {assignment.due_date && (
+          {assignment.due_date && (
               <div className="bg-white/10 rounded-lg px-3 py-2 border border-white/20">
                 <span className="text-white/80">Due: </span>
                 <span className="text-white font-medium">{new Date(assignment.due_date).toLocaleDateString()}</span>
               </div>
-            )}
+          )}
             <div className="bg-white/10 rounded-lg px-3 py-2 border border-white/20">
               <span className="text-white/80">Max Points: </span>
               <span className="text-white font-medium">{assignment.max_points}</span>
