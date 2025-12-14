@@ -45,6 +45,32 @@ export default function LearnPage({ params }: LearnPageProps) {
   
   // Cache for lesson data to avoid redundant fetches
   const lessonCache = useRef<Map<string, LessonWithDetails>>(new Map())
+  
+  // Prefetch next lesson in background
+  const prefetchNextLesson = useCallback(async (currentLessonId: string) => {
+    if (!enrollment?.course?.modules) return
+    
+    // Find current lesson's module and index
+    for (const module of enrollment.course.modules) {
+      const lessonIndex = module.lessons?.findIndex(l => l.id === currentLessonId) ?? -1
+      if (lessonIndex >= 0 && module.lessons) {
+        // Prefetch next lesson in same module
+        const nextLesson = module.lessons[lessonIndex + 1]
+        if (nextLesson && !lessonCache.current.has(nextLesson.id)) {
+          // Prefetch in background (don't await)
+          courseService.getLessonById(nextLesson.id).then(lesson => {
+            if (lesson) {
+              lessonCache.current.set(nextLesson.id, lesson)
+              console.log('✅ Prefetched next lesson:', lesson.title)
+            }
+          }).catch(err => {
+            console.warn('⚠️ Failed to prefetch lesson:', err)
+          })
+        }
+        break
+      }
+    }
+  }, [enrollment])
 
   // Handle sidebar state for desktop - closed by default, user can toggle
   useEffect(() => {
@@ -241,6 +267,8 @@ export default function LearnPage({ params }: LearnPageProps) {
             status: 'in_progress',
           }).catch(err => console.error('Error updating lesson progress:', err))
         }
+        // Prefetch next lesson in background
+        prefetchNextLesson(lessonId)
         return
       }
 
