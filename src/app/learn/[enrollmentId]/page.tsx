@@ -217,12 +217,14 @@ export default function LearnPage({ params }: LearnPageProps) {
               })
           }
 
-          // Cache the lesson data for future use
-          if (finalLessonData) {
-            lessonCache.current.set(lessonIdToLoad, finalLessonData)
-          }
+        // Cache the lesson data for future use
+        if (finalLessonData) {
+          lessonCache.current.set(lessonIdToLoad, finalLessonData)
+          // Prefetch next lesson in background for faster navigation
+          prefetchNextLesson(lessonIdToLoad)
+        }
 
-          setCurrentLesson(finalLessonData)
+        setCurrentLesson(finalLessonData)
         } else {
           setCurrentLesson(null)
         }
