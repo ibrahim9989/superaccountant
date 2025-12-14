@@ -46,16 +46,22 @@ export default function LearnPage({ params }: LearnPageProps) {
   // Cache for lesson data to avoid redundant fetches
   const lessonCache = useRef<Map<string, LessonWithDetails>>(new Map())
   
+  // Cache for enrollment structure (modules/lessons list)
+  const enrollmentCache = useRef<CourseEnrollmentWithDetails | null>(null)
+  
   // Prefetch next lesson in background
   const prefetchNextLesson = useCallback(async (currentLessonId: string) => {
-    if (!enrollment?.course?.modules) return
+    if (!enrollment?.course) return
+    // Type assertion: course may have modules when loaded from API
+    const courseWithModules = enrollment.course as CourseEnrollmentWithDetails['course'] & { modules?: Array<{ id: string; lessons?: Array<{ id: string }> }> }
+    if (!courseWithModules?.modules) return
     
     // Find current lesson's module and index
-    for (const module of enrollment.course.modules) {
-      const lessonIndex = module.lessons?.findIndex(l => l.id === currentLessonId) ?? -1
-      if (lessonIndex >= 0 && module.lessons) {
+    for (const courseModule of courseWithModules.modules) {
+      const lessonIndex = courseModule.lessons?.findIndex(l => l.id === currentLessonId) ?? -1
+      if (lessonIndex >= 0 && courseModule.lessons) {
         // Prefetch next lesson in same module
-        const nextLesson = module.lessons[lessonIndex + 1]
+        const nextLesson = courseModule.lessons[lessonIndex + 1]
         if (nextLesson && !lessonCache.current.has(nextLesson.id)) {
           // Prefetch in background (don't await)
           courseService.getLessonById(nextLesson.id).then(lesson => {
@@ -102,6 +108,24 @@ export default function LearnPage({ params }: LearnPageProps) {
   const loadEnrollmentData = useCallback(async () => {
     if (!user || !resolvedParams.enrollmentId) return
     
+    // Check cache first for instant loading
+    if (enrollmentCache.current && enrollmentCache.current.id === resolvedParams.enrollmentId) {
+      console.log('✅ Using cached enrollment data')
+      setEnrollment(enrollmentCache.current)
+      // Still load progress in background
+      courseService.getCourseProgress(resolvedParams.enrollmentId)
+        .then(setCourseProgress)
+        .catch(err => console.error('Error loading progress:', err))
+      
+      // Load first lesson if not already loaded
+      const modules = (enrollmentCache.current.course as any)?.modules || []
+      if (modules.length > 0 && modules[0]?.lessons?.length > 0 && !currentLesson) {
+        const firstLessonId = modules[0].lessons[0].id
+        handleLessonSelect(firstLessonId)
+      }
+      return
+    }
+    
     // Only reload if enrollmentId changed or data hasn't been loaded yet
     if (hasLoadedData.current && currentEnrollmentId.current === resolvedParams.enrollmentId) {
       return
@@ -111,6 +135,8 @@ export default function LearnPage({ params }: LearnPageProps) {
       setLoadingData(true)
       hasLoadedData.current = true
       currentEnrollmentId.current = resolvedParams.enrollmentId
+      
+      console.log('🔄 Loading enrollment data (not cached)')
       
       // Parallelize initial data loading
       const [enrollmentData, progressData] = await Promise.all([
@@ -122,6 +148,9 @@ export default function LearnPage({ params }: LearnPageProps) {
         router.push('/courses')
         return
       }
+      
+      // Cache enrollment structure for future use
+      enrollmentCache.current = enrollmentData
       setEnrollment(enrollmentData)
       setCourseProgress(progressData)
 

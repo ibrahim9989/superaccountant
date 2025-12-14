@@ -16,6 +16,11 @@ const supabaseAdmin = createClient(supabaseUrl as string, serviceKey as string, 
   }
 })
 
+/**
+ * Lightweight endpoint that returns only enrollment structure
+ * (modules and lessons list) without full lesson content
+ * This is much faster than the full modules endpoint
+ */
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -32,7 +37,7 @@ export async function GET(
       return NextResponse.json({ error: 'Enrollment ID is required' }, { status: 400 })
     }
 
-    console.log('🔍 [API] Fetching enrollment:', enrollmentId)
+    console.log('⚡ [API] Fetching enrollment structure (lightweight):', enrollmentId)
 
     // Get enrollment first
     const { data: enrollment, error: enrollmentError } = await supabaseAdmin
@@ -50,28 +55,24 @@ export async function GET(
       return NextResponse.json({ error: 'Enrollment not found' }, { status: 404 })
     }
 
-    console.log('✅ [API] Enrollment found. Course ID:', enrollment.course_id)
-
-    // OPTIMIZED: Fetch only structure first (no nested content/quizzes/assignments)
-    // This reduces query time significantly - full lesson data loaded on-demand
+    // OPTIMIZED: Use separate queries instead of nested joins for better performance
+    // This avoids the expensive nested query that was causing 1500ms+ load times
+    
+    // Step 1: Fetch modules only (fast, uses index)
     const { data: modules, error: modulesError } = await supabaseAdmin
       .from('course_modules')
       .select(`
-        *,
-        lessons:lessons(
-          id,
-          title,
-          description,
-          lesson_type,
-          order_index,
-          duration_minutes,
-          is_required,
-          is_active,
-          module_id
-        )
+        id,
+        title,
+        description,
+        week_number,
+        order_index,
+        is_active,
+        course_id
       `)
       .eq('course_id', enrollment.course_id)
       .eq('is_active', true)
+      .order('week_number', { ascending: true })
       .order('order_index', { ascending: true })
 
     if (modulesError) {
@@ -79,18 +80,49 @@ export async function GET(
       return NextResponse.json({ error: modulesError.message }, { status: 500 })
     }
 
-    // Filter and sort lessons
-    const modulesWithActiveLessons = (modules || []).map(module => ({
-      ...module,
-      lessons: (module.lessons || [])
-        .filter((lesson: any) => lesson.is_active !== false)
-        .sort((a: any, b: any) => (a.order_index || 0) - (b.order_index || 0))
+    // Step 2: Fetch lessons separately (parallel, uses indexes)
+    const moduleIds = (modules || []).map(m => m.id)
+    const lessonsByModule: Record<string, any[]> = {}
+    
+    if (moduleIds.length > 0) {
+      const { data: lessons, error: lessonsError } = await supabaseAdmin
+        .from('lessons')
+        .select(`
+          id,
+          title,
+          lesson_type,
+          order_index,
+          duration_minutes,
+          is_required,
+          is_active,
+          module_id
+        `)
+        .in('module_id', moduleIds)
+        .eq('is_active', true)
+        .order('order_index', { ascending: true })
+      
+      if (lessonsError) {
+        console.error('❌ [API] Error fetching lessons:', lessonsError)
+        // Continue with empty lessons rather than failing
+      } else if (lessons) {
+        // Group lessons by module_id for O(1) lookup
+        lessons.forEach(lesson => {
+          if (!lessonsByModule[lesson.module_id]) {
+            lessonsByModule[lesson.module_id] = []
+          }
+          lessonsByModule[lesson.module_id].push(lesson)
+        })
+      }
+    }
+
+    // Step 3: Combine modules with their lessons
+    const modulesWithActiveLessons = (modules || []).map(courseModule => ({
+      ...courseModule,
+      lessons: lessonsByModule[courseModule.id] || []
     }))
 
-    console.log('✅ [API] Modules found:', modulesWithActiveLessons.length)
-    console.log('⚡ [API] Optimized: Only fetching lesson structure, not full content')
+    console.log('✅ [API] Structure loaded:', modulesWithActiveLessons.length, 'modules')
 
-    // Add cache headers for client-side caching
     const response = NextResponse.json({ 
       data: {
         enrollment,
@@ -98,8 +130,8 @@ export async function GET(
       }
     })
     
-    // Cache for 5 minutes on client
-    response.headers.set('Cache-Control', 'private, max-age=300')
+    // Cache for 10 minutes
+    response.headers.set('Cache-Control', 'private, max-age=600')
     
     return response
   } catch (error) {

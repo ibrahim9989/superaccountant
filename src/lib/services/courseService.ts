@@ -597,21 +597,31 @@ export class CourseService {
     return data || []
   }
 
-  async getEnrollmentById(enrollmentId: string): Promise<CourseEnrollmentWithDetails | null> {
+  async getEnrollmentById(enrollmentId: string, lightweight: boolean = false): Promise<CourseEnrollmentWithDetails | null> {
     const supabase = getSupabaseClient();
     
-    console.log('🔍 Fetching enrollment:', enrollmentId)
+    console.log(`🔍 Fetching enrollment: ${enrollmentId}${lightweight ? ' (lightweight)' : ''}`)
+    
+    // Use lightweight endpoint for faster initial load (structure only)
+    const endpoint = lightweight 
+      ? `/api/enrollments/${enrollmentId}/structure`
+      : `/api/enrollments/${enrollmentId}/modules`
     
     // First, try using API route with service role (bypasses RLS)
     try {
-      const apiResponse = await fetch(`/api/enrollments/${enrollmentId}/modules`, {
-        cache: 'no-store'
+      const apiResponse = await fetch(endpoint, {
+        cache: lightweight ? 'force-cache' : 'no-store',
+        next: lightweight ? { revalidate: 600 } : undefined // Cache for 10 minutes if lightweight
       })
       
       if (apiResponse.ok) {
         const apiData = await apiResponse.json()
         if (apiData.data && apiData.data.modules) {
-          console.log('✅ [API Route] Modules found:', apiData.data.modules.length)
+          if (lightweight) {
+            console.log('⚡ [API Route] Lightweight structure loaded:', apiData.data.modules.length, 'modules')
+          } else {
+            console.log('✅ [API Route] Full modules found:', apiData.data.modules.length)
+          }
           
           // Get course details
           const { data: course, error: courseError } = await supabase

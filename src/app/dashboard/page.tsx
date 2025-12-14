@@ -26,6 +26,19 @@ export default function DashboardPage() {
       hasLoadedEnrollments.current = true;
       const data = await courseService.getUserEnrollments(user.id);
       setEnrollments(data);
+      
+      // Prefetch enrollment structures in background for instant navigation
+      // This dramatically improves UX when user clicks "Continue Learning"
+      data.forEach(enrollment => {
+        // Prefetch in background (don't await)
+        courseService.getEnrollmentById(enrollment.id, true) // lightweight
+          .then(() => {
+            console.log(`✅ Prefetched enrollment structure: ${enrollment.id}`)
+          })
+          .catch(err => {
+            console.warn(`⚠️ Failed to prefetch enrollment ${enrollment.id}:`, err)
+          })
+      })
     } catch (err) {
       console.error('Error loading enrollments:', err);
       hasLoadedEnrollments.current = false; // Reset on error to allow retry
