@@ -441,16 +441,10 @@ export default function MCQTest({ session, onComplete, onAbandon }: MCQTestProps
 
             <div className="flex gap-3 flex-wrap">
               <button
-                onClick={handleAbandonTest}
-                className="px-6 py-3 bg-white/10 text-white font-semibold rounded-lg hover:bg-white/20 transition-colors border border-white/20"
-              >
-                Abandon
-              </button>
-              <button
                 onClick={handleSkipQuestion}
-                className="px-6 py-3 bg-white/10 text-white font-semibold rounded-lg hover:bg-white/20 transition-colors border border-white/20"
+                className="px-6 py-3 bg-[#DC2626] text-white font-semibold rounded-lg hover:bg-[#B91C1C] transition-colors"
               >
-                Skip
+                Skip Question
               </button>
               <button
                 onClick={handleNextQuestion}
