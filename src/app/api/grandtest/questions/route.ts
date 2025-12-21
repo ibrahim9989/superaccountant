@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { cacheService, cacheKeys } from '@/lib/services/cacheService'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -28,6 +29,15 @@ export async function GET(request: Request) {
       )
     }
 
+    // Try to get from cache
+    const cacheKey = cacheKeys.grandtest.questions(courseId)
+    const cached = await cacheService.get(cacheKey)
+    if (cached) {
+      console.log('✅ Grandtest questions cache hit')
+      return NextResponse.json({ data: cached })
+    }
+
+    console.log('❌ Grandtest questions cache miss, fetching from database')
     console.log('📚 Fetching grandtest questions for course:', courseId)
 
     // Get questions using ADMIN client (bypasses RLS)
@@ -46,8 +56,13 @@ export async function GET(request: Request) {
       )
     }
 
-    console.log(`✅ Fetched ${questions?.length || 0} questions`)
-    return NextResponse.json({ data: questions || [] })
+    const result = questions || []
+    
+    // Cache the result for 2 hours (7200 seconds)
+    await cacheService.set(cacheKey, result, { ttl: 7200 })
+
+    console.log(`✅ Fetched ${result.length} questions`)
+    return NextResponse.json({ data: result })
   } catch (error) {
     console.error('Unexpected error in get questions API:', error)
     return NextResponse.json(

@@ -1,8 +1,18 @@
 import { NextResponse } from 'next/server'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+import { cacheService, cacheKeys } from '@/lib/services/cacheService'
 
 export async function GET() {
 	try {
+		// Try to get from cache
+		const cacheKey = cacheKeys.admin.enrollments
+		const cached = await cacheService.get(cacheKey)
+		if (cached) {
+			console.log('✅ Admin enrollments cache hit')
+			return NextResponse.json({ data: cached })
+		}
+
+		console.log('❌ Admin enrollments cache miss, fetching from database')
 		const url = process.env.NEXT_PUBLIC_SUPABASE_URL as string
 		const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY as string
 		if (!url || !serviceKey) {
@@ -43,6 +53,9 @@ export async function GET() {
 			user: { profile: profileMap.get(e.user_id) || null },
 			course: courseMap.get(e.course_id) || null,
 		}))
+
+		// Cache the result for 5 minutes (300 seconds)
+		await cacheService.set(cacheKey, merged, { ttl: 300 })
 
 		return NextResponse.json({ data: merged })
 	} catch (e: unknown) {

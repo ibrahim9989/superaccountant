@@ -1,4 +1,5 @@
 import { getSupabaseClient } from '@/lib/supabase/client'
+import { cacheService, cacheKeys } from '@/lib/services/cacheService'
 import {
   Course,
   CourseWithDetails,
@@ -61,6 +62,18 @@ export class CourseService {
     is_featured?: boolean
     difficulty_level?: string
   }): Promise<CourseWithDetails[]> {
+    // Generate cache key from filters
+    const filterKey = JSON.stringify(filters || {})
+    const cacheKey = cacheKeys.course.list(filterKey)
+    
+    // Try to get from cache
+    const cached = await cacheService.get<CourseWithDetails[]>(cacheKey)
+    if (cached) {
+      console.log('✅ Courses cache hit')
+      return cached
+    }
+    
+    console.log('❌ Courses cache miss, fetching from database')
     const supabase = getSupabaseClient();
     
     console.log('Fetching courses with filters:', filters)
@@ -131,10 +144,25 @@ export class CourseService {
       }
     }
     
-    return data || []
+    const result = data || []
+    
+    // Cache the result for 1 hour (3600 seconds)
+    await cacheService.set(cacheKey, result, { ttl: 3600 })
+    
+    return result
   }
 
   async getCourseById(courseId: string): Promise<CourseWithDetails | null> {
+    const cacheKey = cacheKeys.course.detail(courseId)
+    
+    // Try to get from cache
+    const cached = await cacheService.get<CourseWithDetails>(cacheKey)
+    if (cached) {
+      console.log('✅ Course detail cache hit')
+      return cached
+    }
+    
+    console.log('❌ Course detail cache miss, fetching from database')
     const supabase = getSupabaseClient();
     const { data, error } = await supabase
       .from('courses')
@@ -159,6 +187,11 @@ export class CourseService {
       return null
     }
 
+    // Cache the result for 1 hour
+    if (data) {
+      await cacheService.set(cacheKey, data, { ttl: 3600 })
+    }
+
     return data
   }
 
@@ -175,6 +208,9 @@ export class CourseService {
       throw new Error(`Failed to create course: ${error.message}`)
     }
 
+    // Invalidate course list cache
+    await cacheService.deletePattern('course:list:*')
+    
     return data
   }
 
@@ -192,6 +228,11 @@ export class CourseService {
       throw new Error(`Failed to update course: ${error.message}`)
     }
 
+    // Invalidate caches for this course
+    await cacheService.delete(cacheKeys.course.detail(courseId))
+    await cacheService.delete(cacheKeys.course.modules(courseId))
+    await cacheService.deletePattern('course:list:*')
+
     return data
   }
 
@@ -206,10 +247,26 @@ export class CourseService {
       console.error('Error deleting course:', error)
       throw new Error(`Failed to delete course: ${error.message}`)
     }
+
+    // Invalidate all caches for this course
+    await cacheService.delete(cacheKeys.course.detail(courseId))
+    await cacheService.delete(cacheKeys.course.modules(courseId))
+    await cacheService.deletePattern(`course:${courseId}:*`)
+    await cacheService.deletePattern('course:list:*')
   }
 
   // Course Module Management
   async getCourseModules(courseId: string): Promise<CourseModuleWithDetails[]> {
+    const cacheKey = cacheKeys.course.modules(courseId)
+    
+    // Try to get from cache
+    const cached = await cacheService.get<CourseModuleWithDetails[]>(cacheKey)
+    if (cached) {
+      console.log('✅ Course modules cache hit')
+      return cached
+    }
+    
+    console.log('❌ Course modules cache miss, fetching from database')
     const supabase = getSupabaseClient();
     const { data, error } = await supabase
       .from('course_modules')
@@ -231,7 +288,12 @@ export class CourseService {
       throw new Error(`Failed to fetch course modules: ${error.message}`)
     }
 
-    return data || []
+    const result = data || []
+    
+    // Cache the result for 1 hour
+    await cacheService.set(cacheKey, result, { ttl: 3600 })
+
+    return result
   }
 
   async createCourseModule(moduleData: CreateCourseModule): Promise<CourseModule> {
@@ -290,16 +352,20 @@ export class CourseService {
       throw new Error(`Failed to create course module: ${error.message}`)
     }
 
+    // Invalidate course modules cache
+    await cacheService.delete(cacheKeys.course.modules(moduleData.course_id))
+    await cacheService.delete(cacheKeys.course.detail(moduleData.course_id))
+
     return data
   }
 
   async updateCourseModule(moduleId: string, updates: UpdateCourseModule): Promise<CourseModule> {
     const supabase = getSupabaseClient();
     
-    // First check if module exists
+    // First check if module exists and get course_id
     const { data: existingModule, error: checkError } = await supabase
       .from('course_modules')
-      .select('id')
+      .select('id, course_id')
       .eq('id', moduleId)
       .maybeSingle()
 
@@ -328,6 +394,13 @@ export class CourseService {
     if (!data) {
       // This can happen if RLS blocks the update or the module was deleted between check and update
       throw new Error(`Course module with ID ${moduleId} could not be updated. It may have been deleted or you may not have permission to update it.`)
+    }
+
+    // Invalidate course modules cache
+    const courseId = data.course_id || existingModule?.course_id
+    if (courseId) {
+      await cacheService.delete(cacheKeys.course.modules(courseId))
+      await cacheService.delete(cacheKeys.course.detail(courseId))
     }
 
     return data
@@ -478,6 +551,20 @@ export class CourseService {
       throw new Error(`Failed to create lesson: ${error.message}`)
     }
 
+    // Invalidate lesson and module caches
+    await cacheService.delete(cacheKeys.lesson.content(data.id))
+    await cacheService.delete(cacheKeys.lesson.full(data.id))
+    // Get module to invalidate course cache
+    const { data: module } = await supabase
+      .from('course_modules')
+      .select('course_id')
+      .eq('id', data.module_id)
+      .single()
+    if (module?.course_id) {
+      await cacheService.delete(cacheKeys.course.modules(module.course_id))
+      await cacheService.delete(cacheKeys.course.detail(module.course_id))
+    }
+
     return data
   }
 
@@ -517,6 +604,20 @@ export class CourseService {
       throw new Error(`No data returned after updating lesson ${lessonId}`)
     }
 
+    // Invalidate lesson and module caches
+    await cacheService.delete(cacheKeys.lesson.content(lessonId))
+    await cacheService.delete(cacheKeys.lesson.full(lessonId))
+    // Get module to invalidate course cache
+    const { data: module } = await supabase
+      .from('course_modules')
+      .select('course_id')
+      .eq('id', data.module_id)
+      .single()
+    if (module?.course_id) {
+      await cacheService.delete(cacheKeys.course.modules(module.course_id))
+      await cacheService.delete(cacheKeys.course.detail(module.course_id))
+    }
+
     return data
   }
 
@@ -534,6 +635,10 @@ export class CourseService {
       throw new Error(`Failed to create lesson content: ${error.message}`)
     }
 
+    // Invalidate lesson content cache
+    await cacheService.delete(cacheKeys.lesson.content(contentData.lesson_id))
+    await cacheService.delete(cacheKeys.lesson.full(contentData.lesson_id))
+
     return data
   }
 
@@ -549,6 +654,12 @@ export class CourseService {
     if (error) {
       console.error('Error updating lesson content:', error)
       throw new Error(`Failed to update lesson content: ${error.message}`)
+    }
+
+    // Invalidate lesson content cache
+    if (data?.lesson_id) {
+      await cacheService.delete(cacheKeys.lesson.content(data.lesson_id))
+      await cacheService.delete(cacheKeys.lesson.full(data.lesson_id))
     }
 
     return data

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+import { cacheService, cacheKeys } from '@/lib/services/cacheService'
 
 function getSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL as string
@@ -59,6 +60,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
+    // Invalidate cache for this course's questions
+    if (data?.course_id) {
+      await cacheService.delete(cacheKeys.grandtest.questions(data.course_id))
+    }
+
     return NextResponse.json({ data })
   } catch (e: unknown) {
     const error = e as Error
@@ -78,6 +84,13 @@ export async function PUT(request: Request) {
     const body = await request.json()
     const supabase = getSupabase()
 
+    // Get existing question to find course_id
+    const { data: existing } = await supabase
+      .from('grandtest_questions')
+      .select('course_id')
+      .eq('id', questionId)
+      .single()
+
     const { data, error } = await supabase
       .from('grandtest_questions')
       .update(body)
@@ -88,6 +101,12 @@ export async function PUT(request: Request) {
     if (error) {
       console.error('Error updating grandtest question:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    // Invalidate cache for this course's questions
+    const courseId = data?.course_id || existing?.course_id
+    if (courseId) {
+      await cacheService.delete(cacheKeys.grandtest.questions(courseId))
     }
 
     return NextResponse.json({ data })
@@ -108,6 +127,13 @@ export async function DELETE(request: Request) {
 
     const supabase = getSupabase()
 
+    // Get question to find course_id before deleting
+    const { data: existing } = await supabase
+      .from('grandtest_questions')
+      .select('course_id')
+      .eq('id', questionId)
+      .single()
+
     const { error } = await supabase
       .from('grandtest_questions')
       .delete()
@@ -116,6 +142,11 @@ export async function DELETE(request: Request) {
     if (error) {
       console.error('Error deleting grandtest question:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    // Invalidate cache for this course's questions
+    if (existing?.course_id) {
+      await cacheService.delete(cacheKeys.grandtest.questions(existing.course_id))
     }
 
     return NextResponse.json({ success: true })

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { cacheService, cacheKeys } from '@/lib/services/cacheService'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -37,6 +38,17 @@ export async function GET(
       return NextResponse.json({ error: 'Enrollment ID is required' }, { status: 400 })
     }
 
+    // Try to get from cache
+    const cacheKey = cacheKeys.enrollment.structure(enrollmentId)
+    const cached = await cacheService.get(cacheKey)
+    if (cached) {
+      console.log('✅ [API] Enrollment structure cache hit')
+      const response = NextResponse.json({ data: cached })
+      response.headers.set('Cache-Control', 'private, max-age=600')
+      return response
+    }
+
+    console.log('❌ [API] Enrollment structure cache miss, fetching from database')
     console.log('⚡ [API] Fetching enrollment structure (lightweight):', enrollmentId)
 
     // Get enrollment first
@@ -123,14 +135,17 @@ export async function GET(
 
     console.log('✅ [API] Structure loaded:', modulesWithActiveLessons.length, 'modules')
 
-    const response = NextResponse.json({ 
-      data: {
-        enrollment,
-        modules: modulesWithActiveLessons
-      }
-    })
+    const result = {
+      enrollment,
+      modules: modulesWithActiveLessons
+    }
+
+    // Cache the result for 15 minutes (900 seconds)
+    await cacheService.set(cacheKey, result, { ttl: 900 })
+
+    const response = NextResponse.json({ data: result })
     
-    // Cache for 10 minutes
+    // Also set HTTP cache headers
     response.headers.set('Cache-Control', 'private, max-age=600')
     
     return response
